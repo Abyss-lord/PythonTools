@@ -10,4 +10,4 @@
                    2024/7/16:
 -------------------------------------------------
 """
-from .sequenceutils import BooleanUtil, StringUtil
+from .basic_utils import BooleanUtil, StringUtil
