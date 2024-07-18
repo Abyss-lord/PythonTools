@@ -10,6 +10,8 @@
                    2024/7/17:
 -------------------------------------------------
 """
+import datetime
+
 from .convertor import BasicConvertor
 from .pattern_pool import PatternPool
 from .basic_utils import DateUtil, StringUtil
@@ -24,17 +26,17 @@ class Validator(object):
         :param birthday: 待测试值
         :return: 是否为生日
         """
+        # PERF 增加更多支持的日期格式
         matched = PatternPool.BIRTHDAY.match(birthday)
         if matched:
             year = BasicConvertor.to_int(matched.group(1))
             month = BasicConvertor.to_int(matched.group(3))
             day = BasicConvertor.to_int(matched.group(5))
-            logger.debug(f"{year}, {month}, {day}")
-            return cls.is_valid_birthday_date(year, month, day)
+            return cls.is_valid_date(year, month, day)
         return False
 
     @classmethod
-    def is_valid_birthday_date(cls, year: int, month: int, day: int) -> bool:
+    def is_valid_date(cls, year: int, month: int, day: int) -> bool:
         """
         验证是否为生日
         :param year: 年
@@ -43,7 +45,8 @@ class Validator(object):
         :return: 是否为生日
         """
         # 判断年
-        if year < 1900 or year > DateUtil.this_year():
+        # NOTE datetime.MINYEAR的值是1，这里的逻辑是否要修改
+        if year < datetime.MINYEAR or year > DateUtil.this_year():
             return False
 
         # 判断月
