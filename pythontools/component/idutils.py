@@ -11,7 +11,8 @@
 -------------------------------------------------
 """
 import typing
-from .basic_utils import SequenceUtil, StringUtil
+import random
+from .basic_utils import SequenceUtil, StringUtil, DateUtil
 from .validator import Validator
 from .constant import PRO_DICT, Sex, AREA_INFO
 from .convertor import BasicConvertor
@@ -25,6 +26,17 @@ class IDCard(object):
         self.province_code: str = BasicConvertor.to_str(StringUtil.sub_lst(id, 0, 2))
         self.area_code: str = BasicConvertor.to_str(StringUtil.sub_lst(id, 0, 6))
         self.birthday: datetime = IDCardUtil.get_birthday_from_id(id)
+
+    def __repr__(self) -> str:
+        return (
+            f"IDCard("
+            f"id='{self.id}', "
+            f"province='{self.get_province()}', "
+            f"area='{self.get_area()}', "
+            f"birthday='{self.birthday.strftime('%Y-%m-%d')}', "
+            f"age={self.get_age()}, "
+            f"sex={self.get_sex()}"
+            f")")
 
     def get_age(self) -> float:
         """
@@ -43,8 +55,9 @@ class IDCard(object):
         :return: 男性或女性
         """
         sex_code = StringUtil.sub_lst(self.id, 16, 17)
+        sex_code = BasicConvertor.to_int(sex_code)
         sex_obj = Sex.get_sex(sex_code)
-        return sex_obj.value[1]
+        return sex_obj.value.sex
 
     def get_province(self) -> str:
         """
@@ -66,14 +79,62 @@ class IDCardUtil(object):
     CHINA_ID_MIN_LENGTH: typing.Final[int] = 15
     # 最长身份证位数
     CHINA_ID_MAX_LENGTH: typing.Final[int] = 18
+    AREA_LST: typing.List[str] = list(AREA_INFO.keys())
 
     @classmethod
-    def generate_random_valid_id(cls) -> str:
+    def generate_random_valid_card(cls, *, sex=Sex.MALE) -> IDCard:
+        """
+        随机产生 IDCard 实例，默认使用18位身份证
+        :param sex: 性别
+        :return: IDCard 对象
+        """
+        default_code_length = 18
+        random_id = cls.generate_random_valid_id(code_length=default_code_length, sex=sex)
+        return cls.get_card_from_id(random_id)
+
+    @classmethod
+    def generate_random_valid_id(cls, *, code_length: int = 18, sex=Sex.MALE) -> str:
         """
         获取随机的身份证 ID
+        :exception: ValueError
+        :param code_length: 身份证长度
+        :param sex: 性别
         :return: 随机的身份证ID
         """
-        raise NotImplementedError()
+        if code_length == cls.CHINA_ID_MAX_LENGTH:
+            return cls.generate_random_valid_18_id(sex=sex)
+
+        if code_length == cls.CHINA_ID_MIN_LENGTH:
+            return cls.generate_random_valid_15_id(sex=sex)
+        else:
+            raise ValueError("code_length must be 15 or 18")
+
+    @classmethod
+    def generate_random_valid_18_id(cls, *, sex=Sex.MALE) -> str:
+        """
+        生成18位身份证
+        :param sex: 性别
+        :return: 18位身份证
+        """
+        area = random.choice(cls.AREA_LST)
+        birthday = DateUtil.get_random_date()
+        birthday_format_str = birthday.strftime("%Y%m%d")
+        sequence_code = random.randint(10, 99)
+        sex_code = sex.value.sex_code
+        code17 = f"{area}{birthday_format_str}{sequence_code}{sex_code}"
+        checksum_code = cls.get_check_sum(code17)
+        code18 = f"{code17}{checksum_code}"
+
+        return code18
+
+    @classmethod
+    def generate_random_valid_15_id(cls, *, sex=Sex.MALE) -> str:
+        """
+        生成15位身份证
+        :param sex: 性别
+        :return: 15位身份证
+        """
+        pass
 
     @classmethod
     def is_valid_id(cls, s: str) -> bool:
