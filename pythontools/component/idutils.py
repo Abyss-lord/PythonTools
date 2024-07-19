@@ -143,6 +143,8 @@ class IDCardUtil(object):
         :param s: 待检测 ID
         :return: 如果合规返回 True，否则返回 False
         """
+        if not StringUtil.is_string(s):
+            return False
         length = len(s.strip())
         if length == 18:
             return cls.is_valid_id_18(s)
@@ -210,15 +212,13 @@ class IDCardUtil(object):
         if not cls.is_valid_id(s):
             return None
         birthday = SequenceUtil.sub_lst(s, 6, 14)
-        matched = PatternPool.BIRTHDAY.match(birthday)
+        matched = PatternPool.BIRTHDAY_PATTERN.match(birthday)
         # 采用正则匹配的方式获取生日信息
-        if matched:
-            year = BasicConvertor.to_int(matched.group(1))
-            month = BasicConvertor.to_int(matched.group(3))
-            day = BasicConvertor.to_int(matched.group(5))
-            return datetime(year, month, day)
-
-        return None
+        # NOTE 如果上面进行了有效性验证，那么必然匹配，所以不需要再次判断
+        year = BasicConvertor.to_int(matched.group(1))
+        month = BasicConvertor.to_int(matched.group(3))
+        day = BasicConvertor.to_int(matched.group(5))
+        return datetime(year, month, day)
 
     @classmethod
     def get_card_from_id(cls, id: str) -> IDCard:
