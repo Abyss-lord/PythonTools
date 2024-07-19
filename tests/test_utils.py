@@ -10,12 +10,12 @@
                    2024/7/16:
 -------------------------------------------------
 """
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 from loguru import logger
 import pytest
-from .context import StringUtil, BooleanUtil, SequenceUtil, Validator, IDCardUtil, DateUtil, \
-    FileUtil
+from .context import (StringUtil, BooleanUtil, SequenceUtil, Validator, IDCardUtil, DateUtil, \
+                      OsUtil, SysUtil)
 
 
 class TestStringUtil:
@@ -75,13 +75,25 @@ class TestDateUtil:
     TEST_ROUND = 10
 
     @classmethod
+    def test_get_random_datetime_with_no_args(cls):
+        for _ in range(cls.TEST_ROUND):
+            res = DateUtil.get_random_datetime()
+            logger.debug(f"{res=}")
+
+    @classmethod
+    def test_get_random_datetime_with_no_args_include_tz(cls):
+        for _ in range(cls.TEST_ROUND):
+            res = DateUtil.get_random_datetime(random_tz=True)
+            logger.debug(f"{res=}")
+
+    @classmethod
     def test_get_random_date_with_no_args(cls):
         for _ in range(cls.TEST_ROUND):
             logger.debug(DateUtil.get_random_date())
 
     @classmethod
     def test_get_random_date_with_one_args(cls):
-        start = datetime(1998, 4, 24)
+        start = date(1998, 4, 24)
         for _ in range(cls.TEST_ROUND):
             logger.debug(DateUtil.get_random_date(start))
 
@@ -117,6 +129,22 @@ class TestDateUtil:
             assert not DateUtil.this_month() == 9
 
     @classmethod
+    def test_get_this_day(cls):
+        DateUtil.this_day()
+
+    @classmethod
+    def test_get_this_hour(cls):
+        DateUtil.this_hour()
+
+    @classmethod
+    def test_get_this_minute(cls):
+        DateUtil.this_minute()
+
+    @classmethod
+    def test_get_this_second(cls):
+        DateUtil.this_second()
+
+    @classmethod
     def test_is_leap_year(cls):
         assert DateUtil.is_leap_year(2024)
         assert not DateUtil.is_leap_year(2025)
@@ -125,14 +153,18 @@ class TestDateUtil:
 
 
 class TestIdUtil:
-    TEST_ROUND = 10
+    TEST_ROUND = 100
 
     @classmethod
     def test_generate_random_id(cls):
         for _ in range(cls.TEST_ROUND):
             id_str = IDCardUtil.generate_random_valid_id()
+            IDCardUtil.generate_random_valid_id(code_length=15)
             logger.debug(id_str)
             assert IDCardUtil.is_valid_id(id_str)
+
+        with pytest.raises(ValueError):
+            IDCardUtil.generate_random_valid_id(code_length=21321)
 
     @classmethod
     def test_generate_random_idcard(cls):
@@ -140,111 +172,146 @@ class TestIdUtil:
             id_obj = IDCardUtil.generate_random_valid_card()
             logger.debug(id_obj)
 
+    @classmethod
+    def test_get_birthday_from_id_with_wrong_args(cls):
+        assert IDCardUtil.get_birthday_from_id("") is None
+        assert IDCardUtil.get_birthday_from_id(1) is None
+        assert IDCardUtil.get_birthday_from_id("1") is None
+        assert IDCardUtil.get_birthday_from_id("adac") is None
+        assert IDCardUtil.get_birthday_from_id("110105199804246511") is None
 
-class TestFileUtil:
+    @classmethod
+    def test_is_valid_id_18(cls):
+        assert IDCardUtil.is_valid_id_18("110105199804246510")
+        assert not IDCardUtil.is_valid_id_18("1101051998042465")
+        assert not IDCardUtil.is_valid_id_18("a10105199804246510")
+        assert not IDCardUtil.is_valid_id_18("110105199813246510")
+
+    @classmethod
+    def test_is_valid_id(cls):
+        id = '123456789012345'
+        with pytest.raises(NotImplementedError):
+            IDCardUtil.is_valid_id(id)
+
+
+class TestSysUtil:
     @classmethod
     def test_list_file(cls):
         p = "/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools"
-        res = FileUtil.list_files(p, check_exist=False)
+        res = OsUtil.list_files(p, check_exist=False)
         logger.debug(res)
 
-        res = FileUtil.list_files(p, check_exist=True)
+        res = OsUtil.list_files(p, check_exist=True)
         logger.debug(res)
 
     @classmethod
     def test_is_windows(cls):
-        assert not FileUtil.is_windows()
+        assert not SysUtil.is_windows_platform()
 
     @classmethod
-    def test_is_unix(cls):
-        assert FileUtil.is_unix_like()
+    def test_is_mac(cls):
+        assert SysUtil.is_mac_platform()
 
+    @classmethod
+    def test_is_linux(cls):
+        assert not SysUtil.is_linux_platform()
+
+    @classmethod
+    def test_is_python3(cls):
+        assert SysUtil.is_py3()
+
+    @classmethod
+    def test_is_python2(cls):
+        assert not SysUtil.is_py2()
+
+
+class TestOsUtil:
     @classmethod
     def test_is_contain_hidden_dir(cls):
-        assert FileUtil.is_contain_hidden_dir("/.git")
-        assert FileUtil.is_contain_hidden_dir(".git")
-        assert FileUtil.is_contain_hidden_dir(".svn/sad/")
-        assert FileUtil.is_contain_hidden_dir("/tmp/__pychache__")
-        assert FileUtil.is_contain_hidden_dir("/tmp/__pychache__/pancx")
-        assert FileUtil.is_contain_hidden_dir("__pycache__")
-        assert not FileUtil.is_contain_hidden_dir("/hidden")
-        assert not FileUtil.is_contain_hidden_dir("hidden")
-        assert not FileUtil.is_contain_hidden_dir("usr/local/")
-        assert not FileUtil.is_contain_hidden_dir("/ust/local/security/")
+        assert OsUtil.is_contain_hidden_dir("/.git")
+        assert OsUtil.is_contain_hidden_dir(".git")
+        assert OsUtil.is_contain_hidden_dir(".svn/sad/")
+        assert OsUtil.is_contain_hidden_dir("/tmp/__pychache__")
+        assert OsUtil.is_contain_hidden_dir("/tmp/__pychache__/pancx")
+        assert OsUtil.is_contain_hidden_dir("__pycache__")
+        assert not OsUtil.is_contain_hidden_dir("/hidden")
+        assert not OsUtil.is_contain_hidden_dir("hidden")
+        assert not OsUtil.is_contain_hidden_dir("usr/local/")
+        assert not OsUtil.is_contain_hidden_dir("/ust/local/security/")
 
     @classmethod
     def test_is_exist(cls):
-        assert not FileUtil.is_exist("")
-        assert not FileUtil.is_exist("")
-        assert FileUtil.is_exist("/")
-        assert FileUtil.is_exist("/tmp")
-        assert FileUtil.is_exist(
+        assert not OsUtil.is_exist("")
+        assert not OsUtil.is_exist("")
+        assert OsUtil.is_exist("/")
+        assert OsUtil.is_exist("/tmp")
+        assert OsUtil.is_exist(
             "/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools")
-        assert FileUtil.is_exist("/Users/")
-        assert not FileUtil.is_exist("dsaddaasawdasdwa")
+        assert OsUtil.is_exist("/Users/")
+        assert not OsUtil.is_exist("dsaddaasawdasdwa")
 
     @classmethod
     def test_is_dir(cls):
-        assert not FileUtil.is_dir("")
-        assert FileUtil.is_dir("/")
-        assert FileUtil.is_dir("/tmp")
-        assert FileUtil.is_dir(
+        assert not OsUtil.is_dir("")
+        assert OsUtil.is_dir("/")
+        assert OsUtil.is_dir("/tmp")
+        assert OsUtil.is_dir(
             "/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools")
 
-        assert not FileUtil.is_dir("/Users/panchenxi/Work/project/work/长期项目和学习/python/own"
-                                   "/PythonTools/pythontools/component/basic_utils.py",
-                                   raise_exception=False)
+        assert not OsUtil.is_dir("/Users/panchenxi/Work/project/work/长期项目和学习/python/own"
+                                 "/PythonTools/pythontools/component/basic_utils.py",
+                                 raise_exception=False)
         with pytest.raises(Exception):
-            FileUtil.is_dir("dsaddaasawdasdwa", raise_exception=True)
+            OsUtil.is_dir("dsaddaasawdasdwa", raise_exception=True)
 
     @classmethod
     def test_is_file(cls):
-        assert not FileUtil.is_file("")
-        assert not FileUtil.is_file("/tmp")
-        assert FileUtil.is_file("/Users/panchenxi/Work/project/work/长期项目和学习/python/own"
-                                "/PythonTools/pythontools/component/basic_utils.py",
-                                raise_exception=False)
+        assert not OsUtil.is_file("")
+        assert not OsUtil.is_file("/tmp")
+        assert OsUtil.is_file("/Users/panchenxi/Work/project/work/长期项目和学习/python/own"
+                              "/PythonTools/pythontools/component/basic_utils.py",
+                              raise_exception=False)
 
         with pytest.raises(ValueError):
-            FileUtil.is_file("dsaddaasawdasdwa", raise_exception=True)
+            OsUtil.is_file("dsaddaasawdasdwa", raise_exception=True)
 
     @classmethod
     def test_get_file_create_time(cls):
         p = "/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools/pythontools/component/constant.py"
-        FileUtil.get_file_create_time(p)
+        OsUtil.get_file_create_time(p)
         with pytest.raises(FileNotFoundError):
-            FileUtil.get_file_create_time(p + "dadada", check_exist=True)
+            OsUtil.get_file_create_time(p + "dadada", check_exist=True)
 
     @classmethod
     def test_list_dirs(cls):
-        res = FileUtil.list_dirs(
+        res = OsUtil.list_dirs(
             "/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools")
         logger.debug(res)
 
-        FileUtil.list_dirs(
+        OsUtil.list_dirs(
             "/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools",
             check_exist=True)
 
     @classmethod
     def test_get_extension_from_path(cls):
         p = "/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools/pythontools/component/constant.py"
-        extension = FileUtil.get_extension_from_path(p)
+        extension = OsUtil.get_extension_from_path(p)
         assert '.py' == extension
 
     @classmethod
     def test_is_match_extension(cls):
         with pytest.raises(ValueError):
-            FileUtil.is_match_extension(".tm", '')
+            OsUtil.is_match_extension(".tm", '')
 
         p = "/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools/pythontools/component/constant.py"
-        assert FileUtil.is_match_extension(p, 'py')
-        assert FileUtil.is_match_extension(p, '.py')
+        assert OsUtil.is_match_extension(p, 'py')
+        assert OsUtil.is_match_extension(p, '.py')
 
     @classmethod
     def test_get_file_from_dir_by_extension(cls):
         p = ("/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools/pythontools"
              "/component/")
-        res = FileUtil.get_file_from_dir_by_extension(p, extension="py")
+        res = OsUtil.get_file_from_dir_by_extension(p, extension="py")
         logger.debug(res)
 
 
@@ -275,3 +342,15 @@ class TestValidator:
         assert not Validator.is_valid_birthday("19000229")
         assert not Validator.is_valid_birthday("011")
         assert not Validator.is_valid_birthday("20220431")
+
+    @classmethod
+    def test_is_json_str(cls):
+        assert Validator.is_json('{"name": "Peter"}')
+        assert Validator.is_json('[1, 2, 3]')
+        assert not Validator.is_json('{nope}')
+        assert not Validator.is_json('nope')
+        assert not Validator.is_json('')
+        assert not Validator.is_json(None)
+
+
+

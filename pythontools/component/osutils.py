@@ -14,12 +14,13 @@ import os
 import time
 import typing
 from operator import eq
+import platform
 
 from .basic_utils import StringUtil
 from .constant import CharPool
 
 
-class FileUtil(object):
+class OsUtil(object):
     @classmethod
     def is_exist(cls, p: str, *, raise_exception: bool = False) -> bool:
         """
@@ -235,21 +236,69 @@ class FileUtil(object):
 
         return file_lst
 
-    @classmethod
-    def is_windows(cls) -> bool:
-        """
-        返回是否在windows平台
-        :return: 是否使用windows平台
-        """
-        sys_separator = os.sep
 
-        return CharPool.BACKSLASH == sys_separator
+class SysUtil(object):
 
     @classmethod
-    def is_unix_like(cls) -> bool:
+    def get_platform_info(cls) -> str:
         """
-        返回是否在 unix 平台上
-        :return: 是否在 unix 平台上
+        获取平台信息
+        :return: 平台信息
         """
-        sys_separator = os.sep
-        return CharPool.SLASH == sys_separator
+        return platform.platform()
+
+    @classmethod
+    def is_mac_platform(cls) -> bool:
+        """
+        判断平台是否是mac
+        :return: 是否是 mac 平台
+        """
+        platform_info = cls.get_platform_info()
+        if StringUtil.is_startswith(platform_info, "macos", case_insensitive=True):
+            return True
+        return False
+
+    @classmethod
+    def is_linux_platform(cls) -> bool:
+        """
+        判断平台是否是linux
+        :return: 是否是linux
+        """
+        platform_info = cls.get_platform_info()
+        if StringUtil.is_startswith(platform_info, "linux", case_insensitive=True):
+            return True
+        return False
+
+    @classmethod
+    def is_windows_platform(cls) -> bool:
+        """
+        判断平台是否是windows
+        :return: 是否是windows
+        """
+        platform_info = cls.get_platform_info()
+        if StringUtil.is_startswith(platform_info, "windows", case_insensitive=True):
+            return True
+        return False
+
+    @classmethod
+    def is_py2(cls) -> bool:
+        """
+        判断是否Python2
+        :return: 是否Python2
+        """
+        if sys.version_info >= (3, 0):
+            return False
+        if sys.version_info < (3, 0):
+            return True
+        raise ValueError('cannot determine if it\'s python2')
+
+    @classmethod
+    def is_py3(cls):
+        """
+        判断是否Python3
+        :return: 是否是Python3
+        """
+        if (3, 0) <= sys.version_info <= (4, 0):
+            return True
+        else:
+            return False
