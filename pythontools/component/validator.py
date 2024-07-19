@@ -11,6 +11,7 @@
 -------------------------------------------------
 """
 import datetime
+import json
 
 from .convertor import BasicConvertor
 from .pattern_pool import PatternPool
@@ -27,7 +28,7 @@ class Validator(object):
         :return: 是否为生日
         """
         # PERF 增加更多支持的日期格式
-        matched = PatternPool.BIRTHDAY.match(birthday)
+        matched = PatternPool.BIRTHDAY_PATTERN.match(birthday)
         if matched:
             year = BasicConvertor.to_int(matched.group(1))
             month = BasicConvertor.to_int(matched.group(3))
@@ -66,3 +67,31 @@ class Validator(object):
             return day < 29 or (day < 30 and DateUtil.is_leap_year(year))
 
         return True
+
+    @classmethod
+    def is_json(cls, s: str) -> bool:
+        """
+        判断字符串是否是json字符串
+
+        *Example*
+
+        >>> cls.is_json('{"name": "Peter"}') # returns true
+        >>> cls.is_json('[1, 2, 3]') # returns true
+        >>> cls.is_json('{nope}') # returns false
+
+        :param s: 待检查字符串
+        :return: 是否是JSON字符串
+        """
+        if StringUtil.is_blank(s):
+            return False
+
+        if PatternPool.JSON_WRAPPER_PATTERN.match(s) is None:
+            return False
+
+        # PERF 不应该用try-except作为分支逻辑
+        try:
+            return isinstance(json.loads(s), (dict, list))
+        except (TypeError, ValueError, OverflowError):
+            pass
+
+        return False
