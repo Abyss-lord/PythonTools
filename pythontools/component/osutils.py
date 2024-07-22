@@ -13,11 +13,11 @@
 import os
 import time
 import typing
+import sys
 from operator import eq
 import platform
 
 from .basic_utils import StringUtil
-from .constant import CharPool
 
 
 class OsUtil(object):

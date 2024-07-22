@@ -12,7 +12,7 @@
 """
 import typing
 import random
-from .basic_utils import SequenceUtil, StringUtil, DateUtil
+from .basic_utils import SequenceUtil, StringUtil, DatetimeUtil
 from .validator import Validator
 from .constant import PRO_DICT, Sex, AREA_INFO
 from .convertor import BasicConvertor
@@ -44,10 +44,7 @@ class IDCard(object):
         :return:
         """
         # NOTE 应该有更好的计算方式
-        now = (datetime.now() + timedelta(days=1))
-        sub_days = now - self.birthday
-        age = round(sub_days.days / 365, 1)
-        return age
+        return DatetimeUtil.get_age(self.birthday)
 
     def get_sex(self) -> str:
         """
@@ -117,7 +114,7 @@ class IDCardUtil(object):
         :return: 18位身份证
         """
         area = random.choice(cls.AREA_LST)
-        birthday = DateUtil.get_random_date()
+        birthday = DatetimeUtil.get_random_date()
         birthday_format_str = birthday.strftime("%Y%m%d")
         sequence_code = random.randint(10, 99)
         sex_code = sex.value.sex_code

@@ -15,8 +15,7 @@ import json
 
 from .convertor import BasicConvertor
 from .pattern_pool import PatternPool
-from .basic_utils import DateUtil, StringUtil
-from loguru import logger
+from .basic_utils import DatetimeUtil, StringUtil
 
 
 class Validator(object):
@@ -47,7 +46,7 @@ class Validator(object):
         """
         # 判断年
         # NOTE datetime.MINYEAR的值是1，这里的逻辑是否要修改
-        if year < datetime.MINYEAR or year > DateUtil.this_year():
+        if year < datetime.MINYEAR or year > DatetimeUtil.this_year():
             return False
 
         # 判断月
@@ -64,7 +63,7 @@ class Validator(object):
 
         # 处理闰年的情况
         if month == 2:
-            return day < 29 or (day < 30 and DateUtil.is_leap_year(year))
+            return day < 29 or (day < 30 and DatetimeUtil.is_leap_year(year))
 
         return True
 
