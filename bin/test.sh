@@ -12,9 +12,9 @@ ROOT_DIR=$(
     cd "$ROOT_DIR" || exit 2
     pwd
 )
+cd "$ROOT_DIR" || exit 2
 # 测试目录
 TEST_DIR="$ROOT_DIR/tests"
-
 #!/bin/bash
 # 清理之前的覆盖率数据
 coverage erase
