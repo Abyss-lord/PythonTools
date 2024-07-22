@@ -10,11 +10,12 @@
                    2024/7/16:
 -------------------------------------------------
 """
+import random
 from datetime import datetime, timedelta, date
 
 from loguru import logger
 import pytest
-from .context import (StringUtil, BooleanUtil, SequenceUtil, Validator, IDCardUtil, DateUtil, \
+from .context import (StringUtil, BooleanUtil, SequenceUtil, Validator, IDCardUtil, DatetimeUtil, \
                       OsUtil, SysUtil)
 
 
@@ -77,79 +78,122 @@ class TestDateUtil:
     @classmethod
     def test_get_random_datetime_with_no_args(cls):
         for _ in range(cls.TEST_ROUND):
-            res = DateUtil.get_random_datetime()
+            res = DatetimeUtil.get_random_datetime()
             logger.debug(f"{res=}")
 
     @classmethod
     def test_get_random_datetime_with_no_args_include_tz(cls):
         for _ in range(cls.TEST_ROUND):
-            res = DateUtil.get_random_datetime(random_tz=True)
+            res = DatetimeUtil.get_random_datetime(random_tz=True)
             logger.debug(f"{res=}")
 
     @classmethod
     def test_get_random_date_with_no_args(cls):
         for _ in range(cls.TEST_ROUND):
-            logger.debug(DateUtil.get_random_date())
+            logger.debug(DatetimeUtil.get_random_date())
 
     @classmethod
     def test_get_random_date_with_one_args(cls):
         start = date(1998, 4, 24)
         for _ in range(cls.TEST_ROUND):
-            logger.debug(DateUtil.get_random_date(start))
+            logger.debug(DatetimeUtil.get_random_date(start))
 
     @classmethod
     def test_get_random_date_with_two_args(cls):
         start = datetime(1998, 4, 24)
         end = datetime(2021, 4, 24)
         for _ in range(cls.TEST_ROUND):
-            logger.debug(DateUtil.get_random_date(start, end))
+            logger.debug(DatetimeUtil.get_random_date(start, end))
 
     @classmethod
     def test_get_random_date_with_wrong_args(cls):
         with pytest.raises(ValueError):
             end = datetime(1998, 4, 24)
             start = datetime(2021, 4, 24)
-            logger.debug(DateUtil.get_random_date(start, end))
+            logger.debug(DatetimeUtil.get_random_date(start, end))
 
         with pytest.raises(ValueError):
             start = datetime(1998, 4, 24)
             end = datetime(1998, 4, 24)
-            logger.debug(DateUtil.get_random_date(start, end))
+            logger.debug(DatetimeUtil.get_random_date(start, end))
 
     @classmethod
     def test_get_this_year(cls):
         for _ in range(cls.TEST_ROUND):
-            assert DateUtil.this_year() == 2024
-            assert not DateUtil.this_year() == 2025
+            assert DatetimeUtil.this_year() == 2024
+            assert not DatetimeUtil.this_year() == 2025
 
     @classmethod
     def test_get_this_month(cls):
         for _ in range(cls.TEST_ROUND):
-            assert DateUtil.this_month() == 7
-            assert not DateUtil.this_month() == 9
+            assert DatetimeUtil.this_month() == 7
+            assert not DatetimeUtil.this_month() == 9
 
     @classmethod
     def test_get_this_day(cls):
-        DateUtil.this_day()
+        DatetimeUtil.this_day()
 
     @classmethod
     def test_get_this_hour(cls):
-        DateUtil.this_hour()
+        DatetimeUtil.this_hour()
 
     @classmethod
     def test_get_this_minute(cls):
-        DateUtil.this_minute()
+        DatetimeUtil.this_minute()
 
     @classmethod
     def test_get_this_second(cls):
-        DateUtil.this_second()
+        DatetimeUtil.this_second()
 
     @classmethod
     def test_is_leap_year(cls):
-        assert DateUtil.is_leap_year(2024)
-        assert not DateUtil.is_leap_year(2025)
-        assert not DateUtil.is_leap_year(1900)
-        assert not DateUtil.is_leap_year(2100)
+        assert DatetimeUtil.is_leap_year(2024)
+        assert not DatetimeUtil.is_leap_year(2025)
+        assert not DatetimeUtil.is_leap_year(1900)
+        assert not DatetimeUtil.is_leap_year(2100)
+
+    @classmethod
+    def test_day_of_month(cls):
+        dt = datetime.now()
+        res = DatetimeUtil.day_of_month(dt)
+        logger.debug(res)
+
+    @classmethod
+    def test_is_same_quarter(cls):
+        for _ in range(cls.TEST_ROUND):
+            d1 = DatetimeUtil.get_random_datetime()
+            d2 = DatetimeUtil.get_random_datetime()
+            res = DatetimeUtil.is_same_quarter(d1, d2)
+            logger.debug(f"d1={repr(d1)}, d2={repr(d2)}, {res=}")
+
+    @classmethod
+    def test_is_same_week(cls):
+        for _ in range(cls.TEST_ROUND):
+            d1 = DatetimeUtil.get_random_datetime(datetime(2024, 12, 1), datetime(2024, 12, 15))
+            d2 = DatetimeUtil.get_random_datetime(datetime(2024, 12, 1), datetime(2024, 12, 15))
+            res = DatetimeUtil.is_same_week(d1, d2)
+            logger.debug(f"d1={repr(d1)}, d2={repr(d2)}, {res=}")
+
+    @classmethod
+    def test_get_age(cls):
+        dt = datetime(1998, 4, 24)
+        res = DatetimeUtil.get_age(dt)
+        logger.debug(f"{res=}")
+
+    @classmethod
+    def test_time_unit_convert(cls):
+        for i in range(cls.TEST_ROUND):
+            duration = i * 1000
+            res = DatetimeUtil.nanos_to_millis(duration)
+            res_second = DatetimeUtil.nanos_to_seconds(duration * 1000)
+            logger.debug(f"{i=}, {res=}, {res_second=}")
+
+    @classmethod
+    def test_second_to_time(cls):
+        for i in range(cls.TEST_ROUND):
+            val = random.randrange(1000, 10000, 1000)
+            res = DatetimeUtil.second_to_time(val)
+            logger.debug(f"{i=}, {val=}, {res=}")
 
 
 class TestIdUtil:
@@ -351,6 +395,3 @@ class TestValidator:
         assert not Validator.is_json('nope')
         assert not Validator.is_json('')
         assert not Validator.is_json(None)
-
-
-

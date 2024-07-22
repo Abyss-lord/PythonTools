@@ -15,7 +15,7 @@ import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from pythontools.component.basic_utils import BooleanUtil, StringUtil, SequenceUtil, DateUtil
+from pythontools.component.basic_utils import BooleanUtil, StringUtil, SequenceUtil, DatetimeUtil
 from pythontools.component.idutils import IDCardUtil
 from pythontools.component.osutils import OsUtil, SysUtil
 from pythontools.component.validator import Validator
