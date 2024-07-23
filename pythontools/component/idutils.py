@@ -19,8 +19,8 @@ import random
 import typing
 from datetime import datetime
 
-from .basic_utils import DatetimeUtil, SequenceUtil, StringUtil
-from .constant import AREA_INFO, PRO_DICT, Sex
+from .basicutils import DatetimeUtil, SequenceUtil, StringUtil
+from .constants.constant import AREA_INFO, PRO_DICT, Sex
 from .convertor import BasicConvertor
 from .pattern_pool import PatternPool
 from .validator import Validator

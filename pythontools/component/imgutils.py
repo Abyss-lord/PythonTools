@@ -15,7 +15,7 @@ Change Activity:
 """
 # here put the import lib
 
-from .basic_utils import RandomUtil
+from .basicutils import RandomUtil
 from .constants.color_constant import Color
 
 

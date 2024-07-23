@@ -22,7 +22,7 @@ import time
 import typing
 from operator import eq
 
-from .basic_utils import StringUtil
+from .basicutils import StringUtil
 
 
 class OsUtil(object):

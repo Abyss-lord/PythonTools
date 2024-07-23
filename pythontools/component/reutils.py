@@ -18,7 +18,7 @@ Change Activity:
 import re
 import typing
 
-from .basic_utils import SequenceUtil, StringUtil
+from .basicutils import SequenceUtil, StringUtil
 from .pattern_pool import RegexPool
 
 
