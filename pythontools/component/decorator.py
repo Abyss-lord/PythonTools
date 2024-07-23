@@ -1,15 +1,20 @@
 #!/usr/bin/env python
-# -*- coding:utf-8 -*-
+# -*- encoding: utf-8 -*-
 """
 -------------------------------------------------
-   File Name：     decorator
-   Description :
-   date：          2024/7/19
+@File       :   decorator.py
+@Date       :   2024/07/23
+@Desc       :   None
+@Version    :   1.0
 -------------------------------------------------
-   Change Activity:
-                   2024/7/19:
+Change Activity:
+@Date       :   2024/07/23
+@Author     :   Plord117
+@Desc       :   None
 -------------------------------------------------
 """
+# here put the import lib
+
 import functools
 import threading
 import time
@@ -74,7 +79,7 @@ class TraceUsedTime(object):
 
     """
 
-    def __init__(self, b_print_stdout=False, enter_msg='', leave_msg=''):
+    def __init__(self, b_print_stdout=False, enter_msg="", leave_msg=""):
         """
         :param b_print_stdout:
             When b_print_stdout is True, CUP will print to both LOGFILE

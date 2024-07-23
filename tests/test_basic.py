@@ -1,31 +1,36 @@
 #!/usr/bin/env python
-# -*- coding:utf-8 -*-
+# -*- encoding: utf-8 -*-
 """
 -------------------------------------------------
-   File Name：     test_basic
-   Description :
-   date：          2024/7/16
+@File       :   test_basic.py
+@Date       :   2024/07/23
+@Desc       :   None
+@Version    :   1.0
 -------------------------------------------------
-   Change Activity:
-                   2024/7/16:
+Change Activity:
+@Date       :   2024/07/23
+@Author     :   Plord117
+@Desc       :   None
 -------------------------------------------------
 """
+# here put the import lib
+
 import calendar
 import datetime
 import os
-import sys
 import platform
 import time
 
-import pytz
 from loguru import logger
+
 from .context import Sex
 
 
 class TestBasic(object):
     def test_basic(self):
         for root, dirs, files in os.walk(
-                '/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools'):
+            "/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools"
+        ):
             logger.info(f"{root=}, {dirs=}")
 
     def test_constant(self):

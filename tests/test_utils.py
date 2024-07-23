@@ -1,22 +1,36 @@
 #!/usr/bin/env python
-# -*- coding:utf-8 -*-
+# -*- encoding: utf-8 -*-
 """
 -------------------------------------------------
-   File Name：     test_utils
-   Description :
-   date：          2024/7/16
+@File       :   test_utils.py
+@Date       :   2024/07/23
+@Desc       :   None
+@Version    :   1.0
 -------------------------------------------------
-   Change Activity:
-                   2024/7/16:
+Change Activity:
+@Date       :   2024/07/23
+@Author     :   Plord117
+@Desc       :   None
 -------------------------------------------------
 """
-import random
-from datetime import datetime, timedelta, date
+# here put the import lib
 
-from loguru import logger
+import random
+from datetime import date, datetime, timedelta
+
 import pytest
-from .context import (StringUtil, BooleanUtil, SequenceUtil, Validator, IDCardUtil, DatetimeUtil, \
-                      OsUtil, SysUtil)
+from loguru import logger
+
+from .context import (
+    BooleanUtil,
+    DatetimeUtil,
+    IDCardUtil,
+    OsUtil,
+    SequenceUtil,
+    StringUtil,
+    SysUtil,
+    Validator,
+)
 
 
 class TestStringUtil:
@@ -67,7 +81,7 @@ class TestStringUtil:
         assert not IDCardUtil.is_valid_id_18("110105199804246511")
 
     def test_date_sub(self):
-        now = (datetime.now() + timedelta(days=1))
+        now = datetime.now() + timedelta(days=1)
         res = now - datetime.now()
         logger.debug(type(res))
 
@@ -169,8 +183,12 @@ class TestDateUtil:
     @classmethod
     def test_is_same_week(cls):
         for _ in range(cls.TEST_ROUND):
-            d1 = DatetimeUtil.get_random_datetime(datetime(2024, 12, 1), datetime(2024, 12, 15))
-            d2 = DatetimeUtil.get_random_datetime(datetime(2024, 12, 1), datetime(2024, 12, 15))
+            d1 = DatetimeUtil.get_random_datetime(
+                datetime(2024, 12, 1), datetime(2024, 12, 15)
+            )
+            d2 = DatetimeUtil.get_random_datetime(
+                datetime(2024, 12, 1), datetime(2024, 12, 15)
+            )
             res = DatetimeUtil.is_same_week(d1, d2)
             logger.debug(f"d1={repr(d1)}, d2={repr(d2)}, {res=}")
 
@@ -233,7 +251,7 @@ class TestIdUtil:
 
     @classmethod
     def test_is_valid_id(cls):
-        id = '123456789012345'
+        id = "123456789012345"
         with pytest.raises(NotImplementedError):
             IDCardUtil.is_valid_id(id)
 
@@ -290,7 +308,8 @@ class TestOsUtil:
         assert OsUtil.is_exist("/")
         assert OsUtil.is_exist("/tmp")
         assert OsUtil.is_exist(
-            "/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools")
+            "/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools"
+        )
         assert OsUtil.is_exist("/Users/")
         assert not OsUtil.is_exist("dsaddaasawdasdwa")
 
@@ -300,11 +319,14 @@ class TestOsUtil:
         assert OsUtil.is_dir("/")
         assert OsUtil.is_dir("/tmp")
         assert OsUtil.is_dir(
-            "/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools")
+            "/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools"
+        )
 
-        assert not OsUtil.is_dir("/Users/panchenxi/Work/project/work/长期项目和学习/python/own"
-                                 "/PythonTools/pythontools/component/basic_utils.py",
-                                 raise_exception=False)
+        assert not OsUtil.is_dir(
+            "/Users/panchenxi/Work/project/work/长期项目和学习/python/own"
+            "/PythonTools/pythontools/component/basic_utils.py",
+            raise_exception=False,
+        )
         with pytest.raises(Exception):
             OsUtil.is_dir("dsaddaasawdasdwa", raise_exception=True)
 
@@ -312,9 +334,11 @@ class TestOsUtil:
     def test_is_file(cls):
         assert not OsUtil.is_file("")
         assert not OsUtil.is_file("/tmp")
-        assert OsUtil.is_file("/Users/panchenxi/Work/project/work/长期项目和学习/python/own"
-                              "/PythonTools/pythontools/component/basic_utils.py",
-                              raise_exception=False)
+        assert OsUtil.is_file(
+            "/Users/panchenxi/Work/project/work/长期项目和学习/python/own"
+            "/PythonTools/pythontools/component/basic_utils.py",
+            raise_exception=False,
+        )
 
         with pytest.raises(ValueError):
             OsUtil.is_file("dsaddaasawdasdwa", raise_exception=True)
@@ -329,32 +353,36 @@ class TestOsUtil:
     @classmethod
     def test_list_dirs(cls):
         res = OsUtil.list_dirs(
-            "/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools")
+            "/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools"
+        )
         logger.debug(res)
 
         OsUtil.list_dirs(
             "/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools",
-            check_exist=True)
+            check_exist=True,
+        )
 
     @classmethod
     def test_get_extension_from_path(cls):
         p = "/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools/pythontools/component/constant.py"
         extension = OsUtil.get_extension_from_path(p)
-        assert '.py' == extension
+        assert ".py" == extension
 
     @classmethod
     def test_is_match_extension(cls):
         with pytest.raises(ValueError):
-            OsUtil.is_match_extension(".tm", '')
+            OsUtil.is_match_extension(".tm", "")
 
         p = "/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools/pythontools/component/constant.py"
-        assert OsUtil.is_match_extension(p, 'py')
-        assert OsUtil.is_match_extension(p, '.py')
+        assert OsUtil.is_match_extension(p, "py")
+        assert OsUtil.is_match_extension(p, ".py")
 
     @classmethod
     def test_get_file_from_dir_by_extension(cls):
-        p = ("/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools/pythontools"
-             "/component/")
+        p = (
+            "/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools/pythontools"
+            "/component/"
+        )
         res = OsUtil.get_file_from_dir_by_extension(p, extension="py")
         logger.debug(res)
 
@@ -390,8 +418,8 @@ class TestValidator:
     @classmethod
     def test_is_json_str(cls):
         assert Validator.is_json('{"name": "Peter"}')
-        assert Validator.is_json('[1, 2, 3]')
-        assert not Validator.is_json('{nope}')
-        assert not Validator.is_json('nope')
-        assert not Validator.is_json('')
+        assert Validator.is_json("[1, 2, 3]")
+        assert not Validator.is_json("{nope}")
+        assert not Validator.is_json("nope")
+        assert not Validator.is_json("")
         assert not Validator.is_json(None)

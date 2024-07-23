@@ -1,21 +1,26 @@
 #!/usr/bin/env python
-# -*- coding:utf-8 -*-
+# -*- encoding: utf-8 -*-
 """
 -------------------------------------------------
-   File Name：     osutils
-   Description :
-   date：          2024/7/16
+@File       :   osutils.py
+@Date       :   2024/07/23
+@Desc       :   None
+@Version    :   1.0
 -------------------------------------------------
-   Change Activity:
-                   2024/7/16:
+Change Activity:
+@Date       :   2024/07/23
+@Author     :   Plord117
+@Desc       :   None
 -------------------------------------------------
 """
+# here put the import lib
+
 import os
+import platform
+import sys
 import time
 import typing
-import sys
 from operator import eq
-import platform
 
 from .basic_utils import StringUtil
 
@@ -25,18 +30,34 @@ class OsUtil(object):
     def is_exist(cls, p: str, *, raise_exception: bool = False) -> bool:
         """
         检查路径是否存在
-        :param p: 路径是否存在
-        :param raise_exception: 不存在是否引发异常
-        :return: 如果路径存在返回True，如果指定raise_exception，不存在则引发FileNotFoundError异常，否则返回False
+
+        Parameters
+        ----------
+        p : str
+            待检测路径
+        raise_exception : bool, optional
+            不存在是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            如果路径存在返回True, 如果raise_exception=False, 则返回False, 否则引发异常
+
+        Raises
+        ------
+        FileNotFoundError
+            如果路径不存在且raise_exception=True, 则引发FileNotFoundError异常
         """
+        # 检查路径是否存在
         if StringUtil.is_blank(p):
             return False
         if os.path.exists(p):
             return True
-
+        
+        # 如果路径不存在且需要抛出异常，则抛出FileNotFoundError
         if raise_exception:
             raise FileNotFoundError(p)
-
+        
         return False
 
     @classmethod
@@ -44,8 +65,8 @@ class OsUtil(object):
         """
         判断路径是否是文件夹
         :param p: 文件夹路径
-        :param raise_exception: 如果文件夹不存在是否引发异常，默认不引发异常
-        :return: 如果路径存在且是文件夹返回True，如果指定raise_exception，不存在则引发FileNotFoundError异常，否则返回False
+        :param raise_exception: 如果文件夹不存在是否引发异常, 默认不引发异常
+        :return: 如果路径存在且是文件夹返回True, 如果指定raise_exception, 不存在则引发FileNotFoundError异常, 否则返回False
         """
         if StringUtil.is_blank(p):
             return False
@@ -56,20 +77,22 @@ class OsUtil(object):
 
         return False
 
+    # @Param p: 文件路径
+    # @Param raise_exception: 如果文件不存在是否引发异常, 默认不引发异常
     @classmethod
     def is_file(cls, p: str, *, raise_exception: bool = False) -> bool:
         """
         判断路径是否是文件
         :param p: 文件路径
-        :param raise_exception: 如果文件不存在是否引发异常，默认不引发异常
-        :return: 文件存在返回 True，如果 raise_exception=False 返回False，否则引发异常
+        :param raise_exception: 如果文件不存在是否引发异常, 默认不引发异常
+        :return: 文件存在返回 True, 如果 raise_exception=False 返回False, 否则引发异常
         """
         if StringUtil.is_blank(p):
             return False
         if os.path.isfile(p):
             return True
         if raise_exception:
-            raise ValueError(f'File {p} does not exist or is not a file')
+            raise ValueError(f"File {p} does not exist or is not a file")
 
         return False
 
@@ -96,7 +119,7 @@ class OsUtil(object):
             return False
 
         base_name = base_name.strip()
-        if base_name.startswith('.') or base_name.startswith('__'):
+        if base_name.startswith(".") or base_name.startswith("__"):
             return True
 
         return False
@@ -106,7 +129,7 @@ class OsUtil(object):
         """
         检测路径是否含有隐藏文件夹
         :param p: 待检测路径
-        :return: 如果含有隐藏文件夹返回 True，否则返回False
+        :return: 如果含有隐藏文件夹返回 True, 否则返回False
         """
         while not cls.is_root_path(p) and not StringUtil.is_blank(p):
             basename = cls.get_basename_from_path(p)
@@ -117,8 +140,13 @@ class OsUtil(object):
         return False
 
     @classmethod
-    def get_file_create_time(cls, p: str, time_format: str = "%Y-%m-%d %H:%M:%S", *,
-                             check_exist: bool = False) -> str:
+    def get_file_create_time(
+        cls,
+        p: str,
+        time_format: str = "%Y-%m-%d %H:%M:%S",
+        *,
+        check_exist: bool = False,
+    ) -> str:
         """
         以字符串形式返回文件创建时间
         :param p: 文件路径
@@ -133,10 +161,9 @@ class OsUtil(object):
         return format_time
 
     @classmethod
-    def list_dirs(cls,
-                  p: str,
-                  ignore_hidden_dir: bool = True,
-                  *, check_exist: bool = False) -> typing.List[str]:
+    def list_dirs(
+        cls, p: str, ignore_hidden_dir: bool = True, *, check_exist: bool = False
+    ) -> typing.List[str]:
         """
         返回一个路径下所有的文件夹
         :param p: 给定路径
@@ -158,14 +185,13 @@ class OsUtil(object):
         return lst
 
     @classmethod
-    def list_files(cls,
-                   p: str,
-                   ignore_hidden_dir: bool = True,
-                   *, check_exist: bool = False) -> typing.List[str]:
+    def list_files(
+        cls, p: str, ignore_hidden_dir: bool = True, *, check_exist: bool = False
+    ) -> typing.List[str]:
         """
         返回一个路径下的所有文件
         :param p: 给定路径
-        :param ignore_hidden_dir: 是否忽略隐藏文件，默认忽略
+        :param ignore_hidden_dir: 是否忽略隐藏文件, 默认忽略
         :param check_exist: 是否进行预检查
         :return: 返回给定路径下所有的文件路径
         """
@@ -217,10 +243,12 @@ class OsUtil(object):
         # 获取文件扩展名
         file_extension = cls.get_extension_from_path(p)
 
-        return eq(file_extension, extension) or eq(file_extension, '.' + extension)
+        return eq(file_extension, extension) or eq(file_extension, "." + extension)
 
     @classmethod
-    def get_file_from_dir_by_extension(cls, p: str, *, extension: str = 'sql') -> typing.List[str]:
+    def get_file_from_dir_by_extension(
+        cls, p: str, *, extension: str = "sql"
+    ) -> typing.List[str]:
         """
         返回给定的扩展名匹配的文件
         :param p:  给定路径
@@ -238,7 +266,6 @@ class OsUtil(object):
 
 
 class SysUtil(object):
-
     @classmethod
     def get_platform_info(cls) -> str:
         """
@@ -290,7 +317,7 @@ class SysUtil(object):
             return False
         if sys.version_info < (3, 0):
             return True
-        raise ValueError('cannot determine if it\'s python2')
+        raise ValueError("cannot determine if it's python2")
 
     @classmethod
     def is_py3(cls):

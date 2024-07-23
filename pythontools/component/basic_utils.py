@@ -1,31 +1,39 @@
 #!/usr/bin/env python
-# -*- coding:utf-8 -*-
+# -*- encoding: utf-8 -*-
 """
 -------------------------------------------------
-File Name:      Utils
-Description :
-date:           2024/7/16
+@File       :   basic_utils.py
+@Date       :   2024/07/23
+@Desc       :   None
+@Version    :   1.0
 -------------------------------------------------
 Change Activity:
-    2024/7/16:
+@Date       :   2024/07/23
+@Author     :   Plord117
+@Desc       :   None
 -------------------------------------------------
 """
-import time
+# here put the import lib
+
 import calendar
-from datetime import timedelta, date, datetime, tzinfo, timezone
 import random
-import typing
-from typing import Any
 import string
+import time
+import typing
+from datetime import date, datetime, timedelta, timezone, tzinfo
+from typing import Any
+
 import pytz
+
 from .constant import Quarter, TimeUnit
 from .convertor import BasicConvertor
 
 
 class RandomUtil:
     @classmethod
-    def get_random_val_from_range(cls, start: int, end: int, *,
-                                  both_include: bool = False) -> int:
+    def get_random_val_from_range(
+        cls, start: int, end: int, *, both_include: bool = False
+    ) -> int:
         """
         从给定范围返回随机值
 
@@ -49,12 +57,18 @@ class RandomUtil:
             如果start > end, 则抛出异常
         """
         if start > end:
-            raise ValueError(f'{start=} must be less than {end=}')
+            raise ValueError(f"{start=} must be less than {end=}")
 
-        return random.randrange(start, end) if not both_include else random.randint(start, end)
+        return (
+            random.randrange(start, end)
+            if not both_include
+            else random.randint(start, end)
+        )
 
     @classmethod
-    def get_random_item_from_sequence(cls, seq: typing.Sequence[Any]) -> typing.Optional[Any]:
+    def get_random_item_from_sequence(
+        cls, seq: typing.Sequence[Any]
+    ) -> typing.Optional[Any]:
         """
         随机从序列中抽取元素
         :param seq: 待抽取序列
@@ -65,7 +79,9 @@ class RandomUtil:
         return random.choice(seq)
 
     @classmethod
-    def get_random_items_from_sequence(cls, seq: typing.Sequence[Any], k: int) -> typing.List[Any]:
+    def get_random_items_from_sequence(
+        cls, seq: typing.Sequence[Any], k: int
+    ) -> typing.List[Any]:
         """
         从给定的序列中随机选择 k 个元素。
         :param seq: 输入的序列, 可以是任何类型的序列（如列表、元组等）。
@@ -77,7 +93,7 @@ class RandomUtil:
             return list()
 
         if k < 0:
-            raise ValueError(f'{k=} must be greater than or equal to 0')
+            raise ValueError(f"{k=} must be greater than or equal to 0")
 
         if k >= len(seq):
             return [i for i in seq]
@@ -91,10 +107,33 @@ class CharsetUtil(object):
 
 
 class BooleanUtil(object):
-    TRUE_SET: typing.FrozenSet[str] = frozenset(
-        ["true", "yes", "y", "t", "ok", "1", "on", "是", "对", "真", "對", "√"])
-    FALSE_SET: typing.FrozenSet[str] = frozenset(
-        ["false", "no", "n", "f", "0", "off", "否", "错", "假", "錯", "×"])
+    TRUE_SET: typing.FrozenSet[str] = frozenset([
+        "true",
+        "yes",
+        "y",
+        "t",
+        "ok",
+        "1",
+        "on",
+        "是",
+        "对",
+        "真",
+        "對",
+        "√",
+    ])
+    FALSE_SET: typing.FrozenSet[str] = frozenset([
+        "false",
+        "no",
+        "n",
+        "f",
+        "0",
+        "off",
+        "否",
+        "错",
+        "假",
+        "錯",
+        "×",
+    ])
     DEFAULT_TRUE_STRING: typing.Final[str] = "TRUE"
     DEFAULT_FALSE_STRING: typing.Final[str] = "FALSE"
 
@@ -167,8 +206,12 @@ class BooleanUtil(object):
         :param strict_mode: 是否启动严格模式, 如果开启严格模式, 则不会使用BOOL进行布尔运算, 否则会进行布尔运算
         :return: 'true', 'false'
         """
-        return cls.to_string(value, cls.DEFAULT_TRUE_STRING, cls.DEFAULT_FALSE_STRING,
-                             strict_mode=strict_mode)
+        return cls.to_string(
+            value,
+            cls.DEFAULT_TRUE_STRING,
+            cls.DEFAULT_FALSE_STRING,
+            strict_mode=strict_mode,
+        )
 
     @classmethod
     def to_str_on_and_off(cls, value: bool, *, strict_mode: bool = True) -> str:
@@ -191,8 +234,9 @@ class BooleanUtil(object):
         return cls.to_string(value, "YES", "NO", strict_mode=strict_mode)
 
     @classmethod
-    def to_string(cls, value: bool, true_str: str, false_str: str, *,
-                  strict_mode: bool = False) -> str:
+    def to_string(
+        cls, value: bool, true_str: str, false_str: str, *, strict_mode: bool = False
+    ) -> str:
         """
         将boolean转换为字符串
         :param value: Boolean值
@@ -484,7 +528,9 @@ class SequenceUtil(object):
         return len(lst) - old_length
 
     @classmethod
-    def resize(cls, lst: typing.Sequence[Any], new_length: int, *, fill_val: Any = None) -> typing.Sequence[Any]:
+    def resize(
+        cls, lst: typing.Sequence[Any], new_length: int, *, fill_val: Any = None
+    ) -> typing.Sequence[Any]:
         """
         调整序列的长度, 如果新长度小于原长度, 则截断, 如果新长度大于原长度, 则填充默认值。
 
@@ -499,15 +545,15 @@ class SequenceUtil(object):
         ----------
         lst : typing.Sequence[Any]
             待调整的序列
-        new_length : int    
+        new_length : int
             新的长度
-        fill_val : Any, optional    
+        fill_val : Any, optional
             填充项的默认值, by default None
 
         Returns
         -------
         typing.Sequence[Any]
-            调整后新生成的序列, 长度为new_length, 
+            调整后新生成的序列, 长度为new_length,
         """
 
         if 0 > new_length:
@@ -560,8 +606,14 @@ class SequenceUtil(object):
         return [i for i in lst if BooleanUtil.value_of(i)]
 
     @classmethod
-    def sub_lst(cls, lst: typing.Sequence[Any], start: int, end: int, *,
-                include_last: bool = False) -> typing.Sequence[Any]:
+    def sub_lst(
+        cls,
+        lst: typing.Sequence[Any],
+        start: int,
+        end: int,
+        *,
+        include_last: bool = False,
+    ) -> typing.Sequence[Any]:
         """
         从序列中获取子序列
 
@@ -589,7 +641,7 @@ class SequenceUtil(object):
         if start < 0 or start > end or start >= len(lst):
             raise ValueError(f"Start index {start} is out of range")
 
-        return lst[start:end + 1] if include_last else lst[start:end]
+        return lst[start : end + 1] if include_last else lst[start:end]
 
 
 class StringUtil(SequenceUtil):
@@ -614,7 +666,9 @@ class StringUtil(SequenceUtil):
         return False
 
     @classmethod
-    def is_blank(cls, s: typing.Optional[str], *, raise_type_exception: bool = False) -> bool:
+    def is_blank(
+        cls, s: typing.Optional[str], *, raise_type_exception: bool = False
+    ) -> bool:
         """
         判断给定的字符串是否为空, 空字符串包括null、空字符串: ""、空格、全角空格、制表符、换行符, 等不可见字符, \\n
 
@@ -745,7 +799,9 @@ class StringUtil(SequenceUtil):
             return s
 
     @classmethod
-    def to_bytes(cls, byte_or_str: typing.Union[bytes, str], encoding=CharsetUtil.UTF_8) -> bytes:
+    def to_bytes(
+        cls, byte_or_str: typing.Union[bytes, str], encoding=CharsetUtil.UTF_8
+    ) -> bytes:
         """
         将字节序列或者字符串转换成字节序列
         :param byte_or_str: 待转换对象
@@ -759,7 +815,9 @@ class StringUtil(SequenceUtil):
             return byte_or_str.encode(encoding)
 
     @classmethod
-    def to_str(cls, byte_or_str: typing.Union[bytes, str], encoding=CharsetUtil.UTF_8) -> str:
+    def to_str(
+        cls, byte_or_str: typing.Union[bytes, str], encoding=CharsetUtil.UTF_8
+    ) -> str:
         """
         将字节序列或者字符串转换成字符串
         :param byte_or_str: 待转换对象
@@ -814,8 +872,14 @@ class StringUtil(SequenceUtil):
         return f" {s} ".center(single_side_width, fill_char)
 
     @classmethod
-    def equals(cls, s1: str, s2: str, *, case_insensitive: bool = True,
-               strict_mode: bool = False) -> bool:
+    def equals(
+        cls,
+        s1: str,
+        s2: str,
+        *,
+        case_insensitive: bool = True,
+        strict_mode: bool = False,
+    ) -> bool:
         """
 
         :param s1:
@@ -832,7 +896,7 @@ class StringUtil(SequenceUtil):
             return s1.strip() == s2.strip()
 
     @classmethod
-    def hide(cls, s: str, start: int, end: int, replace_char: str = '*') -> str:
+    def hide(cls, s: str, start: int, end: int, replace_char: str = "*") -> str:
         """
          隐藏字符串 s 中从 start 到 end 位置的字符, 用指定的替换字符 replace_char 替换。
 
@@ -863,11 +927,17 @@ class StringUtil(SequenceUtil):
             else:
                 new_str_lst.append(v)
 
-        return ''.join(new_str_lst)
+        return "".join(new_str_lst)
 
     @classmethod
-    def is_startswith(cls, s: str, prefix: str, *, case_insensitive: bool = True,
-                      strict_mode: bool = False) -> bool:
+    def is_startswith(
+        cls,
+        s: str,
+        prefix: str,
+        *,
+        case_insensitive: bool = True,
+        strict_mode: bool = False,
+    ) -> bool:
         """
         检查字符串 s 是否以指定的前缀 prefix 开头。
 
@@ -902,9 +972,36 @@ class StringUtil(SequenceUtil):
 
 class DatetimeUtil(object):
     wtb = [
-        "sun", "mon", "tue", "wed", "thu", "fri", "sat",
-        "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec",
-        "gmt", "ut", "utc", "est", "edt", "cst", "cdt", "mst", "mdt", "pst", "pdt"
+        "sun",
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "jan",
+        "feb",
+        "mar",
+        "apr",
+        "may",
+        "jun",
+        "jul",
+        "aug",
+        "sep",
+        "oct",
+        "nov",
+        "dec",
+        "gmt",
+        "ut",
+        "utc",
+        "est",
+        "edt",
+        "cst",
+        "cdt",
+        "mst",
+        "mdt",
+        "pst",
+        "pdt",
     ]
 
     @classmethod
@@ -1081,9 +1178,9 @@ class DatetimeUtil(object):
         return tz
 
     @classmethod
-    def get_random_date(cls,
-                        start: typing.Optional[date] = None,
-                        end: typing.Optional[date] = None) -> date:
+    def get_random_date(
+        cls, start: typing.Optional[date] = None, end: typing.Optional[date] = None
+    ) -> date:
         """
         返回随机日期
 
@@ -1105,17 +1202,18 @@ class DatetimeUtil(object):
             end = date.today()
 
         days_between = (end - start).days
-        random_num_of_days = RandomUtil.get_random_val_from_range(
-            0, days_between)
+        random_num_of_days = RandomUtil.get_random_val_from_range(0, days_between)
         random_date = start + timedelta(days=random_num_of_days)
         return random_date
 
     @classmethod
-    def get_random_datetime(cls,
-                            start: typing.Optional[datetime] = None,
-                            end: typing.Optional[datetime] = None,
-                            *,
-                            random_tz: bool = False) -> datetime:
+    def get_random_datetime(
+        cls,
+        start: typing.Optional[datetime] = None,
+        end: typing.Optional[datetime] = None,
+        *,
+        random_tz: bool = False,
+    ) -> datetime:
         """
         生成一个随机的 datetime 对象, 支持指定时间范围和随机时区。
 
@@ -1143,8 +1241,9 @@ class DatetimeUtil(object):
         random_second = RandomUtil.get_random_val_from_range(0, 60)
 
         # 拼接 datetime 对象
-        random_datetime = random_datetime.replace(hour=random_hour, minute=random_minute,
-                                                  second=random_second)
+        random_datetime = random_datetime.replace(
+            hour=random_hour, minute=random_minute, second=random_second
+        )
         if random_tz:
             random_tz = cls.get_random_tz()
             random_datetime = random_datetime.replace(tzinfo=random_tz)
@@ -1183,9 +1282,8 @@ class DatetimeUtil(object):
         :return: 表示UTC时间的 Datetime 对象
         """
         if not isinstance(date_obj, datetime):
-            raise TypeError(
-                f"date_obj must be datetime.datetime, not {type(date_obj)}")
-        return date_obj.astimezone(pytz.timezone('UTC'))
+            raise TypeError(f"date_obj must be datetime.datetime, not {type(date_obj)}")
+        return date_obj.astimezone(pytz.timezone("UTC"))
 
     @classmethod
     def utc_to_local(cls, date_obj: datetime, tz: str) -> datetime:
@@ -1196,8 +1294,7 @@ class DatetimeUtil(object):
         :return: 转换后的 Datetime 对象
         """
         if not isinstance(date_obj, datetime):
-            raise TypeError(
-                f"date_obj must be datetime.datetime, not {type(date_obj)}")
+            raise TypeError(f"date_obj must be datetime.datetime, not {type(date_obj)}")
 
         return date_obj.astimezone(pytz.timezone(tz))
 
@@ -1214,8 +1311,9 @@ class DatetimeUtil(object):
         return days_in_month
 
     @classmethod
-    def get_age(cls, birthday: datetime, *, use_float_format: bool = False) \
-            -> typing.Union[int, float]:
+    def get_age(
+        cls, birthday: datetime, *, use_float_format: bool = False
+    ) -> typing.Union[int, float]:
         """
         根据给定生日返回年龄
         :param birthday: 给定生日
@@ -1225,13 +1323,13 @@ class DatetimeUtil(object):
         if birthday is None:
             raise ValueError("birthday cannot be None")
 
-        now = (datetime.now() + timedelta(days=1))
+        now = datetime.now() + timedelta(days=1)
         if use_float_format:
             sub_days = (now - birthday).days
             age = round(sub_days / 365, 1)
             return age
 
-        now = (datetime.now() + timedelta(days=1))
+        now = datetime.now() + timedelta(days=1)
         age = now.year - birthday.year
 
         # NOTE 根据月、日判断是否对年龄 -1

@@ -1,31 +1,56 @@
 #!/usr/bin/env python
-# -*- coding:utf-8 -*-
+# -*- encoding: utf-8 -*-
 """
 -------------------------------------------------
-   File Name：     validator
-   Description :
-   date：          2024/7/17
+@File       :   validator.py
+@Date       :   2024/07/23
+@Desc       :   None
+@Version    :   1.0
 -------------------------------------------------
-   Change Activity:
-                   2024/7/17:
+Change Activity:
+@Date       :   2024/07/23
+@Author     :   Plord117
+@Desc       :   None
 -------------------------------------------------
 """
+# here put the import lib
+
 import datetime
 import json
 
+from .basic_utils import DatetimeUtil, StringUtil
 from .convertor import BasicConvertor
 from .pattern_pool import PatternPool
-from .basic_utils import DatetimeUtil, StringUtil
 
 
 class Validator(object):
     @classmethod
     def is_valid_birthday(cls, birthday: str) -> bool:
         """
-        验证是否为生日，目前支持yyyy-MM-dd、yyyyMMdd、yyyy/MM/dd、yyyy.MM.dd、yyyy年MM月dd日
-        :param birthday: 待测试值
-        :return: 是否为生日
+        验证是否为生日, 目前支持yyyy-MM-dd、yyyyMMdd、yyyy/MM/dd、yyyy.MM.dd、yyyy年MM月dd日
+
+        Example:
+        ----------
+        >>> Validator.is_valid_birthday('1990-01-01') # returns True
+        >>> Validator.is_valid_birthday('19900101') # returns True
+        >>> Validator.is_valid_birthday('1990/01/01') # returns True
+        >>> Validator.is_valid_birthday('1990.01.01') # returns True
+        >>> Validator.is_valid_birthday('1990年01月01日') # returns True
+        >>> Validator.is_valid_birthday('1990-13-01') # returns False
+        >>> Validator.is_valid_birthday('1990-02-29') # returns False (非闰年)
+        >>> Validator.is_valid_birthday('1990-02-30') # returns False (非30天的月份)
+
+        Parameters
+        ----------
+        birthday : str
+            待检测日期
+
+        Returns
+        -------
+        bool
+            如果是合法的生日, 则返回True, 否则返回False
         """
+
         # PERF 增加更多支持的日期格式
         matched = PatternPool.BIRTHDAY_PATTERN.match(birthday)
         if matched:
@@ -39,13 +64,29 @@ class Validator(object):
     def is_valid_date(cls, year: int, month: int, day: int) -> bool:
         """
         验证是否为生日
-        :param year: 年
-        :param month: 月
-        :param day: 日
-        :return: 是否为生日
+
+        Example:
+        ----------
+        >>> Validator.is_valid_date(1990, 1, 1) # returns True
+        >>> Validator.is_valid_date(1990, 13, 1) # returns False
+
+        Parameters
+        ----------
+        year : int
+            年
+        month : int
+            月
+        day : int
+            日
+
+        Returns
+        -------
+        bool
+            如果是合法的日期, 则返回True, 否则返回False
         """
+
         # 判断年
-        # NOTE datetime.MINYEAR的值是1，这里的逻辑是否要修改
+        # NOTE datetime.MINYEAR的值是1, 这里的逻辑是否要修改
         if year < datetime.MINYEAR or year > DatetimeUtil.this_year():
             return False
 
@@ -72,14 +113,21 @@ class Validator(object):
         """
         判断字符串是否是json字符串
 
-        *Example*
+        Example:
+        ----------
+        >>> Validator.is_json('{"name": "John", "age": 30, "city": "New York"}') # returns True
+        >>> Validator.is_json('{"name": "John", "age": 30, "city": "New York"') # returns False
+        >>> Validator.is_json('{"name": "John", "age": 30, "city": "New York"} ') # returns False
 
-        >>> cls.is_json('{"name": "Peter"}') # returns true
-        >>> cls.is_json('[1, 2, 3]') # returns true
-        >>> cls.is_json('{nope}') # returns false
+        Parameters
+        ----------
+        s : str
+            待检测字符串
 
-        :param s: 待检查字符串
-        :return: 是否是JSON字符串
+        Returns
+        -------
+        bool
+            如果是json字符串, 则返回True, 否则返回False
         """
         if StringUtil.is_blank(s):
             return False

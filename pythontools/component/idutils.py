@@ -1,23 +1,29 @@
 #!/usr/bin/env python
-# -*- coding:utf-8 -*-
+# -*- encoding: utf-8 -*-
 """
 -------------------------------------------------
-   File Name：     idutils
-   Description :
-   date：          2024/7/17
+@File       :   idutils.py
+@Date       :   2024/07/23
+@Desc       :   None
+@Version    :   1.0
 -------------------------------------------------
-   Change Activity:
-                   2024/7/17:
+Change Activity:
+@Date       :   2024/07/23
+@Author     :   Plord117
+@Desc       :   None
 -------------------------------------------------
 """
-import typing
+# here put the import lib
+
 import random
-from .basic_utils import SequenceUtil, StringUtil, DatetimeUtil
-from .validator import Validator
-from .constant import PRO_DICT, Sex, AREA_INFO
+import typing
+from datetime import datetime
+
+from .basic_utils import DatetimeUtil, SequenceUtil, StringUtil
+from .constant import AREA_INFO, PRO_DICT, Sex
 from .convertor import BasicConvertor
 from .pattern_pool import PatternPool
-from datetime import datetime, timedelta
+from .validator import Validator
 
 
 class IDCard(object):
@@ -25,7 +31,7 @@ class IDCard(object):
         self.id: str = id
         self.province_code: str = BasicConvertor.to_str(StringUtil.sub_lst(id, 0, 2))
         self.area_code: str = BasicConvertor.to_str(StringUtil.sub_lst(id, 0, 6))
-        self.birthday: datetime = IDCardUtil.get_birthday_from_id(id)
+        self.birthday: typing.Optional[datetime] = IDCardUtil.get_birthday_from_id(id)
 
     def __repr__(self) -> str:
         return (
@@ -36,7 +42,8 @@ class IDCard(object):
             f"birthday='{self.birthday.strftime('%Y-%m-%d')}', "
             f"age={self.get_age()}, "
             f"sex={self.get_sex()}"
-            f")")
+            f")"
+        )
 
     def get_age(self) -> float:
         """
@@ -81,12 +88,14 @@ class IDCardUtil(object):
     @classmethod
     def generate_random_valid_card(cls, *, sex=Sex.MALE) -> IDCard:
         """
-        随机产生 IDCard 实例，默认使用18位身份证
+        随机产生 IDCard 实例, 默认使用18位身份证
         :param sex: 性别
         :return: IDCard 对象
         """
         default_code_length = 18
-        random_id = cls.generate_random_valid_id(code_length=default_code_length, sex=sex)
+        random_id = cls.generate_random_valid_id(
+            code_length=default_code_length, sex=sex
+        )
         return cls.get_card_from_id(random_id)
 
     @classmethod
@@ -131,14 +140,14 @@ class IDCardUtil(object):
         :param sex: 性别
         :return: 15位身份证
         """
-        pass
+        raise NotImplementedError()
 
     @classmethod
     def is_valid_id(cls, s: str) -> bool:
         """
         判断是否是合规的身份证 ID
         :param s: 待检测 ID
-        :return: 如果合规返回 True，否则返回 False
+        :return: 如果合规返回 True, 否则返回 False
         """
         if not StringUtil.is_string(s):
             return False
@@ -155,7 +164,7 @@ class IDCardUtil(object):
         """
         是否是合规的18位身份证
         :param s: 待检测身份证 ID
-        :return: 如果合规返回 True，否则返回 False
+        :return: 如果合规返回 True, 否则返回 False
         """
         if cls.CHINA_ID_MAX_LENGTH != len(s):
             return False
@@ -178,7 +187,7 @@ class IDCardUtil(object):
         """
         检查是否是合规的15位身份证
         :param s: 待检测身份证 ID
-        :return: 如果合规返回 True，否则返回 False
+        :return: 如果合规返回 True, 否则返回 False
         """
         raise NotImplementedError()
 
@@ -197,7 +206,7 @@ class IDCardUtil(object):
         if check_digit < 10:
             return f"{check_digit}"
         else:
-            return 'X'
+            return "X"
 
     @classmethod
     def get_birthday_from_id(cls, s: str) -> typing.Optional[datetime]:
@@ -211,7 +220,7 @@ class IDCardUtil(object):
         birthday = SequenceUtil.sub_lst(s, 6, 14)
         matched = PatternPool.BIRTHDAY_PATTERN.match(birthday)
         # 采用正则匹配的方式获取生日信息
-        # NOTE 如果上面进行了有效性验证，那么必然匹配，所以不需要再次判断
+        # NOTE 如果上面进行了有效性验证, 那么必然匹配, 所以不需要再次判断
         year = BasicConvertor.to_int(matched.group(1))
         month = BasicConvertor.to_int(matched.group(3))
         day = BasicConvertor.to_int(matched.group(5))
