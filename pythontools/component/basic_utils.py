@@ -25,7 +25,7 @@ from typing import Any
 
 import pytz
 
-from .constant import Quarter, TimeUnit
+from .constants.constant import Quarter, TimeUnit
 from .convertor import BasicConvertor
 
 
@@ -98,6 +98,376 @@ class RandomUtil:
         if k >= len(seq):
             return [i for i in seq]
         return random.sample(seq, k)
+
+    @classmethod
+    def get_random_distinct_items_from_sequence(
+        cls, seq: typing.Sequence[Any], k: int
+    ) -> typing.Set[Any]:
+        """
+        随机获得列表中的一定量的不重复元素, 返回Set
+
+        Parameters
+        ----------
+        seq : typing.Sequence[Any]
+            待获取序列
+        k : int
+            获取数量
+
+        Returns
+        -------
+        typing.Set[Any]
+            不重复元素的集合
+
+        Raises
+        ------
+        ValueError
+            如果k > len(seq), 则抛出异常
+        ValueError
+            如果无法获取足够的元素, 则抛出异常
+        """
+        if k > len(seq):
+            raise ValueError(f"{k=} must be less than or equal to the length of {seq=}")
+
+        res: typing.Set[Any] = set()
+        cnt = 0
+
+        while len(res) < k:
+            random_val = cls.get_random_item_from_sequence(seq)
+            res.add(random_val)
+            cnt += 1
+            if cnt > 2 * k:
+                raise ValueError(f"Cannot get {k=} distinct items from {seq=}")
+        return res
+
+    @classmethod
+    def get_random_booleans(cls, length: int) -> typing.Generator[bool, None, None]:
+        """
+        获取指定数量的布尔值
+
+        Parameters
+        ----------
+        length : int
+            序列长度
+
+        Returns
+        -------
+        typing.Generator[bool, None, None]
+            布尔值生成器
+
+        Yields
+        ------
+        Iterator[typing.Generator[bool, None, None]]
+            生成布尔类型的生成器
+        """
+        for _ in range(length):
+            yield cls.get_random_boolean()
+
+    @classmethod
+    def get_random_boolean(cls) -> bool:
+        """
+        返回随机布尔值
+
+        Returns
+        -------
+        bool
+            随机布尔值
+        """
+        val = cls.get_random_val_from_range(0, 2)
+        return val == 1
+
+    @classmethod
+    def get_random_chineses(cls, length: int = 10) -> typing.Generator[str, None, None]:
+        """
+        获取指定长度的随机中文字符
+
+        Parameters
+        ----------
+        length : int, optional
+            字符序列长度, by default 10
+
+        Returns
+        -------
+        typing.Generator[str, None, None]
+            随机中文字符生成器
+
+        Yields
+        ------
+        Iterator[typing.Generator[str, None, None]]
+            随机中文字符生成器
+        """
+        for _ in range(length):
+            yield cls.get_random_chinese()
+
+    @classmethod
+    def get_random_chinese(cls) -> str:
+        """
+        获取随机中文字符
+
+        Examples
+        --------
+        >>> RandomUtil.get_random_chinese() # 输出: '龥'
+        >>> RandomUtil.get_random_chinese() # 输出: '可'
+
+        Returns
+        -------
+        str
+            随机中文字符
+
+        Notes
+        --------
+        1. 该方法依赖于`StringUtil.get_random_chinese()`
+        """
+        return StringUtil.get_random_chinese()
+
+    @classmethod
+    def get_random_float(cls) -> float:
+        """
+        获取随机浮点数
+
+        Returns
+        -------
+        float
+            随机浮点数, [0, 1)之间
+        """
+        return cls.get_random_float_with_range_and_precision(0.0, 1.0)
+
+    @classmethod
+    def get_random_floats_with_range_and_precision(
+        cls, start: float, end: float, *, precision: int = 3, length: int = 10
+    ) -> typing.Generator[float, None, None]:
+        """
+        返回指定长度的随机浮点数
+
+        Parameters
+        ----------
+        start : float
+            生成范围下限
+        end : float
+            生成范围上限
+        precision : int, optional
+            浮点数精度, by default 3
+        length : int, optional
+            序列长度, by default 10
+
+        Returns
+        -------
+        typing.Generator[float, None, None]
+            随机浮点数生成器
+        """
+        for _ in range(length):
+            yield cls.get_random_float_with_range_and_precision(
+                start, end, precision=precision
+            )
+
+    @classmethod
+    def get_random_float_with_range_and_precision(
+        cls, start: float, end: float, *, precision: int = 3
+    ) -> float:
+        """
+        返回随机浮点数
+
+        Parameters
+        ----------
+        start : float
+            生成范围下限
+        end : float
+            生成范围上限
+        precision : int, optional
+            浮点数精度, by default 3
+
+        Returns
+        -------
+        float
+            随机浮点数
+        """
+        if start >= end:
+            raise ValueError(f"{start=} must be less than {end=}")
+        random_float = round(random.uniform(start, end), precision)
+        return random_float
+
+    @classmethod
+    def get_random_complex(cls) -> complex:
+        """
+        获取随机复数
+
+        Returns
+        -------
+        complex
+            随机复数
+        """
+        real_part = cls.get_random_float()
+        imag_part = cls.get_random_float()
+        return complex(real_part, imag_part)
+
+    @classmethod
+    def get_random_complexes_with_range_and_precision(
+        cls,
+        real_range: typing.Tuple[float, float],
+        imag_range: typing.Tuple[float, float],
+        *,
+        precision: int = 3,
+        length: int = 10,
+    ) -> typing.Generator[complex, None, None]:
+        """
+        返回指定长度的随机复数
+
+        Parameters
+        ----------
+        real_range : typing.Tuple[float, float]
+            实部生成范围
+        imag_range : typing.Tuple[float, float]
+            虚部生成范围
+        precision : int, optional
+            浮点数精度, by default 3
+        length : int, optional
+            序列长度, by default 10
+
+        Returns
+        -------
+        typing.Generator[complex, None, None]
+            随机复数生成器
+        """
+        for _ in range(length):
+            yield cls.get_random_complex_with_range_and_precision(
+                real_range, imag_range, precision=precision
+            )
+
+    @classmethod
+    def get_random_complex_with_range_and_precision(
+        cls,
+        real_range: typing.Tuple[float, float],
+        imag_range: typing.Tuple[float, float],
+        *,
+        precision: int = 3,
+    ) -> complex:
+        """
+        获取随机复数
+
+        Parameters
+        ----------
+        real_range : typing.Tuple[float, float]
+            实部生成范围
+        imag_range : typing.Tuple[float, float]
+            虚部生成范围
+        precision : int, optional
+            浮点数精度, by default 3
+
+        Returns
+        -------
+        complex
+            随机复数
+        """
+        real_part = cls.get_random_float_with_range_and_precision(
+            *real_range, precision=precision
+        )
+        imag_part = cls.get_random_float_with_range_and_precision(
+            *imag_range, precision=precision
+        )
+
+        return complex(real_part, imag_part)
+
+    @classmethod
+    def get_random_bytes(cls, length: int) -> bytes:
+        # todo
+        raise NotImplementedError()
+
+    @classmethod
+    def get_random_date(cls) -> date:
+        """
+        获取随机日期对象
+
+        Returns
+        -------
+        date
+            随机日期对象
+
+        Notes
+        -------
+        1. 该方法依赖于`DatetimeUtil.get_random_date()`
+        """
+        return DatetimeUtil.get_random_date()
+
+    @classmethod
+    def get_random_datetime(cls) -> datetime:
+        """
+        获取随机日期+时间
+
+        Returns
+        -------
+        datetime
+            随机日期+时间, datetime对象
+
+        Notes
+        -------
+        1. 该方法依赖于`DatetimeUtil.get_random_datetime()`
+        """
+        return DatetimeUtil.get_random_datetime()
+
+    @classmethod
+    def get_random_str_upper(cls, k: int) -> str:
+        """
+        获取指定长度的随机大写字母字符串
+
+        Parameters
+        ----------
+        k : int
+            字符串长度
+
+        Returns
+        -------
+        str
+            随机大写字母字符串
+
+        Notes
+        -------
+        1. 该方法依赖于`StringUtil.get_random_strs()`
+        """
+        basic_str = StringUtil.get_random_strs(k)
+        return basic_str.upper()
+
+    @classmethod
+    def get_random_str_lower(cls, k: int) -> str:
+        """
+        获取指定长度的随机小写字母字符串
+
+        Parameters
+        ----------
+        k : int
+            字符串长度
+
+        Returns
+        -------
+        str
+            随机小写字母字符串
+
+        Notes
+        -------
+        1. 该方法依赖于`StringUtil.get_random_strs()`
+        """
+        basic_str = StringUtil.get_random_strs(k)
+        return basic_str.lower()
+
+    @classmethod
+    def get_random_str_capitalized(cls, k: int) -> str:
+        """
+        获取指定长度的随机首字母大写字母字符串
+
+        Parameters
+        ----------
+        k : int
+            字符串长度
+
+        Returns
+        -------
+        str
+            随机首字母大写字母字符串
+
+        Notes
+        -------
+        1. 该方法依赖于`StringUtil.get_random_strs()`
+        """
+        basic_str = StringUtil.get_random_strs(k)
+        return basic_str.capitalize()
 
 
 class CharsetUtil(object):
@@ -1021,6 +1391,19 @@ class StringUtil(SequenceUtil):
 
         return "".join(RandomUtil.get_random_items_from_sequence(chars, n))
 
+    @classmethod
+    def get_random_chinese(cls) -> str:
+        """
+        获取随机中文字符串
+
+        Returns
+        -------
+        str
+            随机中文字符串
+        """
+        random_val = RandomUtil.get_random_val_from_range(0x4E00, 0x9FA5)
+        return chr(random_val)
+
 
 class DatetimeUtil(object):
     wtb = [
@@ -1436,6 +1819,24 @@ class RadixUtil(object):
     def convert_base(
         cls, num: typing.Union[int, str], from_base: int, to_base: int
     ) -> str:
+        """
+        进制转换
+
+        Parameters
+        ----------
+        num : typing.Union[int, str]
+            要转换的数据
+        from_base : int
+            初始进制
+        to_base : int
+            目标进制
+
+        Returns
+        -------
+        str
+            转换后的字符串
+        """
+
         def to_decimal(num: typing.Union[int, str], from_base: int) -> int:
             if isinstance(num, int):
                 return num
