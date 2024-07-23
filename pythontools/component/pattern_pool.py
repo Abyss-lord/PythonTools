@@ -29,6 +29,9 @@ class RegexPool(object):
     ID_NUMBER_18_REGEX = r"^[1-9]\d{5}(18|19|([23]\d))\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$"
     # JSON 字符串
     JSON_REGEX = r"^\s*[\[{]\s*(.*)\s*[\}\]]\s*$"
+    # 单个中文汉字
+    CHINESE = "[\u2e80-\u2eff\u2f00-\u2fdf\u31c0-\u31ef\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\ud840\udc00-\ud869\udedf\ud869\udf00-\ud86d\udf3f\ud86d\udf40-\ud86e\udc1f\ud86e\udc20-\ud873\udeaf\ud87e\udc00-\ud87e\ude1f]"
+    CHINESES = CHINESE + "+"
 
 
 class PatternPool:
