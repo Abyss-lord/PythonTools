@@ -326,15 +326,15 @@ class BooleanUtil(object):
         return False
 
     @classmethod
-    def xor(cls, *values: typing.List[bool], strict: bool = True) -> bool:
+    def xor(cls, *values, strict: bool = True) -> bool:
         """
         对Boolean数组取异或
 
         Example:
         ----------
-        >>> BooleanUtil.xor([True, False]) # True
-        >>> BooleanUtil.xor([True, True]) # False
-        >>> BooleanUtil.xor([True, False, True]) # False
+        >>> BooleanUtil.xor(True, False) # True
+        >>> BooleanUtil.xor(True, True) # False
+        >>> BooleanUtil.xor(True, False, True) # False
 
         Parameters
         ----------
@@ -643,6 +643,58 @@ class SequenceUtil(object):
 
         return lst[start : end + 1] if include_last else lst[start:end]
 
+    @classmethod
+    def get_item_by_idx(
+        cls,
+        lst: typing.Sequence[Any],
+        idx: int,
+        default: Any = None,
+        *,
+        raise_exception: bool = False,
+    ) -> Any:
+        """
+        根据给定的索引返回元素
+
+        Example:
+        ----------
+        >>> lst = [1, 2, 3]
+        ... SequenceUtil.get_item_by_idx(lst, 1) # 2
+        ... SequenceUtil.get_item_by_idx(lst, 4) # None
+        ... SequenceUtil.get_item_by_idx(lst, 4, default=0) # 0
+
+        Parameters
+        ----------
+        lst : typing.Sequence[Any]
+            待提取序列
+        idx : int
+            给定的索引位置
+        default : Any, optional
+            提取默认值, by default None
+        raise_exception : bool, optional
+            当给定索引大于等于序列长度时是否抛出异常, by default False
+
+        Returns
+        -------
+        Any
+            提取的值
+
+        Raises
+        ------
+        ValueError
+            当索引小于0时抛出异常
+        IndexError
+            当给定索引大于等于序列长度时, 并且 raise_exception 为 True, 则抛出异常
+        """
+        seq_length = len(lst)
+        if idx < 0:
+            raise ValueError(f"Index {idx} is out of range")
+        if idx >= seq_length:
+            if raise_exception:
+                raise IndexError(f"Index {idx} is out of range")
+            else:
+                return default
+        return lst[idx]
+
 
 class StringUtil(SequenceUtil):
     @classmethod
@@ -652,8 +704,8 @@ class StringUtil(SequenceUtil):
 
         *Example:*
 
-        >>> is_string('foo') # returns true
-        >>> is_string(b'foo') # returns false
+        >>> assert is_string('foo') # returns true
+        >>> assert not is_string(b'foo') # returns false
 
         :param obj: 待检测对象
         :param raise_type_exception: 类型错误的时候是否引发异常
@@ -1245,8 +1297,8 @@ class DatetimeUtil(object):
             hour=random_hour, minute=random_minute, second=random_second
         )
         if random_tz:
-            random_tz = cls.get_random_tz()
-            random_datetime = random_datetime.replace(tzinfo=random_tz)
+            tz_info = cls.get_random_tz()
+            random_datetime = random_datetime.replace(tzinfo=tz_info)
 
         return random_datetime
 
@@ -1375,3 +1427,32 @@ class DatetimeUtil(object):
 
         res_dt = datetime.now() + timedelta(hours=hour, minutes=minute, seconds=seconds)
         return res_dt.strftime("%H:%M:%S")
+
+
+class RadixUtil(object):
+    ZERO = "0"
+
+    @classmethod
+    def convert_base(
+        cls, num: typing.Union[int, str], from_base: int, to_base: int
+    ) -> str:
+        def to_decimal(num: typing.Union[int, str], from_base: int) -> int:
+            if isinstance(num, int):
+                return num
+            return int(num, base=from_base)
+
+        def from_decimal(num: int, base: int) -> str:
+            if num == 0:
+                return cls.ZERO
+            digits = []
+            while num:
+                digits.append(str(num % base))
+                num //= base
+            # PERF 倒转字符串效率低, 应该优化
+            digits.reverse()
+            return "".join(
+                map(lambda x: str(x) if int(x) < 10 else chr(int(x) + 55), digits)
+            )
+
+        decimal_val = to_decimal(num, from_base)
+        return from_decimal(decimal_val, to_base)
