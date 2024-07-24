@@ -53,11 +53,11 @@ class OsUtil(object):
             return False
         if os.path.exists(p):
             return True
-        
+
         # 如果路径不存在且需要抛出异常，则抛出FileNotFoundError
         if raise_exception:
             raise FileNotFoundError(p)
-        
+
         return False
 
     @classmethod
@@ -263,6 +263,27 @@ class OsUtil(object):
                     file_lst.append(abs_file_path)
 
         return file_lst
+
+    @classmethod
+    def get_file_lines(cls, f: str) -> int:
+        """
+        计算文件行数
+
+        Parameters
+        ----------
+        f : str
+            文件路径
+
+        Returns
+        -------
+        int
+            行数
+        """
+        with open(f, "r") as f_obj:
+            i = -1
+            for i, _ in enumerate(f_obj):
+                pass
+        return i + 1
 
 
 class SysUtil(object):
