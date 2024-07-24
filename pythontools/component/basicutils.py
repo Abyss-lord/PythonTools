@@ -1764,14 +1764,18 @@ class DatetimeUtil(object):
             age = round(sub_days / 365, 1)
             return age
 
-        now = datetime.now() + timedelta(days=1)
         age = now.year - birthday.year
 
         # NOTE 根据月、日判断是否对年龄 -1
-        birth_dt_with_fix_year = datetime(9999, birthday.month, birthday.day)
-        now_dt_with_fix_year = datetime(9999, now.month, now.day)
+        # ISSUE-1, 如果生日是闰年2-29, 则构建datetime对象时报错。
+        # 这里的问题是如果是闰年，会出现2月29日，那么使用 9999-02-29 构建 datetime 对象会报错
+        # 改为单独对月和日进行判断，不再构建datetime对象
+        # birth_dt_with_fix_year = datetime(9999, birthday.month, birthday.day)
+        # now_dt_with_fix_year = datetime(9999, now.month, now.day)
 
-        if birth_dt_with_fix_year > now_dt_with_fix_year:
+        if birthday.month > now.month or (
+            birthday.month == now.month and birthday.day > now.day
+        ):
             age -= 1
 
         return age
