@@ -16,6 +16,7 @@ Change Activity:
 # here put the import lib
 
 import calendar
+import itertools as it
 import random
 import string
 import time
@@ -1064,6 +1065,91 @@ class SequenceUtil(object):
             else:
                 return default
         return lst[idx]
+
+    @classmethod
+    def get_first_n_item_from_iter(
+        cls, iterable: typing.Iterable[Any], n: int
+    ) -> typing.Iterable[Any]:
+        """
+        从序列中获取前n个元素
+
+        Example:
+        ----------
+        >>> lst = [1, 2, 3, 4, 5]
+        ... SequenceUtil.get_first_n_item_from_iter(lst, 3) # [1, 2, 3]
+        >>> d = {3: 4, 6: 2, 0: 9, 9: 0, 1: 4}
+        ... SequenceUtil.get_first_n_item_from_iter(d.keys(), 3) # [(3, 4), (6, 2), (0, 9)]
+        ... SequenceUtil.get_first_n_item_from_iter(d, 10) # [3, 6, 0, 9, 1]
+
+        Parameters
+        ----------
+        iterable : typing.Sequence[Any]
+            待提取序列
+        n : int
+            前n个元素
+
+        Returns
+        -------
+        typing.Iterable[Any]
+            前n个元素组成的序列
+
+        Raises
+        ------
+        ValueError
+            如果n小于0则抛出异常
+        """
+        if n < 0:
+            raise ValueError(f"n should be greater than 0, but got {n}")
+
+        return list(it.islice(iterable, n))
+
+    @classmethod
+    def get_first_match_item(
+        iterable: typing.Iterable[Any],
+        func: typing.Callable[[Any], bool],
+        default_val: Any = None,
+    ) -> Any:
+        """
+        从可迭代对象中返回第一个符合条件的元素
+
+        Parameters
+        ----------
+        iterable : typing.Iterable[Any]
+            待提取可迭代对象
+        func : typing.Callable[[Any], bool]
+            检测函数
+        default_val : Any, optional
+            返回默认值, by default None
+
+        Returns
+        -------
+        Any
+            第一个符合条件的对象
+        """
+        return next((i for i in iterable if func(i)), default_val)
+
+    @classmethod
+    def is_all_ele_equal(cls, iterable: typing.Iterable[Any]) -> bool:
+        """
+        判断序列中是否所有元素相等
+
+        Example:
+        ----------
+        >>> SequenceUtil.is_all_ele_equal([1, 1, 1, 1]) # True
+        >>> SequenceUtil.is_all_ele_equal([1, 2, 1, 1]) # False
+
+        Parameters
+        ----------
+        iterable : typing.Iterable[Any]
+            待检测序列
+
+        Returns
+        -------
+        bool
+            如果所有元素相等返回True, 否则返回False
+        """
+        g = it.groupby(iterable)
+        return next(g, True) and not next(g, False)
 
 
 class StringUtil(SequenceUtil):
