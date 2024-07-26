@@ -31,7 +31,10 @@ class RegexPool(object):
     JSON_REGEX = r"^\s*[\[{]\s*(.*)\s*[\}\]]\s*$"
     # 单个中文汉字
     CHINESE = "[\u2e80-\u2eff\u2f00-\u2fdf\u31c0-\u31ef\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\ud840\udc00-\ud869\udedf\ud869\udf00-\ud86d\udf3f\ud86d\udf40-\ud86e\udc1f\ud86e\udc20-\ud873\udeaf\ud87e\udc00-\ud87e\ude1f]"
-    CHINESES = CHINESE + "+"
+    CHINESES = (
+        "[\u2e80-\u2eff\u2f00-\u2fdf\u31c0-\u31ef\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff"
+        "\ud840\udc00-\ud869\udedf\ud869\udf00-\ud86d\udf3f\ud86d\udf40-\ud86e\udc1f\ud86e\udc20-\ud873\udeaf\ud87e\udc00-\ud87e\ude1f]+"
+    )
     # 数字+字母+下划线
     GENERAL_STRING_PATTERN = "^\\w+$"
     # 钱币
@@ -52,6 +55,43 @@ class RegexPool(object):
         + "([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领]\\d{3}\\d{1,3}[领])|"
         + "([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-Z][A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳使领]))$"
     )
+    # 中文+英文字母+数字+下划线
+    GENERAL_WITH_CHINESE = "^[\u4e00-\u9fff\\w]+$"
+    # HEX
+    HEX = "^[a-fA-F0-9]+$"
+    #   统一社会信用代码
+    #   第一部分：登记管理部门代码1位 (数字或大写英文字母)
+    #   第二部分：机构类别代码1位 (数字或大写英文字母)
+    #   第三部分：登记管理机关行政区划码6位 (数字)
+    #   第四部分：主体标识码（组织机构代码）9位 (数字或大写英文字母)
+    #   第五部分：校验码1位 (数字或大写英文字母)
+    CHINESE_CREDIT_CODE = "^[0-9A-HJ-NPQRTUWXY]{2}\\d{6}[0-9A-HJ-NPQRTUWXY]{10}$"
+    # 车架号 别名：车辆识别代号 车辆识别码 eg:LDC613P23A1305189 eg:LSJA24U62JG269225 十七位码、车架号 车辆的唯一标示
+    CAR_VIN = "^[A-HJ-NPR-Z0-9]{8}[0-9X][A-HJ-NPR-Z0-9]{2}\\d{6}$"
+    # 驾驶证 别名：驾驶证档案编号、行驶证编号 eg:430101758218 12位数字字符串 仅限：中国驾驶证档案编号
+    CHINESE_CAR_DRIVING_LICENCE = "^[0-9]{12}$"
+    # 邮箱
+    EMAIL = "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)])"
+    # 浮点数
+    FLOAT_NUM = "^(-?\d+)(\.\d+)?$"
+    # 正浮点数
+    POSITIVE_FLOAT = "^[1-9]\d*\.\d*|0\.\d*[1-9]\d*$"
+    # 负浮点数
+    NEGATIVE_FLOAT = "^-([1-9]\d*\.\d*|0\.\d*[1-9]\d*)$"
+    # 整数
+    INTEGER = "^-?\d+$"
+    # 正整数
+    POSITIVE_INTEGER = r"^-[1-9]\d*|0$"
+    # 负整数
+    NEGATIVE_INTEGER = r"^-[1-9]\d*|0$"
+    # 腾讯QQ
+    TECENT_CODE = r"[1-9][0-9]{4,}"
+    # 强密码，必须包含大小写字母和数字的组合，不能使用特殊字符，长度在8-12之间
+    STRONG_PASSWORD = "^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,12}$"
+    # 密码， 以字母开头，长度在6~18之间，只能包含字母、数字和下划线
+    PASSWORD = r"^[a-zA-Z]\w{5,17}$"
+    # 空行
+    BLANK_LINE = r"\n\s*\r"
 
 
 class PatternPool:
@@ -80,4 +120,36 @@ class PatternPool:
     # 中国车牌号码（兼容新能源车牌）
     CHINESE_VEHICLE_NUMBER = re.compile(RegexPool.CHINESE_VEHICLE_NUMBER)
     # 中文
-    CHINESES = re.compile(RegexPool.CHINESES)
+    # CHINESES = re.compile(RegexPool.CHINESES)
+    # 中文+英文字母+数字+下划线
+    GENERAL_WITH_CHINESE = re.compile(RegexPool.GENERAL_WITH_CHINESE)
+    # HEX
+    HEX = re.compile(RegexPool.HEX)
+    # 统一社会信用代码
+    CHINESE_CREDIT_CODE = re.compile(RegexPool.CHINESE_CREDIT_CODE)
+    # 车架号 别名：车辆识别代号 车辆识别码 eg:LDC613P23A1305189 eg:LSJA24U62JG269225 十七位码、车架号 车辆的唯一标示
+    CAR_VIN = re.compile(RegexPool.CAR_VIN)
+    # 驾驶证 别名：驾驶证档案编号、行驶证编号 eg:430101758218 12位数字字符串 仅限：中国驾驶证档案编号
+    CHINESE_CAR_DRIVING_LICENCE = re.compile(RegexPool.CHINESE_CAR_DRIVING_LICENCE)
+    # 邮箱
+    EMAIL = re.compile(RegexPool.EMAIL, re.IGNORECASE)
+    # 浮点数
+    FLOAT_NUM = re.compile(RegexPool.FLOAT_NUM)
+    # 正浮点数
+    POSITIVE_FLOAT = re.compile(RegexPool.POSITIVE_FLOAT)
+    # 负浮点数
+    NEGATIVE_FLOAT = re.compile(RegexPool.NEGATIVE_FLOAT)
+    # 整数
+    INTEGER = re.compile(RegexPool.INTEGER)
+    # 正整数
+    POSITIVE_INTEGER = re.compile(RegexPool.POSITIVE_INTEGER)
+    # 负整数
+    NEGATIVE_INTEGER = re.compile(RegexPool.NEGATIVE_INTEGER)
+    # 腾讯qq
+    TECENT_CODE = re.compile(RegexPool.TECENT_CODE)
+    # 强密码，必须包含大小写字母和数字的组合，不能使用特殊字符，长度在8-12之间
+    STRONG_PASSWORD = re.compile(RegexPool.STRONG_PASSWORD)
+    # 密码
+    PASSWORD = re.compile(RegexPool.PASSWORD)
+    # 空行
+    BLANK_LINE = re.compile(RegexPool.BLANK_LINE)
