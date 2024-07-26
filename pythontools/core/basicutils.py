@@ -26,7 +26,7 @@ from typing import Any
 
 import pytz
 
-from .constants.constant import Quarter, TimeUnit
+from .constants.time_constant import Quarter, TimeUnit
 from .convertor import BasicConvertor
 
 

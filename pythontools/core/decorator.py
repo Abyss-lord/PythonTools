@@ -18,6 +18,7 @@ Change Activity:
 import functools
 import threading
 import time
+import typing
 
 
 # 单例模式装饰器

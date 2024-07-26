@@ -23,6 +23,7 @@ import typing
 from operator import eq
 
 from .basicutils import StringUtil
+from .decorator import RaiseException
 
 
 class OsUtil(object):
@@ -196,7 +197,7 @@ class OsUtil(object):
         :return: 返回给定路径下所有的文件路径
         """
         if check_exist:
-            cls.is_exist(p, raise_exception=True)
+            cls.is_exist(p)
         lst = []
         for root, _, files in os.walk(p):
             for file in files:

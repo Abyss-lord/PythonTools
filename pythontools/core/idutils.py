@@ -20,10 +20,11 @@ import typing
 from datetime import datetime
 
 from .basicutils import DatetimeUtil, SequenceUtil, StringUtil
-from .constants.constant import AREA_INFO, PRO_DICT, Sex
+from .constants.area_constant import AREA_INFO, PRO_DICT
+from .constants.people_constant import Gender
 from .convertor import BasicConvertor
 from .pattern_pool import PatternPool
-from .validator import Validator
+from .validators.datetime_validator import DatetimeValidator
 
 
 class IDCard(object):
@@ -60,7 +61,7 @@ class IDCard(object):
         """
         sex_code = StringUtil.sub_lst(self.id, 16, 17)
         sex_code = BasicConvertor.to_int(sex_code)
-        sex_obj = Sex.get_sex(sex_code)
+        sex_obj = Gender.get_sex(sex_code)
         return sex_obj.value.sex
 
     def get_province(self) -> str:
@@ -86,7 +87,7 @@ class IDCardUtil(object):
     AREA_LST: typing.List[str] = list(AREA_INFO.keys())
 
     @classmethod
-    def generate_random_valid_card(cls, *, sex=Sex.MALE) -> IDCard:
+    def generate_random_valid_card(cls, *, sex=Gender.MALE) -> IDCard:
         """
         随机产生 IDCard 实例, 默认使用18位身份证
         :param sex: 性别
@@ -99,7 +100,7 @@ class IDCardUtil(object):
         return cls.get_card_from_id(random_id)
 
     @classmethod
-    def generate_random_valid_id(cls, *, code_length: int = 18, sex=Sex.MALE) -> str:
+    def generate_random_valid_id(cls, *, code_length: int = 18, sex=Gender.MALE) -> str:
         """
         获取随机的身份证 ID
         :exception: ValueError
@@ -116,7 +117,7 @@ class IDCardUtil(object):
             raise ValueError("code_length must be 15 or 18")
 
     @classmethod
-    def generate_random_valid_18_id(cls, *, sex=Sex.MALE) -> str:
+    def generate_random_valid_18_id(cls, *, sex=Gender.MALE) -> str:
         """
         生成18位身份证
         :param sex: 性别
@@ -134,7 +135,7 @@ class IDCardUtil(object):
         return code18
 
     @classmethod
-    def generate_random_valid_15_id(cls, *, sex=Sex.MALE) -> str:
+    def generate_random_valid_15_id(cls, *, sex=Gender.MALE) -> str:
         """
         生成15位身份证
         :param sex: 性别
@@ -175,7 +176,7 @@ class IDCardUtil(object):
             return False
         # 校验生日
         birthday = SequenceUtil.sub_lst(s, 6, 14)
-        if not Validator.is_valid_birthday(birthday):
+        if not DatetimeValidator.is_valid_birthday(birthday):
             return False
         # 校验最后一位
         check_sum = cls.get_check_sum(s)

@@ -15,15 +15,16 @@ Change Activity:
 """
 # here put the import lib
 
+__all__ = ["DatetimeValidator"]
+
 import datetime
-import json
 
-from .basicutils import DatetimeUtil, StringUtil
-from .convertor import BasicConvertor
-from .pattern_pool import PatternPool
+from ..basicutils import DatetimeUtil
+from ..convertor import BasicConvertor
+from ..pattern_pool import PatternPool
 
 
-class Validator(object):
+class DatetimeValidator(object):
     @classmethod
     def is_valid_birthday(cls, birthday: str) -> bool:
         """
@@ -84,7 +85,6 @@ class Validator(object):
         bool
             如果是合法的日期, 则返回True, 否则返回False
         """
-
         # 判断年
         # NOTE datetime.MINYEAR的值是1, 这里的逻辑是否要修改
         if year < datetime.MINYEAR or year > DatetimeUtil.this_year():
@@ -107,38 +107,3 @@ class Validator(object):
             return day < 29 or (day < 30 and DatetimeUtil.is_leap_year(year))
 
         return True
-
-    @classmethod
-    def is_json(cls, s: str) -> bool:
-        """
-        判断字符串是否是json字符串
-
-        Example:
-        ----------
-        >>> Validator.is_json('{"name": "John", "age": 30, "city": "New York"}') # returns True
-        >>> Validator.is_json('{"name": "John", "age": 30, "city": "New York"') # returns False
-        >>> Validator.is_json('{"name": "John", "age": 30, "city": "New York"} ') # returns False
-
-        Parameters
-        ----------
-        s : str
-            待检测字符串
-
-        Returns
-        -------
-        bool
-            如果是json字符串, 则返回True, 否则返回False
-        """
-        if StringUtil.is_blank(s):
-            return False
-
-        if PatternPool.JSON_WRAPPER_PATTERN.match(s) is None:
-            return False
-
-        # PERF 不应该用try-except作为分支逻辑
-        try:
-            return isinstance(json.loads(s), (dict, list))
-        except (TypeError, ValueError, OverflowError):
-            pass
-
-        return False

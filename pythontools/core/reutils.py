@@ -19,6 +19,7 @@ import re
 import typing
 
 from .basicutils import SequenceUtil, StringUtil
+from .errors import ValidationError
 from .pattern_pool import RegexPool
 
 
@@ -70,7 +71,7 @@ class ReUtil(object):
         ----------
         1. 依赖于`get_matched_group_by_idx`方法
         """
-        cls.is_match(pattern, s, raise_error=False)
+        cls.is_match(pattern, s, raise_exception=False)
         return cls.get_matched_group_by_idx(pattern, s, 0)
 
     @classmethod
@@ -94,7 +95,7 @@ class ReUtil(object):
         ----------
         1. 依赖于`get_matched_group_by_idx`方法
         """
-        cls.is_match(pattern, s, raise_error=False)
+        cls.is_match(pattern, s, raise_exception=False)
         return cls.get_matched_group_by_idx(pattern, s, 1)
 
     @classmethod
@@ -155,7 +156,7 @@ class ReUtil(object):
 
     @classmethod
     def is_match(
-        cls, pattern: re.Pattern, s: str, *, raise_error: bool = False
+        cls, pattern: re.Pattern, s: str, *, raise_exception: bool = False
     ) -> bool:
         """
         检查是否匹配
@@ -166,7 +167,7 @@ class ReUtil(object):
             编译后的正则模式
         s : str
             待匹配字符串
-        raise_error : bool, optional
+        raise_exception : bool, optional
             如果匹配失败, 是否抛出异常, by default False
 
         Returns
@@ -181,11 +182,34 @@ class ReUtil(object):
         ValueError
             如果raise_error为True, 且匹配失败, 抛出ValueError异常
         """
+
         if not isinstance(pattern, re.Pattern):
             raise TypeError("pattern must be a re.Pattern object")
 
         res = pattern.search(s)
-        if res is None and raise_error:
-            raise ValueError(f"pattern {pattern} not match string {s}")
+        if res is None and raise_exception:
+            raise ValidationError(pattern, s, f"pattern {pattern} not match string {s}")
 
         return res is not None
+
+    @classmethod
+    def is_match_reg(cls, s: str, reg: str, *, raise_exception: bool = False) -> bool:
+        """
+        是否匹配正则表达式
+
+        Parameters
+        ----------
+        s : str
+            待匹配字符串
+        reg : str
+            待匹配正则表达式
+        raise_exception : bool, optional
+            匹配不成功是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            是否匹配成功
+        """
+        pattern = re.compile(reg)
+        return cls.is_match(pattern, s, raise_exception=raise_exception)

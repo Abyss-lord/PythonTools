@@ -62,6 +62,13 @@ class BasicConvertor:
         return float(value)
 
     @classmethod
+    def to_number(
+        cls, value: Any, default_val: int = 0, *, strict_mode: bool = False
+    ) -> typing.Union[int, float]:
+        # TODO 待实现
+        return 1
+
+    @classmethod
     def to_bool(
         cls, value: Any, default_val: bool = False, *, strict_mode: bool = False
     ) -> bool:
