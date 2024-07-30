@@ -190,6 +190,8 @@ class BasicValidator(object):
         True
         >>> BasicValidator.equals(1, 2)
         False
+        >>> BasicValidator.equals("1", 1)
+        False
 
         Parameters
         ----------
@@ -223,7 +225,18 @@ class BasicValidator(object):
         """
         判断数值是否在给定范围内
 
-        Exam
+        Examples
+        --------
+        >>> BasicValidator.is_between(1, 0, 2)
+        True
+        >>> BasicValidator.is_between(2, 0, 1)
+        False
+        >>> BasicValidator.is_between(1, 0, 2)
+        True
+        >>> BasicValidator.is_between(1, 1, 2)
+        True
+        >>> BasicValidator.is_between(2, 1, 2)
+        True
 
         Parameters
         ----------

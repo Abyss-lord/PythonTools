@@ -292,7 +292,7 @@ class StringValidator:
         bool
             是否为中文
         """
-        return ReUtil.is_match(PatternPool.CHINESES, s, raise_exception=raise_exception)
+        return ReUtil.is_match(PatternPool.CHINESE, s, raise_exception=raise_exception)
 
     @classmethod
     def is_general_with_chinese(cls, s: str, *, raise_exception: bool = False) -> bool:

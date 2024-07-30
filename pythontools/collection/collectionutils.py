@@ -51,13 +51,15 @@ class CollectionUtil:
 
         """
         for key, value in nested_dict.items():
-            if isinstance(nested_dict, abc.Mapping):
+            if isinstance(value, abc.Mapping):
                 yield from cls.nested_dict_iter(value)
             else:
                 yield key, value
 
     @classmethod
-    def get_powerset(cls, iterable: typing.Iterable) -> typing.Generator[it.chain, Any, Any]:
+    def get_powerset(
+        cls, iterable: typing.Iterable
+    ) -> typing.Generator[it.chain, Any, Any]:
         """
         返回iterable的幂集
 
