@@ -798,6 +798,39 @@ class SequenceUtil(object):
         return False
 
     @classmethod
+    def get_length(cls, sequence: typing.Sequence[Any]) -> int:
+        """
+        返回序列长度
+
+        Examples:
+        ----------
+        >>> SequenceUtil.get_length(None)
+        ValueError: Invalid sequence
+        >>> SequenceUtil.get_length([])
+        0
+        >>> SequenceUtil.get_length([1, 2, 3])
+        3
+
+        Parameters
+        ----------
+        sequence : typing.Sequence[Any]
+            待检测序列
+
+        Returns
+        -------
+        int
+            序列长度
+
+        Raises
+        ------
+        ValueError
+            如果序列为None则抛出异常
+        """
+        if sequence is None or not isinstance(sequence, typing.Sequence):
+            raise ValueError("Invalid sequence")
+        return len(sequence)
+
+    @classmethod
     def first_idx_of_none(cls, sequence: typing.Sequence[Any]) -> int:
         """
         返回第一个None元素的索引
