@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "pythontools"
+version = "0.1.0"
+description = "Python 常用开发工具类"
+authors = ["pancx <p_lord@163.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+loguru = "^0.7.2"
+pytz = "^2024.1"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
