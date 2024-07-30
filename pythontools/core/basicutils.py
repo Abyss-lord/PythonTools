@@ -1240,7 +1240,7 @@ class StringUtil(SequenceUtil):
             if c in (string.ascii_letters + string.digits + string.punctuation):
                 return False
 
-        return True
+        return len(val.strip()) == 0
 
     @classmethod
     def is_not_blank(cls, s: str, *, raise_type_exception: bool = False) -> bool:
