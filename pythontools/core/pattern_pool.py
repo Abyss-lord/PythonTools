@@ -30,7 +30,7 @@ class RegexPool(object):
     # JSON 字符串
     JSON_REGEX = r"^\s*[\[{]\s*(.*)\s*[\}\]]\s*$"
     # 单个中文汉字
-    CHINESE = "[\u2e80-\u2eff\u2f00-\u2fdf\u31c0-\u31ef\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\ud840\udc00-\ud869\udedf\ud869\udf00-\ud86d\udf3f\ud86d\udf40-\ud86e\udc1f\ud86e\udc20-\ud873\udeaf\ud87e\udc00-\ud87e\ude1f]"
+    CHINESE = "[\u4e00-\u9fa5]"
     CHINESES = (
         "[\u2e80-\u2eff\u2f00-\u2fdf\u31c0-\u31ef\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff"
         "\ud840\udc00-\ud869\udedf\ud869\udf00-\ud86d\udf3f\ud86d\udf40-\ud86e\udc1f\ud86e\udc20-\ud873\udeaf\ud87e\udc00-\ud87e\ude1f]+"
@@ -120,6 +120,7 @@ class PatternPool:
     # 中国车牌号码（兼容新能源车牌）
     CHINESE_VEHICLE_NUMBER = re.compile(RegexPool.CHINESE_VEHICLE_NUMBER)
     # 中文
+    CHINESE = re.compile(RegexPool.CHINESE)
     # CHINESES = re.compile(RegexPool.CHINESES)
     # 中文+英文字母+数字+下划线
     GENERAL_WITH_CHINESE = re.compile(RegexPool.GENERAL_WITH_CHINESE)
