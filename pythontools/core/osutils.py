@@ -20,10 +20,10 @@ import platform
 import sys
 import time
 import typing
+import warnings
 from operator import eq
 
 from .basicutils import StringUtil
-from .decorator import RaiseException
 
 
 class OsUtil(object):
@@ -351,3 +351,57 @@ class SysUtil(object):
             return True
         else:
             return False
+
+    @classmethod
+    def get_system_property(
+        cls, name: str, default_value: str = "", *, quiet: bool = False
+    ) -> typing.Any:
+        """
+        获取指定名称的系统变量
+
+        Parameters
+        ----------
+        name : str
+            指定的变量名称
+        default_value : str, optional
+            默认值, by default ""
+        quiet : bool, optional
+            是否关闭警告信息, by default False
+
+        Returns
+        -------
+        typing.Any
+            指定的系统变量值
+        """
+        try:
+            res = os.getenv(name)
+        except Exception as e:
+            if not quiet:
+                warnings.warn(
+                    f"get system property {name} error: {e}, will return default value, {default_value}"
+                )
+        else:
+            return res if res is not None else default_value
+
+    def get_system_properties(self, quiet: bool = False) -> typing.Dict[str, str]:
+        """
+        获取所有的系统变量
+
+        Parameters
+        ----------
+        quiet : bool, optional
+            是否关闭警告信息, by default False
+
+        Returns
+        -------
+        typing.Dict[str, str]
+            所有的系统变量
+        """
+        try:
+            res = os.environ
+        except Exception as e:
+            if not quiet:
+                warnings.warn(f"get system properties error: {e}")
+
+        environ_dict = {k: v for k, v in res.items()}
+        return environ_dict
