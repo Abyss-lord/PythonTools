@@ -26,6 +26,14 @@ class ColorUtil:
     def get_random_color(
         cls,
     ) -> str:
+        """
+        获取随机十六进制表示的颜色
+
+        Returns
+        -------
+        str
+            随机十六进制表示的颜色
+        """
         red = RandomUtil.get_random_val_from_range(0, cls.RGB_COLOR_BOUND)
         green = RandomUtil.get_random_val_from_range(0, cls.RGB_COLOR_BOUND)
         blue = RandomUtil.get_random_val_from_range(0, cls.RGB_COLOR_BOUND)
