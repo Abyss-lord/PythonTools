@@ -10,6 +10,7 @@ python = "^3.11"
 loguru = "^0.7.2"
 pytz = "^2024.1"
 black = "^24.4.2"
+types-pytz = "^2024.1.0.20240417"
 
 
 [tool.poetry.group.dev.dependencies]
