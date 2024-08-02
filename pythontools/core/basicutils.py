@@ -1186,6 +1186,48 @@ class SequenceUtil(object):
 
 
 class StringUtil(SequenceUtil):
+    # UNICODE 字符宽度
+    WIDTHS = [
+        (126, 1),
+        (159, 0),
+        (687, 1),
+        (710, 0),
+        (711, 1),
+        (727, 0),
+        (733, 1),
+        (879, 0),
+        (1154, 1),
+        (1161, 0),
+        (4347, 1),
+        (4447, 2),
+        (7467, 1),
+        (7521, 0),
+        (8369, 1),
+        (8426, 0),
+        (9000, 1),
+        (9002, 2),
+        (11021, 1),
+        (12350, 2),
+        (12351, 1),
+        (12438, 2),
+        (12442, 0),
+        (19893, 2),
+        (19967, 1),
+        (55203, 2),
+        (63743, 1),
+        (64106, 2),
+        (65039, 1),
+        (65059, 0),
+        (65131, 2),
+        (65279, 1),
+        (65376, 2),
+        (65500, 1),
+        (65510, 2),
+        (120831, 1),
+        (262141, 2),
+        (1114109, 1),
+    ]
+
     @classmethod
     def is_string(cls, obj: typing.Any, *, raise_type_exception: bool = False) -> bool:
         """
@@ -1498,12 +1540,21 @@ class StringUtil(SequenceUtil):
         return s.strip().startswith(prefix.strip())
 
     @classmethod
-    def get_random_strs(cls, n, *, chars: typing.Optional[str] = None) -> str:
+    def get_random_strs(cls, n: int, *, chars: typing.Optional[str] = None) -> str:
         """
-        返回给定个数的随机字符串
-        :param n: 字符数量
-        :param chars: 源字符串
-        :return: 随机字符串
+        返回给定数量的随机字符串
+
+        Parameters
+        ----------
+        n : int
+            字符数量
+        chars : typing.Optional[str], optional
+            源字符串, 如果为None则使用默认的字符集, by default None
+
+        Returns
+        -------
+        str
+            随机字符串
         """
         if chars is None:
             chars = string.ascii_letters + string.digits
@@ -1522,6 +1573,201 @@ class StringUtil(SequenceUtil):
         """
         random_val = RandomUtil.get_random_val_from_range(0x4E00, 0x9FA5)
         return chr(random_val)
+
+    @classmethod
+    def generate_box_string_from_dict(
+        cls,
+        data: typing.Mapping[str, Any],
+        *,
+        title: str = " RESULT ",
+    ) -> str:
+        """
+        从字典数据生成箱体信息
+
+        Parameters
+        ----------
+        data : typing.Mapping[str, Any]
+            待生成的数据
+        title : str, optional
+            标题, by default " RESULT "
+
+        Returns
+        -------
+        str
+            箱体信息
+        """
+
+        def get_center_title(title: str) -> str:
+            if not title.startswith(" ") and not title.endswith(" "):
+                return " " + title + " "
+            if not title.startswith(" "):
+                return " " + title
+
+            if not title.endswith(" "):
+                return title + " "
+            return title
+
+        # PERF 需要优化
+        max_key_length = max(cls.get_width(str(key)) for key in data.keys())
+        max_value_length = max(cls.get_width(str(value)) for value in data.values())
+
+        require_symbol_length = 7
+
+        # 边框长度，即 +-----+ 的总长度
+        box_width = max_key_length + max_value_length + require_symbol_length
+
+        title = get_center_title(title)
+        padding_length = (box_width - cls.get_width(title) - 2) // 2
+
+        # 预生成框的顶部边框
+        top_border = (
+            "+" + "-" * padding_length + f"{title}" + "-" * padding_length + "+"
+        )
+
+        # 生成框的内容
+        content = []
+        for key, value in data.items():
+            prefix = "| "
+            symbol = " : "
+            sufix = " |"
+
+            current_key_length = cls.get_width(str(key))
+            current_key_padding_length = max_key_length - current_key_length
+
+            current_value_length = cls.get_width(str(value))
+            current_value_padding_length = max_value_length - current_value_length
+
+            key_padding = ""
+            value_padding = ""
+
+            if current_key_padding_length > 0:
+                key_padding = " " * current_key_padding_length
+            if current_value_padding_length > 0:
+                value_padding = " " * current_value_padding_length
+
+            content.append(
+                f"{prefix}{key}{key_padding}{symbol}{value}{value_padding}{sufix}"
+            )
+
+        # 生成框的底部边框
+        bottom_border = "+" + "-" * (box_width - 2) + "+"
+
+        # 获取修正值
+        border_modification_length = cls.get_width(bottom_border) - cls.get_width(
+            top_border
+        )
+        if border_modification_length > 0:
+            top_border = (
+                "+"
+                + "-" * border_modification_length
+                + "-" * padding_length
+                + f"{title}"
+                + "-" * padding_length
+                + "+"
+            )
+
+        # 合并所有部分
+        box_string = "\n".join([top_border] + content + [bottom_border])
+        return box_string
+
+    @classmethod
+    def get_annotation_str(cls, s: str, annotation_syntax: str = "--") -> str:
+        """
+        生成备注释信息
+
+        Parameters
+        ----------
+        s : str
+            待注释字符串
+        annotation_syntax : str, optional
+            注释语法, by default "--"
+
+        Returns
+        -------
+        str
+            被注释的语句
+        """
+        line_lst = []
+        lines = s.splitlines()
+        for line in lines:
+            if not line.startswith(annotation_syntax):
+                line_lst.append(annotation_syntax + " " + line)
+            else:
+                line_lst.append(line)
+
+        return "\n".join(line_lst)
+
+    @classmethod
+    def get_width(cls, s: str) -> int:
+        """
+        获取字符串显示宽度
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+
+        Returns
+        -------
+        int
+            字符串长度
+        """
+        if cls.is_blank(s):
+            return 0
+        length = 0
+        for c in s:
+            if (o := ord(c)) == 0xE or o == 0xF:
+                continue
+            for num, wid in cls.WIDTHS:
+                if o <= num:
+                    length += wid
+                    break
+
+        return length
+
+    @classmethod
+    def align_text(cls, text: str, padding: str = " ", align: str = "left") -> str:
+        """
+        根据指定的方式对齐字符串
+
+        Parameters
+        ----------
+        text : str
+            待对齐文本
+        padding : str, optional
+            填充字符串, by default " "
+        align : str, optional
+            对齐方式, by default "left"
+
+        Returns
+        -------
+        str
+            对齐后的字符串
+
+        Raises
+        ------
+        ValueError
+            如果对齐方式不是 "left", "right" 或 "center", 则抛出异常
+        """
+        if align not in ["left", "right", "center"]:
+            raise ValueError(
+                f"align must be 'left', 'right' or 'center', but got {align}"
+            )
+        if align in ["left", "right"]:
+            return cls._align_text(text, len(text) + 1, padding, align)
+        else:
+            return cls._align_text(text, len(text) + 2, padding, align)
+
+    @classmethod
+    def _align_text(
+        cls, text: str, width: int, padding: str = " ", align: str = "left"
+    ) -> str:
+        if align == "left":
+            return text.rjust(width, padding)
+        elif align == "right":
+            return text.ljust(width, padding)
+        else:
+            return text.center(width, padding)
 
 
 class DatetimeUtil(object):

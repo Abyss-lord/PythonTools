@@ -22,11 +22,13 @@ from enum import Enum
 Person = namedtuple("Person", ["sex", "sex_code"])
 
 
-MALE_SET: typing.FrozenSet[str] = frozenset(["MALE", "male", "男性" "男" "男的"])
+MALE_SET: typing.FrozenSet[str] = frozenset(["MALE", "male", "男性", "男", "男的"])
 FEMALE_SET: typing.FrozenSet[str] = frozenset([
     "FEMALE",
     "female",
-    "女性" "女" "女的",
+    "女性",
+    "女",
+    "女的",
 ])
 
 
