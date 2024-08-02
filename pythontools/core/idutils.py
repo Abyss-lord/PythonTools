@@ -118,7 +118,6 @@ class IDCardUtil(object):
             身份证实例
         """
         default_code_length = 18
-        gender = Gender.get_gender_by_name(gender)
         random_id = cls.generate_random_valid_id(
             code_length=default_code_length, gender=gender
         )
@@ -126,7 +125,7 @@ class IDCardUtil(object):
 
     @classmethod
     def generate_random_valid_id(
-        cls, *, code_length: int = 18, gender=Gender.MALE
+        cls, *, code_length: int = 18, gender: str = "男"
     ) -> str:
         """
         获取随机ID
@@ -135,8 +134,8 @@ class IDCardUtil(object):
         ----------
         code_length : int, optional
             身份证ID长度, by default 18
-        gender : Gender, optional
-            指定性别, by default Gender.MALE
+        gender : str, optional
+            指定性别, by default 男
 
         Returns
         -------
@@ -164,8 +163,7 @@ class IDCardUtil(object):
         Parameters
         ----------
         gender : str, optional
-            性别, by default Gender.MALE
-
+            性别, by default 男
         Returns
         -------
         str

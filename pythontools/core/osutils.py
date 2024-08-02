@@ -536,7 +536,8 @@ class SysUtil(object):
         else:
             return res if res is not None else default_value
 
-    def get_system_properties(self, quiet: bool = False) -> typing.Dict[str, str]:
+    @classmethod
+    def get_system_properties(cls, quiet: bool = False) -> typing.Dict[str, str]:
         """
         获取所有的系统变量
 
