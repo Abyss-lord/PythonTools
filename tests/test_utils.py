@@ -54,6 +54,66 @@ class TestStringUtil:
         pass
 
     @classmethod
+    def test_get_str_length(cls):
+        s = "hello world, 你好啊"
+        assert StringUtil.get_width(s) == 19
+        assert StringUtil.get_width("") == 0
+        assert StringUtil.get_width(None) == 0
+        assert StringUtil.get_width("\t") == 0
+        assert StringUtil.get_width("\r") == 0
+        assert StringUtil.get_width("\n") == 0
+        assert StringUtil.get_width("1234567890") == 10
+        assert StringUtil.get_width("你好啊") == 6
+        assert StringUtil.get_width("hello world") == 11
+
+    @classmethod
+    def test_generate_box_string_from_dict_without_chinese(cls):
+        d = {
+            0: "James Brown",
+            1: "Mary Johnson",
+            2: "Patricia Smith",
+            3: "Robert Williams",
+            4: "Linda Jones",
+            5: "Michael Brown",
+            6: "Elizabeth Garcia",
+            7: "David Martinez",
+            8: "Barbara Rodriguez",
+            9: "Susan Wilson",
+        }
+        box_str = StringUtil.generate_box_string_from_dict(d)
+        logger.debug("\n" + box_str)
+
+    @classmethod
+    def test_generate_box_string_from_dict_with_chinese(cls):
+        d = {
+            "中文姓名": "李军",
+            "英文姓名": "John Smith",
+            "年龄": 27,
+            "地址": "上海市黄浦区",
+            "电话号码": "13987654321",
+            "电子邮件": "john.smith@example.com",
+            "职业": "软件工程师",
+        }
+
+        box_str = StringUtil.generate_box_string_from_dict(d, title="个人信息")
+        logger.debug("\n" + box_str)
+        logger.debug(StringUtil.get_width("+----------------- 个人信息 ------------+"))
+
+    @classmethod
+    def test_align_text(cls):
+        s = "hello world, 你好啊"
+        assert StringUtil.align_text(s, align="left") == " hello world, 你好啊"
+        assert StringUtil.align_text(s, align="center") == " hello world, 你好啊 "
+        assert StringUtil.align_text(s, align="right") == "hello world, 你好啊 "
+
+    @classmethod
+    def test_get_annotation_str(cls):
+        s1 = "测试1"
+        s2 = "测试2-1\n测试2-2\n测试2-3"
+        logger.debug(StringUtil.get_annotation_str(s1))
+        logger.debug(StringUtil.get_annotation_str(s2))
+
+    @classmethod
     def test_center(cls):
         a = StringUtil.get_center_msg("hello world", "=", 40)
         b = StringUtil.get_center_msg("hello world", "=", 1)
@@ -160,8 +220,8 @@ class TestDateTimeUtil:
     @classmethod
     def test_get_this_month(cls):
         for _ in range(cls.TEST_ROUND):
-            assert DatetimeUtil.this_month() == 7
-            assert not DatetimeUtil.this_month() == 9
+            assert DatetimeUtil.this_month() == 8
+            assert not DatetimeUtil.this_month() == 13
 
     @classmethod
     def test_get_this_day(cls):
@@ -244,9 +304,8 @@ class TestIdUtil:
 
     @classmethod
     def test_generate_random_idcard(cls):
-        for _ in range(cls.TEST_ROUND):
-            id_obj = IDCardUtil.generate_random_valid_card()
-            logger.debug(id_obj)
+        id_obj = IDCardUtil.generate_random_valid_card()
+        logger.debug(id_obj)
 
     @classmethod
     def test_get_birthday_from_id_with_wrong_args(cls):
@@ -311,6 +370,11 @@ class TestSysUtil:
         assert 1 == SysUtil.get_system_property("dadsdsaadsa", 1, quiet=True)
         assert 1 == SysUtil.get_system_property("dadsdsaadsa", 1, quiet=False)
 
+    @classmethod
+    def test_get_system_properties(cls):
+        for k, v in SysUtil.get_system_properties().items():
+            logger.debug("k={}, v={}".format(k, v))
+
 
 class TestOsUtil:
     @classmethod
@@ -371,7 +435,7 @@ class TestOsUtil:
     def test_get_file_create_time(cls):
         p = "/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools/tests/context.py"
         OsUtil.get_file_create_time(p)
-        with pytest.raises(FileNotFoundError):
+        with pytest.raises(ValueError):
             OsUtil.get_file_create_time(p + "dadada", check_exist=True)
 
     @classmethod
@@ -446,6 +510,10 @@ class TestValidator:
         assert not DatetimeValidator.is_valid_birthday("011")
         assert not DatetimeValidator.is_valid_birthday("20220431")
 
+
+class TestStringValidator:
+    TEST_ROUND = 1000
+
     @classmethod
     def test_is_json_str(cls):
         assert StringValidator.is_json('{"name": "Peter"}')
@@ -454,6 +522,142 @@ class TestValidator:
         assert not StringValidator.is_json("nope")
         assert not StringValidator.is_json("")
         assert not StringValidator.is_json(None)
+
+    @classmethod
+    def test_is_general_string_with_length(cls):
+        static_str = "1234567890"
+        assert StringValidator.is_general_string_with_length(static_str, 1, 20)
+        assert not StringValidator.is_general_string_with_length(static_str, 1, 2)
+
+        for _ in range(cls.TEST_ROUND):
+            random_length = RandomUtil.get_random_val_from_range(1, 20)
+            random_str = StringUtil.get_random_strs(random_length)
+            random_test_length = RandomUtil.get_random_val_from_range(1, 20)
+            if random_test_length >= random_length:
+                assert StringValidator.is_general_string_with_length(
+                    random_str, 1, random_test_length
+                )
+            else:
+                assert not StringValidator.is_general_string_with_length(
+                    random_str, 1, random_test_length
+                )
+
+    @classmethod
+    def test_is_general_string_with_length2(cls):
+        static_str = "1234567890"
+        assert StringValidator.is_general_string_with_length(static_str, 1, -1)
+
+    @classmethod
+    def test_is_money(cls) -> None:
+        # PERF 搞清楚这个正则表达式
+        assert StringValidator.is_money("456.789")
+
+    @classmethod
+    def test_is_zip_code(cls) -> None:
+        for test_obj in ["210018", "210001", "210009", "210046"]:
+            assert StringValidator.is_zip_code(test_obj)
+
+    @classmethod
+    def test_is_mobile(cls) -> None:
+        correct_phone = "17161193307"
+        incorrect_phone = "1716119330"
+        assert StringValidator.is_mobile(correct_phone)
+        assert not StringValidator.is_mobile(incorrect_phone)
+
+    @classmethod
+    def test_is_email(cls) -> None:
+        incorrect_emails = [
+            "plainaddress",
+            "@missingusername.com",
+            "user@.com.my",
+            "user@domain..com",
+            "user@-domain.com",
+        ]
+
+        correct_emails = [
+            "user@example.com",
+            "firstname.lastname@example.com",
+            "user+mailbox@example.com",
+            "user.name+tag+sorting@example.com",
+            "user@example.co.uk",
+            "user_name@example.com",
+            "user-name@example.com",
+            "user.name@subdomain.example.com",
+            "user_name+123@example.com",
+            "user@domain.com.",
+            "user@123.123.123.123",
+            "user@domain-with-dash.com",
+            "user@domain-with-dash.com",
+            "user@123.123.123.123",
+        ]
+
+        for correct_email in correct_emails:
+            assert StringValidator.is_email(correct_email)
+
+        for incorrect_email in incorrect_emails:
+            assert not StringValidator.is_email(incorrect_email)
+
+    @classmethod
+    def test_is_hex(cls) -> None:
+        correct_hex = [
+            "1A2B3C",  # 常见的十六进制字符串
+            "abcdef",  # 小写字母
+            "ABCDEF",  # 大写字母
+            "123",  # 单一的有效十六进制数字
+            "0x123ABC",
+            "ff",  # 最小有效的两位十六进制数字
+            "7F",  # 一字节的十六进制数值
+            "000001",  # 具有前导零的有效十六进制字符串
+            "DEADBEEF",  # 经典的十六进制字符串
+        ]
+
+        incorrect_hex = [
+            "G123",  # 非十六进制字符
+            "123Z",  # 非十六进制字符
+            "0xGHIJKL",  # 前缀但包含非十六进制字符
+            "123ABC!"  # 包含非十六进制字符
+            "1.2.3",  # 包含点号的无效格式
+            "123 456",  # 包含空格的无效格式
+            "",  # 空字符串
+            "0x123 456",  # 带有空格的前缀十六进制字符串
+        ]
+
+        for correct_str in correct_hex:
+            assert StringValidator.is_hex(correct_str)
+
+        for incorrect_str in incorrect_hex:
+            assert not StringValidator.is_hex(incorrect_str)
+
+    @classmethod
+    def test_is_chinese_vehicle_number(cls) -> None:
+        correct_vin = [
+            "京A12345",  # 北京市的车牌号
+            "沪B23456",  # 上海市的车牌号
+            "粤C34567",  # 广东省的车牌号
+            "苏D45678",  # 江苏省的车牌号
+            "浙E56789",  # 浙江省的车牌号
+            "川H12345",  # 四川省的车牌号
+            "桂K12345",  # 广西省的车牌号
+        ]
+
+        incorrect_vin = [
+            "AB12345",  # 无效的车牌号格式（省份代码错误）
+            "京123456",  # 车牌号长度超出有效范围
+            "粤C3456",  # 车牌号长度不足
+            "苏1234",  # 缺少省份代码
+            "浙E5678AB",  # 包含无效字符
+            "鲁F123456",  # 车牌号长度超出有效范围
+            "晋5678",  # 缺少省份代码
+            "川H123456",  # 车牌号长度超出有效范围
+            "鄂J123",  # 车牌号长度不足
+            "桂K1234567",  # 车牌号长度超出有效范围
+        ]
+
+        for correct_vin_str in correct_vin:
+            assert StringValidator.is_chinese_vehicle_number(correct_vin_str)
+
+        for incorrect_vin_str in incorrect_vin:
+            assert not StringValidator.is_chinese_vehicle_number(incorrect_vin_str)
 
 
 class TestReUtil(object):

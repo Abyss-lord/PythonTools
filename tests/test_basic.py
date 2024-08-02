@@ -34,8 +34,8 @@ class TestBasic(object):
             logger.info(f"{root=}, {dirs=}")
 
     def test_constant(self):
-        assert Gender.MALE == Gender.get_sex(1)
-        assert Gender.FEMALE == Gender.get_sex(2)
+        assert Gender.MALE == Gender.get_gender_by_code(1)
+        assert Gender.FEMALE == Gender.get_gender_by_code(2)
 
     def test_platform(self):
         logger.info(platform.platform())
