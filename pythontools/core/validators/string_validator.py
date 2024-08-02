@@ -332,7 +332,11 @@ class StringValidator:
         bool
             是否为Hex(16进制)字符串
         """
-        return ReUtil.is_match(PatternPool.HEX, s, raise_exception=raise_exception)
+        return ReUtil.is_match(
+            PatternPool.HEX, s, raise_exception=raise_exception
+        ) or ReUtil.is_match(
+            PatternPool.HEX_WITH_PREFIX, s, raise_exception=raise_exception
+        )
 
     @classmethod
     def is_credit_code(cls, s: str, *, raise_exception: bool = False) -> bool:

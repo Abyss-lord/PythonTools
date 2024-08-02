@@ -59,6 +59,7 @@ class RegexPool(object):
     GENERAL_WITH_CHINESE = "^[\u4e00-\u9fff\\w]+$"
     # HEX
     HEX = "^[a-fA-F0-9]+$"
+    HEX_WITH_PREFIX = "^0x[0-9A-Fa-f]+$"
     #   统一社会信用代码
     #   第一部分：登记管理部门代码1位 (数字或大写英文字母)
     #   第二部分：机构类别代码1位 (数字或大写英文字母)
@@ -126,6 +127,8 @@ class PatternPool:
     GENERAL_WITH_CHINESE = re.compile(RegexPool.GENERAL_WITH_CHINESE)
     # HEX
     HEX = re.compile(RegexPool.HEX)
+    # 带有前缀
+    HEX_WITH_PREFIX = re.compile(RegexPool.HEX_WITH_PREFIX)
     # 统一社会信用代码
     CHINESE_CREDIT_CODE = re.compile(RegexPool.CHINESE_CREDIT_CODE)
     # 车架号 别名：车辆识别代号 车辆识别码 eg:LDC613P23A1305189 eg:LSJA24U62JG269225 十七位码、车架号 车辆的唯一标示
