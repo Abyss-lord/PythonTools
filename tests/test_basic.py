@@ -19,6 +19,7 @@ import datetime
 import os
 import platform
 import time
+import warnings
 
 import pytest
 from loguru import logger
@@ -59,6 +60,18 @@ class TestBasic(object):
 
     def test_sys_args(self):
         pass
+
+    def test_str_join(self):
+        s = []
+        res = "".join(s)
+        logger.debug("res: {}".format(res))
+        logger.debug(type(res))
+
+    def test_warning(self):
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            warnings.warn("This is a warning")
+            logger.warning("This is a warning")
 
 
 class TestQuarterObject:

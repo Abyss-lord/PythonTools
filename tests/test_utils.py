@@ -100,21 +100,21 @@ class TestStringUtil:
         logger.debug(StringUtil.get_width("+----------------- 个人信息 ------------+"))
 
     @classmethod
-    def test_align_text(cls):
+    def test_align_text(cls) -> None:
         s = "hello world, 你好啊"
         assert StringUtil.align_text(s, align="left") == " hello world, 你好啊"
         assert StringUtil.align_text(s, align="center") == " hello world, 你好啊 "
         assert StringUtil.align_text(s, align="right") == "hello world, 你好啊 "
 
     @classmethod
-    def test_get_annotation_str(cls):
+    def test_get_annotation_str(cls) -> None:
         s1 = "测试1"
         s2 = "测试2-1\n测试2-2\n测试2-3"
         logger.debug(StringUtil.get_annotation_str(s1))
         logger.debug(StringUtil.get_annotation_str(s2))
 
     @classmethod
-    def test_center(cls):
+    def test_center(cls) -> None:
         a = StringUtil.get_center_msg("hello world", "=", 40)
         b = StringUtil.get_center_msg("hello world", "=", 1)
         logger.debug(a)
@@ -152,18 +152,62 @@ class TestStringUtil:
         new_lst = SequenceUtil.resize(lst, -1)
         logger.debug(new_lst)
 
-    def test_validate(self):
+    def test_validate(self) -> None:
         assert DatetimeValidator.is_valid_birthday("19980424")
         assert not DatetimeValidator.is_valid_birthday("19981424")
 
-    def test_id_valid(self):
+    def test_id_valid(self) -> None:
         assert IDCardUtil.is_valid_id_18("110105199804246510")
         assert not IDCardUtil.is_valid_id_18("110105199804246511")
 
-    def test_date_sub(self):
+    def test_date_sub(self) -> None:
         now = datetime.now() + timedelta(days=1)
         res = now - datetime.now()
         logger.debug(type(res))
+
+    def test_roman_encode(self) -> None:
+        assert StringUtil.equals(StringUtil.roman_encode(7), "VII")
+        assert StringUtil.equals(StringUtil.roman_encode(1994), "MCMXCIV")
+        assert StringUtil.equals(StringUtil.roman_encode(2020), "MMXX")
+        assert StringUtil.equals(StringUtil.roman_encode(37), "XXXVII")
+
+    def test_get_roman_range(self) -> None:
+        generator = StringUtil.get_roman_range(1, 7)
+        lst = ["I", "II", "III", "IV", "V", "VI"]
+        for i, v in enumerate(generator):
+            assert StringUtil.equals(v, lst[i])
+
+    def test_roman_decode(self) -> None:
+        assert StringUtil.roman_decode("VII") == 7
+        assert StringUtil.roman_decode("MCMXCIV") == 1994
+
+    def test_has_blank(self) -> None:
+        assert StringUtil.has_blank("")
+        assert StringUtil.has_blank(" ")
+        assert StringUtil.has_blank("", "s", "b")
+        assert not StringUtil.has_blank("s", "b")
+
+    def test_is_all_blank(self) -> None:
+        assert StringUtil.is_all_blank("")
+        assert StringUtil.is_all_blank(" ")
+        assert StringUtil.is_all_blank("", " ", "  ", "\t\n")
+        assert not StringUtil.is_all_blank("", "s", "b")
+        assert not StringUtil.is_all_blank("s", "b")
+
+    def test_is_surround(self) -> None:
+        assert StringUtil.is_surround("hello world", "hello", "world")
+        assert not StringUtil.is_surround(
+            "hello world", "Hello", "world", case_insensitive=False
+        )
+        assert StringUtil.is_surround(
+            "hello world", "Hello", "world", case_insensitive=True
+        )
+
+    def test_empty_to_default(self) -> None:
+        assert StringUtil.empty_to_default("", "default") == "default"
+        assert StringUtil.empty_to_default(" ", "default") == " "
+        assert StringUtil.empty_to_default("s", "default") == "s"
+        assert StringUtil.empty_to_default(None, "default") == "default"
 
 
 class TestDateTimeUtil:
@@ -658,6 +702,68 @@ class TestStringValidator:
 
         for incorrect_vin_str in incorrect_vin:
             assert not StringValidator.is_chinese_vehicle_number(incorrect_vin_str)
+
+    @classmethod
+    def test_get_common_prefix(cls) -> None:
+        test_1_str1 = "hello world"
+        test_2_str2 = "hello python"
+        assert StringUtil.equals(
+            StringUtil.get_common_prefix(test_1_str1, test_2_str2), "hello "
+        )
+
+        test_2_str1 = "programming"
+        test_2_str2 = "progress"
+        assert StringUtil.equals(
+            StringUtil.get_common_prefix(test_2_str1, test_2_str2), "progr"
+        )
+
+        test_3_str1 = "1llo world"
+        test_3_str2 = "hello python"
+        assert StringUtil.is_blank(
+            StringUtil.get_common_prefix(test_3_str1, test_3_str2)
+        )
+
+    @classmethod
+    def test_get_common_suffix(cls) -> None:
+        test_1_str1 = "hello 我的世界 python"
+        test_2_str2 = "hello python"  # 注意：这里的字符串顺序是反的
+        assert StringUtil.equals(
+            StringUtil.get_common_suffix(test_1_str1, test_2_str2), " python"
+        )
+
+        test_2_str1 = "programming"
+        test_2_str2 = "running"
+        assert StringUtil.equals(
+            StringUtil.get_common_suffix(test_2_str1, test_2_str2), "ing"
+        )
+
+        test_3_str1 = "hello world"
+        test_3_str2 = "hello python"
+        assert StringUtil.equals(
+            StringUtil.get_common_suffix(test_3_str1, test_3_str2), ""
+        )
+
+    @classmethod
+    def test_group_by_length(cls) -> None:
+        input_string = "abcdefghij"
+        result = StringUtil.group_by_length(input_string, 3)
+        assert result == ["abc", "def", "ghi", "j"]
+
+    @classmethod
+    def test_format_in_currency(cls) -> None:
+        assert StringUtil.equals(
+            StringUtil.format_in_currency("123456789"), "123,456,789"
+        )
+        assert StringUtil.equals(
+            StringUtil.format_in_currency("123456789.45"), "123,456,789.45"
+        )
+        assert StringUtil.equals(
+            StringUtil.format_in_currency("-123456789.45"), "-123,456,789.45"
+        )
+        assert StringUtil.equals(StringUtil.format_in_currency("0"), "0")
+        assert StringUtil.equals(
+            StringUtil.format_in_currency("-123456789"), "-123,456,789"
+        )
 
 
 class TestReUtil(object):
