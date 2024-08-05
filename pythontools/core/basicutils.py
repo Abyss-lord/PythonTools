@@ -28,6 +28,7 @@ import pytz
 
 from .constants.time_constant import Quarter, TimeUnit
 from .convertor import BasicConvertor
+from .decorator import UnCkeckFucntion
 
 
 class RandomUtil:
@@ -1228,6 +1229,9 @@ class StringUtil(SequenceUtil):
         (1114109, 1),
     ]
 
+    __VAL = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1]
+    __SYB = ["M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"]
+
     @classmethod
     def is_string(cls, obj: typing.Any, *, raise_type_exception: bool = False) -> bool:
         """
@@ -1326,6 +1330,92 @@ class StringUtil(SequenceUtil):
                 return False
 
         return True
+
+    @classmethod
+    def is_startswith(
+        cls,
+        s: str,
+        prefix: str,
+        *,
+        case_insensitive: bool = True,
+        strict_mode: bool = False,
+    ) -> bool:
+        """
+        检查字符串 s 是否以指定的前缀 prefix 开头。
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        prefix : str
+            前缀
+        case_insensitive : bool, optional
+            大小写是否敏感, by default True
+        strict_mode : bool, optional
+            是否采用严格模式, by default False
+
+        Returns
+        -------
+        bool
+            _description_
+        """
+
+        if strict_mode:
+            return s.startswith(prefix)
+
+        s = s.strip()
+        prefix = prefix.strip()
+
+        if case_insensitive:
+            return s.lower().startswith(prefix.lower())
+
+        return s.startswith(prefix)
+
+    @classmethod
+    def is_endswith(
+        cls,
+        s: str,
+        suffix: str,
+        *,
+        case_insensitive: bool = True,
+        strict_mode: bool = False,
+    ) -> bool:
+        if strict_mode:
+            return s.endswith(suffix)
+
+        s = s.strip()
+        suffix = suffix.strip()
+        if case_insensitive:
+            return s.lower().endswith(suffix.lower())
+
+        return s.endswith(suffix)
+
+    @classmethod
+    def is_surround(
+        cls, s: str, prefix: str, suffix: str, case_insensitive: bool = True
+    ) -> bool:
+        """
+        判断字符串是否由指定前后缀包围
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        prefix : str
+            指定前缀
+        suffix : str
+            指定后缀
+
+        Returns
+        -------
+        bool
+            是否由指定前后缀包围
+        """
+        if case_insensitive:
+            s = s.lower()
+            prefix = prefix.lower()
+            suffix = suffix.lower()
+        return s.startswith(prefix) and s.endswith(suffix)
 
     @classmethod
     def none_to_empty(cls, s: str) -> str:
@@ -1511,33 +1601,6 @@ class StringUtil(SequenceUtil):
                 new_str_lst.append(v)
 
         return "".join(new_str_lst)
-
-    @classmethod
-    def is_startswith(
-        cls,
-        s: str,
-        prefix: str,
-        *,
-        case_insensitive: bool = True,
-        strict_mode: bool = False,
-    ) -> bool:
-        """
-        检查字符串 s 是否以指定的前缀 prefix 开头。
-
-        :param s: 输入的字符串。
-        :param prefix: 要检查的前缀。
-        :param case_insensitive: 是否忽略大小写进行检查, 默认为 True。
-        :param strict_mode: 严格模式下, 不会对待测试字符串和前缀进行任何处理, 默认False
-        :return: 如果 s 以 prefix 开头, 则返回 True；否则返回 False。
-        """
-
-        if strict_mode:
-            return s.startswith(prefix)
-
-        if case_insensitive:
-            return s.lower().strip().startswith(prefix.lower().strip())
-
-        return s.strip().startswith(prefix.strip())
 
     @classmethod
     def get_random_strs(cls, n: int, *, chars: typing.Optional[str] = None) -> str:
@@ -1757,6 +1820,260 @@ class StringUtil(SequenceUtil):
             return cls._align_text(text, len(text) + 1, padding, align)
         else:
             return cls._align_text(text, len(text) + 2, padding, align)
+
+    @classmethod
+    def get_common_suffix(cls, str1: str, str2: str) -> str:
+        """
+        返回两个字符串的公共后缀
+
+        Parameters
+        ----------
+        str1 : str
+            待检测字符串1
+        str2 : str
+            待检测字符串2
+
+        Returns
+        -------
+        str
+            公共后缀
+        """
+        rev_str1 = str1[::-1]
+        rev_str2 = str2[::-1]
+        return cls.get_common_prefix(rev_str1, rev_str2)[::-1]
+
+    @classmethod
+    def get_common_prefix(cls, str1: str, str2: str) -> str:
+        """
+        返回两个字符串的公共前缀
+
+        Parameters
+        ----------
+        str1 : str
+            待检测字符串1
+        str2 : str
+            待检测字符串2
+
+        Returns
+        -------
+        str
+            两个字符串的公共前缀
+        """
+        min_len = min(len(str1), len(str2))
+
+        common_str_lst = []
+        for i in range(min_len):
+            if str1[i] != str2[i]:
+                break
+            else:
+                common_str_lst.append(str1[i])
+
+        return "".join(common_str_lst)
+
+    @classmethod
+    def group_by_length(cls, s: str, n: int) -> typing.List[str]:
+        """
+        根据制定的长度分组字符串
+
+        Parameters
+        ----------
+        s : str
+            待分组字符串
+        n : int
+            每组字符串数量
+
+        Returns
+        -------
+        typing.List[str]
+            分组后的字符串
+        """
+        if SequenceUtil.is_empty(s):
+            return []
+        return [s[i : i + n] for i in range(0, len(s), n)]
+
+    @classmethod
+    @UnCkeckFucntion()
+    def format_in_currency(cls, s: str | float) -> str:
+        """
+        格式化字符串为货币格式
+
+        Parameters
+        ----------
+        s : str
+            待格式化字符串
+
+        Returns
+        -------
+        str
+            格式化后的字符串
+        """
+        # TODO 实现货币格式化, 目前只实现了逗号分隔符的格式化, 只能处理整数
+        if isinstance(s, float):
+            s = str(s)
+
+        negative_flg = False
+        if s.startswith("-"):
+            negative_flg = True
+            s = s[1:]
+
+        if "." not in s:
+            integer_part = s
+            decimal_part = ""
+        else:
+            integer_part, decimal_part = s.split(".")
+
+        rev_str = integer_part[::-1]
+        str_lst = cls.group_by_length(rev_str, 3)
+        res_lst = []
+        for i in str_lst[::-1]:
+            res_lst.append(i[::-1])
+
+        integer_str = ",".join(res_lst)
+        decimal_str = (
+            "." + decimal_part if StringUtil.is_not_blank(decimal_part) else ""
+        )
+        sign_str = "-" if negative_flg else ""
+
+        return f"{sign_str}{integer_str}{decimal_str}"
+
+    @classmethod
+    def append_if_missing(
+        cls, s: str, suffix: str, case_insensitive: bool = True
+    ) -> str:
+        """
+        如果给定字符串不是以给定的字符串为结尾，则在尾部添加结尾字符串
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        suffix : str
+            指定后缀
+        case_insensitive : bool, optional
+            是否大小写敏感, by default True
+
+        Returns
+        -------
+        str
+            填充后的字符串
+        """
+        if cls.is_endswith(s, suffix, case_insensitive=case_insensitive):
+            return s
+        else:
+            return s + suffix
+
+    @classmethod
+    def repeat_by_length(cls, s: str, length: int) -> str:
+        """
+        重复字符串，直到长度达到指定长度
+
+
+        Parameters
+        ----------
+        s : str
+            待重复字符串
+        length : int
+            重复后字符串长度
+
+        Returns
+        -------
+        str
+            重复后的字符串
+        """
+        str_length = len(s)
+        if str_length >= length:
+            return s[:length]
+        else:
+            return s + cls.repeat_by_length(s, length - str_length)
+
+    @classmethod
+    @UnCkeckFucntion()
+    def roman_encode(cls, num: int) -> str:
+        """
+        将阿拉伯数字转换成罗马数字
+
+        Parameters
+        ----------
+        num : int
+            待转换阿拉伯数字
+
+        Returns
+        -------
+        str
+            转换后的罗马数字
+        """
+        roman_num = ""
+        i = 0
+        while num > 0:
+            for _ in range(num // cls.__VAL[i]):
+                roman_num += cls.__SYB[i]
+                num -= cls.__VAL[i]
+            i += 1
+        return roman_num
+
+    @classmethod
+    @UnCkeckFucntion()
+    def roman_decode(cls, s: str) -> int:
+        roman_int_mapping = {
+            "I": 1,
+            "V": 5,
+            "X": 10,
+            "L": 50,
+            "C": 100,
+            "D": 500,
+            "M": 1000,
+        }
+
+        int_value = 0
+        prev_value = 0
+
+        for char in reversed(s):
+            current_value = roman_int_mapping[char]
+            if current_value < prev_value:
+                int_value -= current_value
+            else:
+                int_value += current_value
+            prev_value = current_value
+
+        return int_value
+
+    @classmethod
+    @UnCkeckFucntion()
+    def get_roman_range(
+        cls, start: int, end: int, step: int = 1
+    ) -> typing.Generator[str, None, None]:
+        """
+        跟 range 函数一样生成罗马数字序列
+
+        Parameters
+        ----------
+        start : int
+            序列起点
+        end : int
+            序列终点
+        step : int, optional
+            序列步长, by default 1
+
+        Returns
+        -------
+        typing.Generator[str, None, None]
+            罗马数字字符串生成器
+
+        Yields
+        ------
+        Iterator[typing.Generator[str, None, None]]
+            罗马数字字符串迭代器
+
+        Raises
+        ------
+        ValueError
+            当 start 大于 end 时抛出异常
+        """
+        if start > end:
+            raise ValueError(f"{start} must be less than {end}")
+
+        for i in range(start, end):
+            yield cls.roman_encode(i)
 
     @classmethod
     def _align_text(
