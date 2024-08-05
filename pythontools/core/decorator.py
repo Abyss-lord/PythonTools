@@ -19,6 +19,7 @@ import functools
 import threading
 import time
 import typing
+import warnings
 
 
 # 单例模式装饰器
@@ -40,7 +41,7 @@ class Singleton(object):
 
     def __call__(self, *args, **kwargs):
         self._lock.acquire()
-        print(f"call {self.__cls=}, {self.__instance=}")
+
         if self.__instance is None:
             self.__instance = self.__cls(*args, **kwargs)
         self._lock.release()
@@ -106,5 +107,21 @@ class TraceUsedTime(object):
             end_time = time.time()
             print(f"func use time {end_time - start_time}")
             return res
+
+        return wrapper
+
+
+class UnCkeckFucntion(object):
+    WARNING_MEDSAGE = "The function does not validate its arguments, which requires the caller to guarantee that the arguments is valid"
+
+    def __init__(self, warning_enabled: bool = True) -> None:
+        self.warning_enabled = warning_enabled
+
+    def __call__(self, func: typing.Callable) -> typing.Callable:
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            if self.warning_enabled:
+                warnings.warn(self.WARNING_MEDSAGE)
+            return func(*args, **kwargs)
 
         return wrapper
