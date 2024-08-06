@@ -43,6 +43,16 @@ class RegexPool(object):
     ZIP_CODE = "^(0[1-7]|1[0-356]|2[0-7]|3[0-6]|4[0-7]|5[0-7]|6[0-7]|7[0-5]|8[0-9]|9[0-8])\\d{4}|99907[78]$"
     # 移动电话 eg: 中国大陆： +86 180 4953 1399，2位区域码标示+11位数字 中国大陆 +86 Mainland China
     MOBILE = "(?:0|86|\\+86)?1[3-9]\\d{9}"
+    # 香港电话, +852 5100 4810， 三位区域码+10位数字, 中国香港手机号码8位数
+    MOBILE_HK = "(?:0|852|\\+852)?\\d{8}"
+    # 台湾电话，+886 09 60 000000， 三位区域码+号码以数字09开头 + 8位数字, 中国台湾手机号码10位数 中国台湾 +886 Taiwan 国际域名缩写：TW
+    MOBILE_TW = "(?:0|886|\\+886)?(?:|-)09\\d{8}"
+    # 澳门电话，+853 68 00000，三位区域码 +号码以数字6开头 + 7位数字, 中国澳门手机号码8位数 中国澳门 +853 Macao 国际域名缩写：MO
+    MOBILE_MO = "(?:0|853|\\+853)?(?:|-)6\\d{7}"
+    # 中国座机电话号码
+    TEL = "(010|02\\d|0[3-9]\\d{2})-?(\\d{6,8})"
+    # 座机400-800
+    TEL_400_800 = "0\\d{2,3}[\\- ]?[1-9]\\d{6,7}|[48]00[\\- ]?[1-9]\\d{2}[\\- ]?\\d{4}"
     # IPV4
     IPV4 = "^(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)$"
     # IPV6
@@ -112,6 +122,16 @@ class PatternPool:
     ZIP_CODE = re.compile(RegexPool.ZIP_CODE)
     # 移动电话 eg: 中国大陆： +86 180 4953 1399，2位区域码标示+11位数字 中国大陆 +86 Mainland China
     MOBILE = re.compile(RegexPool.MOBILE)
+    # 香港移动电话
+    MOBILE_HK = re.compile(RegexPool.MOBILE_HK)
+    # 台湾移动电话
+    MOBILE_TW = re.compile(RegexPool.MOBILE_TW)
+    # 澳门移动电话
+    MOBILE_MO = re.compile(RegexPool.MOBILE_MO)
+    # 中国座机
+    TEL = re.compile(RegexPool.TEL)
+    # 座机400_800
+    TEL_400_800 = re.compile(RegexPool.TEL_400_800)
     # IPV4
     IPV4 = re.compile(RegexPool.IPV4)
     # IPV6

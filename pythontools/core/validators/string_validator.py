@@ -175,6 +175,92 @@ class StringValidator:
         return ReUtil.is_match(PatternPool.MOBILE, s, raise_exception=raise_exception)
 
     @classmethod
+    def is_mobile_hk(cls, s: str, *, raise_exception: bool = False) -> bool:
+        """
+        判断是否是香港移动电话号码
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            匹配失败是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            是否是香港移动电话号码
+        """
+        return ReUtil.is_match(
+            PatternPool.MOBILE_HK, s, raise_exception=raise_exception
+        )
+
+    @classmethod
+    def is_mobile_tw(cls, s: str, *, raise_exception: bool = False) -> bool:
+        """
+        判断是否是台湾移动电话号码
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            匹配失败是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            是否是台湾移动电话号码
+        """
+        return ReUtil.is_match(
+            PatternPool.MOBILE_TW, s, raise_exception=raise_exception
+        )
+
+    @classmethod
+    def is_mobile_mo(cls, s: str, *, raise_exception: bool = False) -> bool:
+        """
+        判断是否是澳门移动手机电话号码
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            匹配失败是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            是否是澳门移动电话号码
+        """
+        return ReUtil.is_match(
+            PatternPool.MOBILE_MO, s, raise_exception=raise_exception
+        )
+
+    @classmethod
+    def is_tel(cls, s: str, *, raise_exception: bool = False) -> bool:
+        """
+        验证是否为电话号码
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            匹配失败是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            是否为电话号码
+        """
+        return ReUtil.is_match(PatternPool.TEL, s, raise_exception=raise_exception)
+
+    @classmethod
+    def is_tel_400800(cls, s: str, *, raise_exception: bool = False) -> bool:
+        return ReUtil.is_match(PatternPool.TEL_400_800)
+
+    @classmethod
     def is_email(cls, s: str, *, raise_exception: bool = False) -> bool:
         """
         验证是否为邮箱
