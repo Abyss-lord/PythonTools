@@ -1253,6 +1253,35 @@ class StringUtil(SequenceUtil):
         return False
 
     @classmethod
+    def is_all_whitespace(cls, s: str) -> bool:
+        """
+        判断字符串是否全为空白字符
+
+        Examples:
+        -------
+
+        >>> assert is_all_whitespace('   ') # returns true
+        True
+        >>> assert is_all_whitespace('foo') # returns false
+        False
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+
+        Returns
+        -------
+        bool
+            字符串是否全为空白字符
+        """
+        for c in s:
+            if c not in string.whitespace:
+                return False
+
+        return True
+
+    @classmethod
     def is_blank(
         cls, s: typing.Optional[str], *, raise_type_exception: bool = False
     ) -> bool:
@@ -1675,10 +1704,87 @@ class StringUtil(SequenceUtil):
                 return title + " "
             return title
 
-        # PERF 需要优化
-        max_key_length = max(cls.get_width(str(key)) for key in data.keys())
-        max_value_length = max(cls.get_width(str(value)) for value in data.values())
+        def get_max_length_from_dict(
+            data: typing.Mapping[str, Any], level: int = 0
+        ) -> tuple[int, int]:
+            max_key_length = 0
+            max_value_length = 0
+            for key, value in data.items():
+                if isinstance(value, dict):
+                    sub_max_key_length, sub_max_value_length = get_max_length_from_dict(
+                        value, level + 1
+                    )
+                    max_key_length = max(max_key_length, sub_max_key_length)
+                    max_value_length = max(max_value_length, sub_max_value_length)
+                elif isinstance(value, list):
+                    for item in value:
+                        if isinstance(item, dict):
+                            sub_max_key_length, sub_max_value_length = (
+                                get_max_length_from_dict(item, level + 1)
+                            )
+                            max_key_length = max(max_key_length, sub_max_key_length)
+                            max_value_length = max(
+                                max_value_length, sub_max_value_length
+                            )
+                        else:
+                            raise TypeError(f"Unsupported type: {type(item)}")
+                else:
+                    max_key_length = max(
+                        max_key_length, get_length_with_level(str(key), level)
+                    )
+                    max_value_length = max(max_value_length, cls.get_width(str(value)))
 
+            return max_key_length, max_value_length
+
+        def get_length_with_level(key: str, level: int, step: int = 2) -> int:
+            return cls.get_width(key) + len(get_left_padding_str(level))
+
+        def get_left_padding_str(level: int, fill_str: str = " ", step: int = 2) -> str:
+            return fill_str * level * step
+
+        def append_content_lines(data, level) -> None:
+            for k, v in data.items():
+                if isinstance(v, dict):
+                    _append_content_line(k, "", level)
+                    append_content_lines(v, level + 1)
+                elif isinstance(v, list):
+                    for item in v:
+                        if isinstance(item, dict):
+                            append_content_lines(v, level + 1)
+                        else:
+                            raise TypeError(
+                                f"Unsupported type: {type(item)} in nested dict"
+                            )
+                else:
+                    _append_content_line(k, v, level)
+
+        def _append_content_line(key: str, value: str, level: int) -> None:
+            prefix = "| "
+            symbol = " : "
+            sufix = " |"
+
+            current_key_length = get_length_with_level(str(key), level)
+            current_key_padding_length = max_key_length - current_key_length
+
+            current_value_length = cls.get_width(str(value))
+            current_value_padding_length = max_value_length - current_value_length
+
+            level_padding = get_left_padding_str(level)
+
+            key_padding = ""
+            value_padding = ""
+
+            if current_key_padding_length > 0:
+                key_padding = " " * current_key_padding_length
+            if current_value_padding_length > 0:
+                value_padding = " " * current_value_padding_length
+
+            content.append(
+                f"{prefix}{level_padding}{key}{key_padding}{symbol}{value}{value_padding}{sufix}"
+            )
+
+        max_key_length, max_value_length = get_max_length_from_dict(data)
+        print(f"{max_key_length=}")
         require_symbol_length = 7
 
         # 边框长度，即 +-----+ 的总长度
@@ -1693,29 +1799,10 @@ class StringUtil(SequenceUtil):
         )
 
         # 生成框的内容
-        content = []
-        for key, value in data.items():
-            prefix = "| "
-            symbol = " : "
-            sufix = " |"
+        content: list[str] = []
 
-            current_key_length = cls.get_width(str(key))
-            current_key_padding_length = max_key_length - current_key_length
-
-            current_value_length = cls.get_width(str(value))
-            current_value_padding_length = max_value_length - current_value_length
-
-            key_padding = ""
-            value_padding = ""
-
-            if current_key_padding_length > 0:
-                key_padding = " " * current_key_padding_length
-            if current_value_padding_length > 0:
-                value_padding = " " * current_value_padding_length
-
-            content.append(
-                f"{prefix}{key}{key_padding}{symbol}{value}{value_padding}{sufix}"
-            )
+        # 包装，生成内容
+        append_content_lines(data, 0)
 
         # 生成框的底部边框
         bottom_border = "+" + "-" * (box_width - 2) + "+"
@@ -1780,8 +1867,12 @@ class StringUtil(SequenceUtil):
         int
             字符串长度
         """
+        if cls.is_all_whitespace(s):
+            return len(s)
+
         if cls.is_blank(s):
             return 0
+
         length = 0
         for c in s:
             if (o := ord(c)) == 0xE or o == 0xF:
