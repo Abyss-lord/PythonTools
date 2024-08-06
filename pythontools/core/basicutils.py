@@ -1569,20 +1569,25 @@ class StringUtil(SequenceUtil):
             return s1.strip() == s2.strip()
 
     @classmethod
-    def hide(cls, s: str, start: int, end: int, replace_char: str = "*") -> str:
+    def hide(cls, s: str, start: int, end: int, *, replace_char: str = "*") -> str:
         """
-         隐藏字符串 s 中从 start 到 end 位置的字符, 用指定的替换字符 replace_char 替换。
+        隐藏字符串 s 中从 start 到 end 位置的字符, 用指定的替换字符 replace_char 替换。
 
-        *Example*
+        Parameters
+        ----------
+        s : str
+            待替换字符串
+        start : int
+            开始替换的位置, 包含
+        end : int
+            替换结束的位置, 不包含
+        replace_char : str, optional
+            替换后的字符串, 其中从 start 到 end 的字符被替换为 replace_char, by default "*"
 
-        >>> StringUtil.hide("1234567890", 3, 6) # '123***7890'
-        >>> StringUtil.hide("1234567890", 0, 4, "#") # '####567890'
-
-        :param s: 输入的字符串。
-        :param start: 开始替换的位置（包含）。
-        :param end: 结束替换的位置（不包含）。
-        :param replace_char: 用于替换的字符, 默认为 '*'。
-        :return: 替换后的字符串, 其中从 start 到 end 的字符被替换为 replace_char。
+        Returns
+        -------
+        str
+            替换后的字符串
         """
         if cls.is_blank(s):
             return s
