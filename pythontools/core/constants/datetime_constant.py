@@ -19,6 +19,7 @@ import calendar
 import datetime
 from collections import namedtuple
 from enum import Enum
+from typing import Optional
 
 QuarterTuple = namedtuple(
     "QuarterTuple",
@@ -118,7 +119,7 @@ class Week(Enum):
     SUNDAY = WeekTuple("SUNDAY", "星期日", "sun", calendar.SUNDAY, 7)
 
     @classmethod
-    def get_week(cls, name: int | str) -> "Week" | None:
+    def get_week(cls, name: int | str) -> Optional["Week"]:
         if isinstance(name, int):
             for week in cls:
                 if week.get_iso8601_value() == name:
@@ -148,7 +149,7 @@ class Week(Enum):
         return self.value.alias
 
     @classmethod
-    def _get_week_from_chinese_format(cls, last_value: str) -> "Week" | None:
+    def _get_week_from_chinese_format(cls, last_value: str) -> Optional["Week"]:
         if last_value == "一":
             return Week.MONDAY
         elif last_value == "二":
@@ -167,7 +168,7 @@ class Week(Enum):
             return None
 
     @classmethod
-    def _get_week_from_numerical_format(cls, last_value: int) -> "Week" | None:
+    def _get_week_from_numerical_format(cls, last_value: int) -> Optional["Week"]:
         if last_value == 1:
             return Week.MONDAY
         elif last_value == 2:
@@ -182,5 +183,115 @@ class Week(Enum):
             return Week.SATURDAY
         elif last_value == 7:
             return Week.SUNDAY
+        else:
+            return None
+
+
+class Month(Enum):
+    JANUARY = MonthTuple("JANUARY", "一月", "jan", 1)
+    FEBRUARY = MonthTuple("FEBRUARY", "二月", "feb", 2)
+    MARCH = MonthTuple("MARCH", "三月", "mar", 3)
+    APRIL = MonthTuple("APRIL", "四月", "apr", 4)
+    MAY = MonthTuple("MAY", "五月", "may", 5)
+    JUNE = MonthTuple("JUNE", "六月", "jun", 6)
+    JULY = MonthTuple("JULY", "七月", "jul", 7)
+    AUGUST = MonthTuple("AUGUST", "八月", "aug", 8)
+    SEPTEMBER = MonthTuple("SEPTEMBER", "九月", "sep", 9)
+    OCTOBER = MonthTuple("OCTOBER", "十月", "oct", 10)
+    NOVEMBER = MonthTuple("NOVEMBER", "十一月", "nov", 11)
+    DECEMBER = MonthTuple("DECEMBER", "十二月", "dec", 12)
+
+    @classmethod
+    def get_month(cls, name: int | str) -> Optional["Month"]:
+        if isinstance(name, int):
+            for month in cls:
+                if month.get_value() == name:
+                    return month
+        elif isinstance(name, str):
+            if name.endswith("月"):
+                month_expression, _, _ = name.partition("月")
+                if month_obj := cls._get_month_from_chinese_format(month_expression):
+                    return month_obj
+                if month_obj := cls._get_month_from_numerical_format(month_expression):
+                    return month_obj
+        else:
+            raise TypeError("name must be int or str")
+
+    def get_value(self) -> int:
+        return self.value.calendar_value
+
+    def get_name(self) -> str:
+        return self.value.name
+
+    def get_chinese_format(self) -> str:
+        return self.value.chinese_name
+
+    def get_alias(self) -> str:
+        return self.value.alias
+
+    def get_last_day(self, year: int) -> int:
+        month = self.get_value()
+        if month == 2:
+            return 29 if calendar.isleap(year) else 28
+        elif month in [4, 6, 9, 11]:
+            return 30
+        else:
+            return 31
+
+    @classmethod
+    def _get_month_from_chinese_format(cls, value: str) -> Optional["Month"]:
+        if value == "一":
+            return Month.JANUARY
+        elif value == "二":
+            return Month.FEBRUARY
+        elif value == "三":
+            return Month.MARCH
+        elif value == "四":
+            return Month.APRIL
+        elif value == "五":
+            return Month.MAY
+        elif value == "六":
+            return Month.JUNE
+        elif value == "七":
+            return Month.JULY
+        elif value == "八":
+            return Month.AUGUST
+        elif value == "九":
+            return Month.SEPTEMBER
+        elif value == "十":
+            return Month.OCTOBER
+        elif value == "十一":
+            return Month.NOVEMBER
+        elif value == "十二":
+            return Month.DECEMBER
+        else:
+            return None
+
+    @classmethod
+    def _get_month_from_numerical_format(cls, value: str) -> Optional["Month"]:
+        if value == "1":
+            return Month.JANUARY
+        elif value == "2":
+            return Month.FEBRUARY
+        elif value == "3":
+            return Month.MARCH
+        elif value == "4":
+            return Month.APRIL
+        elif value == "5":
+            return Month.MAY
+        elif value == "6":
+            return Month.JUNE
+        elif value == "7":
+            return Month.JULY
+        elif value == "8":
+            return Month.AUGUST
+        elif value == "9":
+            return Month.SEPTEMBER
+        elif value == "10":
+            return Month.OCTOBER
+        elif value == "11":
+            return Month.NOVEMBER
+        elif value == "12":
+            return Month.DECEMBER
         else:
             return None
