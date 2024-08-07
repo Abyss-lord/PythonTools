@@ -26,7 +26,7 @@ from typing import Any
 
 import pytz
 
-from .constants.time_constant import Quarter, TimeUnit
+from .constants.datetime_constant import Quarter, TimeUnit
 from .convertor import BasicConvertor
 from .decorator import UnCkeckFucntion
 
@@ -1386,7 +1386,7 @@ class StringUtil(SequenceUtil):
         Returns
         -------
         bool
-            _description_
+            字符串 s 是否以指定的前缀 prefix 开头。
         """
 
         if strict_mode:
@@ -1401,6 +1401,55 @@ class StringUtil(SequenceUtil):
         return s.startswith(prefix)
 
     @classmethod
+    def is_starts_with_any(cls, s: str, *prefixes: str) -> bool:
+        """
+        判断给定字符串是否以任何一个字符串开始.
+        如果 prefixes 为空或者s为空, 则返回False.
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+
+        Returns
+        -------
+        bool
+            如果字符串以任何一个字符串开始返回True, 否则返回False
+        """
+        if cls.is_empty(prefixes) or cls.is_blank(s):
+            return False
+        for prefix in prefixes:
+            if cls.is_startswith(s, prefix, case_insensitive=False):
+                return True
+
+        return False
+
+    @classmethod
+    def is_starts_with_any_ignore_case(cls, s: str, *prefixes: str) -> bool:
+        """
+        判断一个字符串是否以任何一个给定字符串开始, 忽略大小写.
+        如果 prefixes 为空或者s为空, 则返回False.
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+
+        Returns
+        -------
+        bool
+            一个字符串是否以任何一个给定字符串开始, 忽略大小写
+        """
+        if cls.is_empty(prefixes) or cls.is_blank(s):
+            return False
+
+        for prefix in prefixes:
+            if cls.is_startswith(s, prefix, case_insensitive=True):
+                return True
+
+        return False
+
+    @classmethod
     def is_endswith(
         cls,
         s: str,
@@ -1409,6 +1458,25 @@ class StringUtil(SequenceUtil):
         case_insensitive: bool = True,
         strict_mode: bool = False,
     ) -> bool:
+        """
+        判断一个字符串 s 是否以指定的后缀 suffix 结尾
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        suffix : str
+            制定的后缀
+        case_insensitive : bool, optional
+            大小写是否敏感, by default True
+        strict_mode : bool, optional
+            是否采用严格模式, by default False
+
+        Returns
+        -------
+        bool
+            字符串 s 是否以指定的后缀 suffix 结尾
+        """
         if strict_mode:
             return s.endswith(suffix)
 
@@ -1445,6 +1513,54 @@ class StringUtil(SequenceUtil):
             prefix = prefix.lower()
             suffix = suffix.lower()
         return s.startswith(prefix) and s.endswith(suffix)
+
+    @classmethod
+    def is_ends_with_any(cls, s: str, *suffixes: str) -> bool:
+        """
+        判断一个字符串 s 是否以任何一个给定字符串结尾
+        如果 suffixes 为空或者s为空, 则返回False.
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+
+        Returns
+        -------
+        bool
+            字符串 s 是否以任何一个给定字符串结尾
+        """
+        if cls.is_empty(suffixes) or cls.is_blank(s):
+            return False
+        for suffix in suffixes:
+            if cls.is_endswith(s, suffix, case_insensitive=False):
+                return True
+
+        return False
+
+    @classmethod
+    def is_ends_with_any_ignore_case(cls, s: str, *suffixes: str) -> bool:
+        """
+        判断一个字符串 s 是否以任何一个给定字符串结尾, 忽略大小写
+        如果 suffixes 为空或者s为空, 则返回False.
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+
+        Returns
+        -------
+        bool
+            字符串 s 是否以任何一个给定字符串结尾, 忽略大小写
+        """
+        if cls.is_empty(suffixes) or cls.is_blank(s):
+            return False
+        for suffix in suffixes:
+            if cls.is_endswith(s, suffix, case_insensitive=True):
+                return True
+
+        return False
 
     @classmethod
     def none_to_empty(cls, s: str) -> str:
@@ -2592,6 +2708,15 @@ class DatetimeUtil(object):
 
         res_dt = datetime.now() + timedelta(hours=hour, minutes=minute, seconds=seconds)
         return res_dt.strftime("%H:%M:%S")
+
+    @classmethod
+    def conver_time(
+        cls, value: int, from_unit: TimeUnit, to_unit: TimeUnit
+    ) -> int | float:
+        if value is None:
+            raise ValueError("value cannot be None")
+
+        return value * from_unit.value.unit_val_in_ns / to_unit.value.unit_val_in_ns
 
 
 class RadixUtil(object):
