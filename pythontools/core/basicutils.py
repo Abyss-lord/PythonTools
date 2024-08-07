@@ -1275,6 +1275,8 @@ class StringUtil(SequenceUtil):
         bool
             字符串是否全为空白字符
         """
+        if s is None or len(s) == 0:
+            return False
         for c in s:
             if c not in string.whitespace:
                 return False
@@ -1708,10 +1710,15 @@ class StringUtil(SequenceUtil):
         """
         if strict_mode:
             return s1 == s2
+        s1 = s1.strip()
+        s2 = s2.strip()
+
+        if len(s1) != len(s2):
+            return False
+
         if case_insensitive:
-            return s1.strip().lower() == s2.strip().lower()
-        else:
-            return s1.strip() == s2.strip()
+            return s1.lower() == s2.lower()
+        return s1.strip() == s2.strip()
 
     @classmethod
     def hide(cls, s: str, start: int, end: int, *, replace_char: str = "*") -> str:
@@ -2288,6 +2295,72 @@ class StringUtil(SequenceUtil):
             yield cls.roman_encode(i)
 
     @classmethod
+    def remove_blank(cls, s: str) -> str:
+        """
+        移除字符串中的空白字符
+
+        Parameters
+        ----------
+        s : str
+            待移除字符串
+
+        Returns
+        -------
+        str
+            移除空白后的字符串
+        """
+        filter_result = it.filterfalse(lambda x: cls.is_blank(x), s)
+        return "".join(filter_result)
+
+    @classmethod
+    def remove_suffix(cls, s: str, suffix: str, case_insensitive: bool = True) -> str:
+        """
+        移除字符串中的指定后缀
+
+        Parameters
+        ----------
+        s : str
+            待移除字符串
+        suffix : str
+            指定后缀
+        case_insensitive : bool, optional
+            是否忽略大小写, by default True
+
+        Returns
+        -------
+        str
+            移除后的字符串
+        """
+        if cls.is_endswith(s, suffix, case_insensitive=case_insensitive):
+            return s[: -len(suffix)]
+        else:
+            return s
+
+    @classmethod
+    def remove_prefix(cls, s: str, prefix: str, case_insensitive: bool = True) -> str:
+        """
+        移除字符串中的指定前缀
+
+        Parameters
+        ----------
+        s : str
+            待移除字符串
+        prefix : str
+            指定的前缀
+        case_insensitive : bool, optional
+            是否忽略大小写, by default True
+
+        Returns
+        -------
+        str
+            移除后的字符串
+        """
+        if cls.is_startswith(s, prefix, case_insensitive=case_insensitive):
+            return s[len(prefix) :]
+        else:
+            return s
+
+    @classmethod
     def _align_text(
         cls, text: str, width: int, padding: str = " ", align: str = "left"
     ) -> str:
@@ -2681,7 +2754,7 @@ class DatetimeUtil(object):
         :param duration: 时长
         :return: 秒
         """
-        return TimeUnit.convert(duration, TimeUnit.NANOSECONDS, TimeUnit.SECONDS)
+        return cls.conver_time(duration, TimeUnit.NANOSECONDS, TimeUnit.SECONDS)
 
     @classmethod
     def nanos_to_millis(cls, duration: int) -> float:
@@ -2690,7 +2763,7 @@ class DatetimeUtil(object):
         :param duration: 时长
         :return: 毫秒
         """
-        return TimeUnit.convert(duration, TimeUnit.NANOSECONDS, TimeUnit.MILLISECONDS)
+        return cls.conver_time(duration, TimeUnit.NANOSECONDS, TimeUnit.MILLISECONDS)
 
     @classmethod
     def second_to_time(cls, seconds: int) -> str:
