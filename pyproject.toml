@@ -19,6 +19,9 @@ select = [
 ]
 ignore = [
     "E402",  # module level import not at top of file
+    "W191",  # indentation contains tabs
+    "B008", # do not perform function calls in argument defaults
+    "C901", # function is too complex
 ]
 
 [tool.poetry.dependencies]
