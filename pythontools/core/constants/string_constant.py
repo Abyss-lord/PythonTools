@@ -15,6 +15,10 @@ Change Activity:
 
 # here put the import lib
 import typing
+from collections import namedtuple
+from enum import Enum
+
+DesensitizedTypeTuple = namedtuple("DesensitizedTypeTuple", ["description"])
 
 
 class CharPool:
@@ -37,3 +41,48 @@ class CharPool:
     AMP: typing.Final[str] = "&"
     COLON: typing.Final[str] = ":"
     AT: typing.Final[str] = "@"
+    ASTERISK: typing.Final[str] = "*"
+
+
+class DesensitizedType(Enum):
+    #  用户id
+    USER_ID = DesensitizedTypeTuple("用户id")
+    #  中文名
+    CHINESE_NAME = DesensitizedTypeTuple("中文名")
+    #  身份证号
+    ID_CARD = DesensitizedTypeTuple("身份证号")
+    #  座机号
+    FIXED_PHONE = DesensitizedTypeTuple("座机号")
+    #  手机号
+    MOBILE_PHONE = DesensitizedTypeTuple("手机号")
+    # 地址
+    ADDRESS = DesensitizedTypeTuple("地址")
+    # 电子邮件
+    EMAIL = DesensitizedTypeTuple("电子邮件")
+    #  密码
+    PASSWORD = DesensitizedTypeTuple("密码")
+    # 中国大陆车牌，包含普通车辆、新能源车辆
+    CAR_LICENSE = DesensitizedTypeTuple("车牌号")
+    # 银行卡
+    BANK_CARD = DesensitizedTypeTuple("银行卡")
+    # IPv4地址
+    IPV4 = DesensitizedTypeTuple("IPv4地址")
+    #  IPv6地址
+    IPV6 = DesensitizedTypeTuple("IPv6地址")
+    # 定义了一个first_mask的规则，只显示第一个字符。
+    FIRST_MASK = DesensitizedTypeTuple("只显示第一个字符")
+    # 定义了一个last_mask的规则，只显示最后一个字符。
+    LAST_MASK = DesensitizedTypeTuple("只显示最后一个字符")
+    # 全部不显示
+    ALL_MASK = DesensitizedTypeTuple("全部不显示")
+
+    def get_description(self) -> str:
+        """
+        显示枚举值描述信息
+
+        Returns
+        -------
+        str
+            枚举值描述信息
+        """
+        return self.value.description
