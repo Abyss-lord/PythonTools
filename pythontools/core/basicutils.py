@@ -456,33 +456,37 @@ class CharsetUtil:
 
 
 class BooleanUtil:
-    TRUE_SET: frozenset[str] = frozenset([
-        "true",
-        "yes",
-        "y",
-        "t",
-        "ok",
-        "1",
-        "on",
-        "是",
-        "对",
-        "真",
-        "對",
-        "√",
-    ])
-    FALSE_SET: frozenset[str] = frozenset([
-        "false",
-        "no",
-        "n",
-        "f",
-        "0",
-        "off",
-        "否",
-        "错",
-        "假",
-        "錯",
-        "×",
-    ])
+    TRUE_SET: frozenset[str] = frozenset(
+        [
+            "true",
+            "yes",
+            "y",
+            "t",
+            "ok",
+            "1",
+            "on",
+            "是",
+            "对",
+            "真",
+            "對",
+            "√",
+        ]
+    )
+    FALSE_SET: frozenset[str] = frozenset(
+        [
+            "false",
+            "no",
+            "n",
+            "f",
+            "0",
+            "off",
+            "否",
+            "错",
+            "假",
+            "錯",
+            "×",
+        ]
+    )
     DEFAULT_TRUE_STRING: typing.Final[str] = "TRUE"
     DEFAULT_FALSE_STRING: typing.Final[str] = "FALSE"
 
@@ -1155,6 +1159,52 @@ class SequenceUtil:
         """
         g = it.groupby(iterable)
         return next(g, True) and not next(g, False)
+
+    @classmethod
+    def is_items_eauql(cls, seq: typing.Sequence[Any]) -> bool:
+        """
+        判断序列中y元素是否都相等
+
+        Parameters
+        ----------
+        seq : typing.Sequence[Any]
+            待检测序列
+
+        Returns
+        -------
+        bool
+            如果所有元素相等或者序列为空返回 True, 否则返回False
+        """
+        if cls.is_empty(seq):
+            return True
+        first_item = seq[0]
+        return seq.count(first_item) == len(seq)
+
+    @classmethod
+    def rotate(cls, seq: typing.Sequence[Any], move_length: int) -> typing.Sequence[Any]:
+        """
+        将列表滚动移动 n 位
+
+        Parameters
+        ----------
+        seq : typing.Sequence[Any]
+            待滚动序列
+        move_length : int
+            滚动位数, 正数向后移动, 负数向前移动
+
+        Returns
+        -------
+        typing.Sequence[Any]
+            滚动后的新列表
+        """
+        if cls.is_empty(seq):
+            return cls.EMPTY
+        seq_length = len(seq)
+
+        if abs(move_length) > seq_length:
+            move_length %= seq_length
+
+        return seq[-move_length:] + seq[:-move_length]
 
 
 class StringUtil(SequenceUtil):
