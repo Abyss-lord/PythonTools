@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
 """
 -------------------------------------------------
 @File       :   context.py
@@ -20,21 +19,24 @@ import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from pythontools.collection.collectionutils import CollectionUtil
+from pythontools.collection.collectionutils import CollectionUtil  # noqa: F401
 from pythontools.core.basicutils import (
-    BooleanUtil,
-    DatetimeUtil,
-    RadixUtil,
-    RandomUtil,
-    SequenceUtil,
-    StringUtil,
+    BooleanUtil,  # noqa: F401
+    DatetimeUtil,  # noqa: F401
+    RadixUtil,  # noqa: F401
+    RandomUtil,  # noqa: F401
+    SequenceUtil,  # noqa: F401
+    StringUtil,  # noqa: F401
+    TimeUnit,  # noqa: F401
 )
-from pythontools.core.constants.people_constant import Gender
-from pythontools.core.constants.time_constant import Quarter
-from pythontools.core.errors import ValidationError
-from pythontools.core.idutils import IDCardUtil
-from pythontools.core.osutils import OsUtil, SysUtil
-from pythontools.core.pattern_pool import PatternPool
-from pythontools.core.reutils import ReUtil
-from pythontools.core.validators.datetime_validator import DatetimeValidator
-from pythontools.core.validators.string_validator import StringValidator
+
+# noqa: F401
+from pythontools.core.constants.people_constant import Gender  # noqa: F401
+from pythontools.core.constants.time_constant import Quarter  # type: ignore # noqa: F401
+from pythontools.core.errors import ValidationError  # noqa: F401
+from pythontools.core.idutils import IDCardUtil  # noqa: F401
+from pythontools.core.osutils import OsUtil, SysUtil  # noqa: F401
+from pythontools.core.pattern_pool import PatternPool  # noqa: F401
+from pythontools.core.reutils import ReUtil  # noqa: F401
+from pythontools.core.validators.datetime_validator import DatetimeValidator  # noqa: F401
+from pythontools.core.validators.string_validator import StringValidator  # noqa: F401

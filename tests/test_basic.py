@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
 """
 -------------------------------------------------
 @File       :   test_basic.py
@@ -27,11 +26,9 @@ from loguru import logger
 from .context import Gender, Quarter
 
 
-class TestBasic(object):
+class TestBasic:
     def test_basic(self):
-        for root, dirs, files in os.walk(
-            "/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools"
-        ):
+        for root, dirs, files in os.walk("/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools"):
             logger.info(f"{root=}, {dirs=}")
 
     def test_constant(self):
@@ -64,14 +61,22 @@ class TestBasic(object):
     def test_str_join(self):
         s = []
         res = "".join(s)
-        logger.debug("res: {}".format(res))
+        logger.debug(f"res: {res}")
         logger.debug(type(res))
 
     def test_warning(self):
-        with warnings.catch_warnings(record=True) as w:
+        with warnings.catch_warnings(record=True) as _:
             warnings.simplefilter("always")
             warnings.warn("This is a warning")
             logger.warning("This is a warning")
+
+    def test_type(self):
+        class SubTuple(tuple):
+            pass
+
+        a = SubTuple()
+        logger.debug(type(a))
+        logger.debug(type(a).__bases__[0] is tuple)
 
 
 class TestQuarterObject:

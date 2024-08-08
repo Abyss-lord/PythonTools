@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
 """
 -------------------------------------------------
 @File       :   test_utils.py
@@ -15,6 +14,7 @@ Change Activity:
 """
 # here put the import lib
 
+import inspect
 import random
 import re
 from datetime import date, datetime, timedelta
@@ -27,6 +27,7 @@ from .context import (
     CollectionUtil,
     DatetimeUtil,
     DatetimeValidator,
+    DesensitizedUtil,
     IDCardUtil,
     OsUtil,
     PatternPool,
@@ -37,8 +38,14 @@ from .context import (
     StringUtil,
     StringValidator,
     SysUtil,
+    TimeUnit,
+    TypeUtil,
     ValidationError,
 )
+
+
+class BaseTest:
+    TEST_ROUND = 100
 
 
 class TestStringUtil:
@@ -59,9 +66,9 @@ class TestStringUtil:
         assert StringUtil.get_width(s) == 19
         assert StringUtil.get_width("") == 0
         assert StringUtil.get_width(None) == 0
-        assert StringUtil.get_width("\t") == 0
-        assert StringUtil.get_width("\r") == 0
-        assert StringUtil.get_width("\n") == 0
+        assert StringUtil.get_width("\t") == 1
+        assert StringUtil.get_width("\r") == 1
+        assert StringUtil.get_width("\n") == 1
         assert StringUtil.get_width("1234567890") == 10
         assert StringUtil.get_width("你好啊") == 6
         assert StringUtil.get_width("hello world") == 11
@@ -196,18 +203,21 @@ class TestStringUtil:
 
     def test_is_surround(self) -> None:
         assert StringUtil.is_surround("hello world", "hello", "world")
-        assert not StringUtil.is_surround(
-            "hello world", "Hello", "world", case_insensitive=False
-        )
-        assert StringUtil.is_surround(
-            "hello world", "Hello", "world", case_insensitive=True
-        )
+        assert not StringUtil.is_surround("hello world", "Hello", "world", case_insensitive=False)
+        assert StringUtil.is_surround("hello world", "Hello", "world", case_insensitive=True)
 
     def test_empty_to_default(self) -> None:
         assert StringUtil.empty_to_default("", "default") == "default"
         assert StringUtil.empty_to_default(" ", "default") == " "
         assert StringUtil.empty_to_default("s", "default") == "s"
         assert StringUtil.empty_to_default(None, "default") == "default"
+
+    @classmethod
+    def test_remove_blank(cls) -> None:
+        original = " hello world \n hello"
+        res = StringUtil.remove_blank(original)
+        assert res == "helloworldhello"
+        logger.debug(f"{original=}\n{res=}")
 
 
 class TestDateTimeUtil:
@@ -301,12 +311,8 @@ class TestDateTimeUtil:
     @classmethod
     def test_is_same_week(cls):
         for _ in range(cls.TEST_ROUND):
-            d1 = DatetimeUtil.get_random_datetime(
-                datetime(2024, 12, 1), datetime(2024, 12, 15)
-            )
-            d2 = DatetimeUtil.get_random_datetime(
-                datetime(2024, 12, 1), datetime(2024, 12, 15)
-            )
+            d1 = DatetimeUtil.get_random_datetime(datetime(2024, 12, 1), datetime(2024, 12, 15))
+            d2 = DatetimeUtil.get_random_datetime(datetime(2024, 12, 1), datetime(2024, 12, 15))
             res = DatetimeUtil.is_same_week(d1, d2)
             logger.debug(f"d1={repr(d1)}, d2={repr(d2)}, {res=}")
 
@@ -330,6 +336,32 @@ class TestDateTimeUtil:
             val = random.randrange(1000, 10000, 1000)
             res = DatetimeUtil.second_to_time(val)
             logger.debug(f"{i=}, {val=}, {res=}")
+
+    @classmethod
+    def test_conver_time(cls) -> None:
+        value = 1000
+        res = DatetimeUtil.conver_time(value, TimeUnit.NANOSECONDS, TimeUnit.MILLISECONDS)
+        logger.debug(f"{res=}")
+
+    @classmethod
+    def test_sub_before(cls) -> None:
+        s1 = "2024-08-01"
+        assert StringUtil.sub_before(s1, "-", False) == "2024"
+        assert StringUtil.sub_before(s1, "-", True) == "2024-08"
+        assert StringUtil.sub_before(s1, "年", False) == "2024-08-01"
+        assert StringUtil.sub_before(None, "", True) == ""
+        assert StringUtil.sub_before("", "", True) == ""
+        assert StringUtil.sub_before("hello world", "", True) == "hello world"
+
+    @classmethod
+    def test_sub_after(cls) -> None:
+        s1 = "2024-08-01"
+        assert StringUtil.sub_after(s1, "-", False) == "08-01"
+        assert StringUtil.sub_after(s1, "-", True) == "01"
+        assert StringUtil.sub_before(s1, "年", False) == "2024-08-01"
+        assert StringUtil.sub_before(None, "", True) == ""
+        assert StringUtil.sub_before("", "", True) == ""
+        assert StringUtil.sub_before("hello world", "", True) == "hello world"
 
 
 class TestIdUtil:
@@ -417,7 +449,7 @@ class TestSysUtil:
     @classmethod
     def test_get_system_properties(cls):
         for k, v in SysUtil.get_system_properties().items():
-            logger.debug("k={}, v={}".format(k, v))
+            logger.debug(f"k={k}, v={v}")
 
 
 class TestOsUtil:
@@ -440,9 +472,7 @@ class TestOsUtil:
         assert not OsUtil.is_exist("")
         assert OsUtil.is_exist("/")
         assert OsUtil.is_exist("/tmp")
-        assert OsUtil.is_exist(
-            "/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools"
-        )
+        assert OsUtil.is_exist("/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools")
         assert OsUtil.is_exist("/Users/")
         assert not OsUtil.is_exist("dsaddaasawdasdwa")
 
@@ -451,9 +481,7 @@ class TestOsUtil:
         assert not OsUtil.is_dir("")
         assert OsUtil.is_dir("/")
         assert OsUtil.is_dir("/tmp")
-        assert OsUtil.is_dir(
-            "/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools"
-        )
+        assert OsUtil.is_dir("/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools")
 
         assert not OsUtil.is_dir(
             "/Users/panchenxi/Work/project/work/长期项目和学习/python/own"
@@ -484,9 +512,7 @@ class TestOsUtil:
 
     @classmethod
     def test_list_dirs(cls):
-        res = OsUtil.list_dirs(
-            "/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools"
-        )
+        res = OsUtil.list_dirs("/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools")
         logger.debug(res)
 
         OsUtil.list_dirs(
@@ -511,10 +537,7 @@ class TestOsUtil:
 
     @classmethod
     def test_get_file_from_dir_by_extension(cls):
-        p = (
-            "/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools/pythontools"
-            "/component/"
-        )
+        p = "/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools/pythontools" "/component/"
         res = OsUtil.get_file_from_dir_by_extension(p, extension="py")
         logger.debug(res)
 
@@ -578,13 +601,9 @@ class TestStringValidator:
             random_str = StringUtil.get_random_strs(random_length)
             random_test_length = RandomUtil.get_random_val_from_range(1, 20)
             if random_test_length >= random_length:
-                assert StringValidator.is_general_string_with_length(
-                    random_str, 1, random_test_length
-                )
+                assert StringValidator.is_general_string_with_length(random_str, 1, random_test_length)
             else:
-                assert not StringValidator.is_general_string_with_length(
-                    random_str, 1, random_test_length
-                )
+                assert not StringValidator.is_general_string_with_length(random_str, 1, random_test_length)
 
     @classmethod
     def test_is_general_string_with_length2(cls):
@@ -707,41 +726,29 @@ class TestStringValidator:
     def test_get_common_prefix(cls) -> None:
         test_1_str1 = "hello world"
         test_2_str2 = "hello python"
-        assert StringUtil.equals(
-            StringUtil.get_common_prefix(test_1_str1, test_2_str2), "hello "
-        )
+        assert StringUtil.equals(StringUtil.get_common_prefix(test_1_str1, test_2_str2), "hello ")
 
         test_2_str1 = "programming"
         test_2_str2 = "progress"
-        assert StringUtil.equals(
-            StringUtil.get_common_prefix(test_2_str1, test_2_str2), "progr"
-        )
+        assert StringUtil.equals(StringUtil.get_common_prefix(test_2_str1, test_2_str2), "progr")
 
         test_3_str1 = "1llo world"
         test_3_str2 = "hello python"
-        assert StringUtil.is_blank(
-            StringUtil.get_common_prefix(test_3_str1, test_3_str2)
-        )
+        assert StringUtil.is_blank(StringUtil.get_common_prefix(test_3_str1, test_3_str2))
 
     @classmethod
     def test_get_common_suffix(cls) -> None:
         test_1_str1 = "hello 我的世界 python"
         test_2_str2 = "hello python"  # 注意：这里的字符串顺序是反的
-        assert StringUtil.equals(
-            StringUtil.get_common_suffix(test_1_str1, test_2_str2), " python"
-        )
+        assert StringUtil.equals(StringUtil.get_common_suffix(test_1_str1, test_2_str2), " python")
 
         test_2_str1 = "programming"
         test_2_str2 = "running"
-        assert StringUtil.equals(
-            StringUtil.get_common_suffix(test_2_str1, test_2_str2), "ing"
-        )
+        assert StringUtil.equals(StringUtil.get_common_suffix(test_2_str1, test_2_str2), "ing")
 
         test_3_str1 = "hello world"
         test_3_str2 = "hello python"
-        assert StringUtil.equals(
-            StringUtil.get_common_suffix(test_3_str1, test_3_str2), ""
-        )
+        assert StringUtil.equals(StringUtil.get_common_suffix(test_3_str1, test_3_str2), "")
 
     @classmethod
     def test_group_by_length(cls) -> None:
@@ -751,22 +758,14 @@ class TestStringValidator:
 
     @classmethod
     def test_format_in_currency(cls) -> None:
-        assert StringUtil.equals(
-            StringUtil.format_in_currency("123456789"), "123,456,789"
-        )
-        assert StringUtil.equals(
-            StringUtil.format_in_currency("123456789.45"), "123,456,789.45"
-        )
-        assert StringUtil.equals(
-            StringUtil.format_in_currency("-123456789.45"), "-123,456,789.45"
-        )
+        assert StringUtil.equals(StringUtil.format_in_currency("123456789"), "123,456,789")
+        assert StringUtil.equals(StringUtil.format_in_currency("123456789.45"), "123,456,789.45")
+        assert StringUtil.equals(StringUtil.format_in_currency("-123456789.45"), "-123,456,789.45")
         assert StringUtil.equals(StringUtil.format_in_currency("0"), "0")
-        assert StringUtil.equals(
-            StringUtil.format_in_currency("-123456789"), "-123,456,789"
-        )
+        assert StringUtil.equals(StringUtil.format_in_currency("-123456789"), "-123,456,789")
 
 
-class TestReUtil(object):
+class TestReUtil:
     @classmethod
     def test_is_match_regex(cls):
         assert ReUtil.is_match(re.compile(r"\d+"), "123456")
@@ -780,14 +779,14 @@ class TestReUtil(object):
     def test_get_group_0(cls):
         birthday = "20221201"
         matched = PatternPool.BIRTHDAY_PATTERN.findall(birthday)
-        res = PatternPool.BIRTHDAY_PATTERN.match(birthday)
-        res2 = PatternPool.BIRTHDAY_PATTERN.search(birthday)
+        _ = PatternPool.BIRTHDAY_PATTERN.match(birthday)
+        _ = PatternPool.BIRTHDAY_PATTERN.search(birthday)
         res3 = PatternPool.BIRTHDAY_PATTERN.match(birthday)
-        r = res3.groups()
+        _ = res3.groups()
         print(matched)
 
 
-class TestRadixUtil(object):
+class TestRadixUtil:
     @classmethod
     def test_decimal_to_any(cls):
         assert RadixUtil.convert_base("1011", 2, 10) == "11"
@@ -802,7 +801,7 @@ class TestRadixUtil(object):
         assert RadixUtil.convert_base("252", 8, 2) == "10101010"
 
 
-class TestBooleanUtil(object):
+class TestBooleanUtil:
     @classmethod
     def test_negate_with_correct_arguments(cls) -> None:
         assert not BooleanUtil.negate(True)
@@ -869,7 +868,7 @@ class TestBooleanUtil(object):
         assert BooleanUtil.to_str_yes_no(False) == "NO"
 
 
-class TestRandomUtil(object):
+class TestRandomUtil:
     TEST_ROUND = 100
 
     @classmethod
@@ -930,9 +929,7 @@ class TestRandomUtil(object):
     @classmethod
     def test_get_random_floats_with_range_and_precision_and_correct_arguments(cls):
         for _ in range(cls.TEST_ROUND):
-            random_generator = RandomUtil.get_random_floats_with_range_and_precision(
-                0.0, 1.0, precision=2, length=5
-            )
+            random_generator = RandomUtil.get_random_floats_with_range_and_precision(0.0, 1.0, precision=2, length=5)
             for random_float in random_generator:
                 assert 0.0 <= random_float <= 1.0 and isinstance(random_float, float)
 
@@ -940,10 +937,8 @@ class TestRandomUtil(object):
     def test_get_random_floats_with_range_and_precision_and_incorrect_arguments(cls):
         for _ in range(cls.TEST_ROUND):
             with pytest.raises(ValueError):
-                random_generator = (
-                    RandomUtil.get_random_floats_with_range_and_precision(
-                        1.0, 0.0, precision=2, length=5
-                    )
+                random_generator = RandomUtil.get_random_floats_with_range_and_precision(
+                    1.0, 0.0, precision=2, length=5
                 )
                 for i in random_generator:
                     pass
@@ -956,9 +951,7 @@ class TestRandomUtil(object):
 
     @classmethod
     def test_get_random_complexes_with_range_and_precision(cls):
-        random_generator = RandomUtil.get_random_complexes_with_range_and_precision(
-            (0, 1), (-1, 1)
-        )
+        random_generator = RandomUtil.get_random_complexes_with_range_and_precision((0, 1), (-1, 1))
         lst = list(random_generator)
         assert len(lst) == 10
         for i in random_generator:
@@ -1005,7 +998,7 @@ class TestRandomUtil(object):
             assert random_str.capitalize() == random_str
 
 
-class TestSequenceUtil(object):
+class TestSequenceUtil(BaseTest):
     @classmethod
     def test_is_not_empty(cls) -> None:
         lst = [1, 2, 3]
@@ -1043,8 +1036,16 @@ class TestSequenceUtil(object):
         assert SequenceUtil.is_all_ele_equal([1, 1, 1, 1])  # True
         assert not SequenceUtil.is_all_ele_equal([1, 2, 1, 1])  # False
 
+    @classmethod
+    def test_move(cls) -> None:
+        original_list = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        for _ in range(cls.TEST_ROUND):
+            move_length = random.randint(0, 100)
+            res = SequenceUtil.rotate(original_list, move_length)
+            logger.debug(f"{res=}, {move_length=}, {move_length % len(original_list)=}")
 
-class TestCollectionUtil(object):
+
+class TestCollectionUtil:
     @classmethod
     def test_powerset(cls):
         s = [1, 2, 3]
@@ -1056,3 +1057,164 @@ class TestCollectionUtil(object):
     def test_nested_dict_iter(cls):
         d = {"a": {"a": {"y": 2}}, "b": {"c": {"a": 5}}, "x": {"a": 6}}
         list(CollectionUtil.nested_dict_iter(d))
+
+
+class TestTypeUtil:
+    @classmethod
+    def test_get_class_names(cls) -> None:
+        test_1_obj = MoreDerived()
+        res = TypeUtil.get_class_mro(test_1_obj)
+        logger.debug(res)
+
+        test_2_obj = Derived
+        res = TypeUtil.get_class_mro(test_2_obj)
+        logger.debug(res)
+
+    @classmethod
+    def test_get_class_tree(cls) -> None:
+        res = inspect.getclasstree(MoreDerived())
+        logger.debug(res)
+
+    @classmethod
+    def test_get_function_info(cls) -> None:
+        def test_func(a: int, b: str, c: int = 1, *args, **kwargs):
+            pass
+
+        res = TypeUtil.get_function_info(test_func)
+        logger.debug(res)
+
+    @classmethod
+    def test_show_function_info(cls) -> None:
+        TypeUtil.show_function_info(StringUtil.get_common_suffix, show_detail=True)
+
+    @classmethod
+    def test_get_class_name(cls) -> None:
+        res = TypeUtil.get_class_name(StringUtil)
+        logger.debug(res)
+
+
+class Base:
+    pass
+
+
+class Derived(Base):
+    pass
+
+
+class MoreDerived(Derived, list):
+    pass
+
+
+class TestUtil:
+    @classmethod
+    def test_desensitize_ipv4(cls) -> None:
+        ipv4 = "192.0.2.1"
+        assert DesensitizedUtil.desensitize_ipv4(ipv4) == "192.*.*.*"
+        assert StringUtil.equals(DesensitizedUtil.desensitize_ipv4(ipv4.encode("utf-8")), "192.*.*.*")
+
+    @classmethod
+    def test_desensitize_ipv6(cls) -> None:
+        ipv6 = "2001:0db8:86a3:08d3:1319:8a2e:0370:7344"
+        assert DesensitizedUtil.desensitize_ipv6(ipv6) == "2001:*:*:*:*:*:*:*"
+        assert StringUtil.equals(DesensitizedUtil.desensitize_ipv6(ipv6.encode("utf-8")), "2001:*:*:*:*:*:*:*")
+
+    @classmethod
+    def test_desensitize_email(cls) -> None:
+        email1 = "duandazhi-jack@gmail.com.cn"
+        assert DesensitizedUtil.desensitize_email(email1) == "d*************@gmail.com.cn"
+        email2 = "duandazhi@126.com"
+        assert StringUtil.equals("d********@126.com", DesensitizedUtil.desensitize_email(email2))
+        email3 = "duandazhi@gmail.com.cn"
+        assert StringUtil.equals("d********@gmail.com.cn", DesensitizedUtil.desensitize_email(email3))
+        assert StringUtil.equals("d********@gmail.com.cn", DesensitizedUtil.desensitize_email(email3.encode("utf-8")))
+        assert StringUtil.equals("", DesensitizedUtil.desensitize_email(""))
+
+    @classmethod
+    def test_desensitize_id_card(cls) -> None:
+        id_card = "51343620000320711X"
+        assert DesensitizedUtil.desensitize_id_card(id_card) == "513436********711X"
+        assert StringUtil.equals(DesensitizedUtil.desensitize_id_card(id_card.encode("utf-8")), "513436********711X")
+
+    @classmethod
+    def test_desensitize_bank_card(cls) -> None:
+        bank_card1 = "1234 2222 3333 4444 6789 9"
+        assert DesensitizedUtil.desensitize_bank_card(bank_card1) == "1234 **** **** **** **** 9"
+        bank_card2 = "1234 **** **** **** **** 91"
+        assert DesensitizedUtil.desensitize_bank_card(bank_card2) == "1234 **** **** **** **** 91"
+        bank_card3 = "1234 2222 3333 4444 6789"
+        assert DesensitizedUtil.desensitize_bank_card(bank_card3) == "1234 **** **** **** 6789"
+        bank_card4 = "1234 2222 3333 4444 678"
+        assert DesensitizedUtil.desensitize_bank_card(bank_card4) == "1234 **** **** **** 678"
+        # bytes
+        assert StringUtil.equals(
+            DesensitizedUtil.desensitize_bank_card(bank_card3.encode("utf-8")), "1234 **** **** **** 6789"
+        )
+        assert StringUtil.equals(DesensitizedUtil.desensitize_bank_card(""), "")
+
+    @classmethod
+    def test_desensitize_mobile_phone(cls) -> None:
+        phone1 = "18049531999"
+        assert StringUtil.equals("180****1999", DesensitizedUtil.desensitize_mobile_phone(phone1))
+        assert StringUtil.equals("180****1999", DesensitizedUtil.desensitize_mobile_phone(phone1.encode("utf-8")))
+
+    @classmethod
+    def test_desensitize_fix_phone(cls) -> None:
+        fix_phone1 = "09157518479"
+        assert StringUtil.equals("091****8479", DesensitizedUtil.desensitize_fix_phone(fix_phone1))
+        assert StringUtil.equals("091****8479", DesensitizedUtil.desensitize_fix_phone(fix_phone1.encode("utf-8")))
+
+    @classmethod
+    def test_desensitize_car_license(cls) -> None:
+        car_license1 = "苏D40000"
+        assert StringUtil.equals("苏D4***0", DesensitizedUtil.desensitize_car_license(car_license1))
+        car_license2 = "陕A12345D"
+        assert StringUtil.equals("陕A1****D", DesensitizedUtil.desensitize_car_license(car_license2))
+        car_license3 = "京A123"
+        with pytest.raises(ValueError) as _:
+            assert StringUtil.equals("京A123", DesensitizedUtil.desensitize_car_license(car_license3))
+
+        assert StringUtil.equals("陕A1****D", DesensitizedUtil.desensitize_car_license(car_license2.encode("utf-8")))
+        assert StringUtil.equals("", DesensitizedUtil.desensitize_car_license(""))
+
+    @classmethod
+    def test_desensitize_address(cls) -> None:
+        address = "北京市海淀区马连洼街道289号"
+        assert StringUtil.equals("北京市海淀区马连洼街*****", DesensitizedUtil.desensitize_address(address, 5))
+        assert StringUtil.equals("***************", DesensitizedUtil.desensitize_address(address, 50))
+        assert StringUtil.equals("北京市海淀区马连洼街道289号", DesensitizedUtil.desensitize_address(address, 0))
+        assert StringUtil.equals("北京市海淀区马连洼街道289号", DesensitizedUtil.desensitize_address(address, -1))
+        # butes
+        assert StringUtil.equals(
+            "北京市海淀区马连洼街道289号", DesensitizedUtil.desensitize_address(address.encode("utf-8"), -1)
+        )
+
+    @classmethod
+    def test_password(cls) -> None:
+        password1 = "password"
+        assert StringUtil.equals("********", DesensitizedUtil.desensitize_password(password1))
+        assert StringUtil.equals("********", DesensitizedUtil.desensitize_password(password1.encode("utf-8")))
+
+    @classmethod
+    def test_desensitize_chineseName(cls) -> None:
+        assert StringUtil.equals("段**", DesensitizedUtil.desensitize_chinese_name("段正淳"))
+        assert StringUtil.equals("张*", DesensitizedUtil.desensitize_chinese_name("张三"))
+
+    @classmethod
+    def test_retain_last(cls) -> None:
+        s = "asdasc"
+        assert StringUtil.equals("*****c", DesensitizedUtil.retain_last(s))
+
+    @classmethod
+    def test_retain_front_and_end(cls) -> None:
+        assert StringUtil.equals("", DesensitizedUtil.retain_front_and_end("", 3, 4))
+        assert StringUtil.equals("", DesensitizedUtil.retain_front_and_end("  ", 3, 4))
+        with pytest.raises(ValueError):
+            assert StringUtil.equals("", DesensitizedUtil.retain_front_and_end("sad", 3, 4))
+
+        with pytest.raises(ValueError):
+            assert StringUtil.equals("", DesensitizedUtil.retain_front_and_end("sad", 3, -1))
+
+    @classmethod
+    def test_desensitize_phone(cls) -> None:
+        phone = "18049531999"
+        assert StringUtil.equals("180****1999", DesensitizedUtil.desensitize_phone(phone))
