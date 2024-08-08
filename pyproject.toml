@@ -5,15 +5,35 @@ description = "Python 常用开发工具类"
 authors = ["pancx <p_lord@163.com>"]
 readme = "README.md"
 
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]  # https://docs.astral.sh/ruff/settings/#lint
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E402",  # module level import not at top of file
+]
+
 [tool.poetry.dependencies]
 python = "^3.11"
 loguru = "^0.7.2"
 pytz = "^2024.1"
 
+[project]
+requires-python = ">=3.11"
+
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.2"
 types-pytz = "^2024.1.0.20240417"
+ruff = "^0.5.6"
 
 [build-system]
 requires = ["poetry-core"]
