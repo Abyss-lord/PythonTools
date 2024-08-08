@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
 """
 -------------------------------------------------
 @File       :   decorator.py
@@ -23,7 +22,7 @@ import warnings
 
 
 # 单例模式装饰器
-class Singleton(object):
+class Singleton:
     """
     单例模式装饰器
 
@@ -48,7 +47,7 @@ class Singleton(object):
         return self.__instance
 
 
-class TraceUsedTime(object):
+class TraceUsedTime:
     """
     Trace used time inside a function.
 
@@ -111,7 +110,7 @@ class TraceUsedTime(object):
         return wrapper
 
 
-class UnCkeckFucntion(object):
+class UnCkeckFucntion:
     WARNING_MEDSAGE = "The function does not validate its arguments, which requires the caller to guarantee that the arguments is valid"
 
     def __init__(self, warning_enabled: bool = True) -> None:

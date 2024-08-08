@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
 """
 -------------------------------------------------
 @File       :   basic_utils.py
@@ -33,9 +32,7 @@ from .decorator import UnCkeckFucntion
 
 class RandomUtil:
     @classmethod
-    def get_random_val_from_range(
-        cls, start: int, end: int, *, both_include: bool = False
-    ) -> int:
+    def get_random_val_from_range(cls, start: int, end: int, *, both_include: bool = False) -> int:
         """
         从给定范围返回随机值
 
@@ -61,16 +58,10 @@ class RandomUtil:
         if start > end:
             raise ValueError(f"{start=} must be less than {end=}")
 
-        return (
-            random.randrange(start, end)
-            if not both_include
-            else random.randint(start, end)
-        )
+        return random.randrange(start, end) if not both_include else random.randint(start, end)
 
     @classmethod
-    def get_random_item_from_sequence(
-        cls, seq: typing.Sequence[Any]
-    ) -> typing.Optional[Any]:
+    def get_random_item_from_sequence(cls, seq: typing.Sequence[Any]) -> Any | None:
         """
         随机从序列中抽取元素
         :param seq: 待抽取序列
@@ -81,9 +72,7 @@ class RandomUtil:
         return random.choice(seq)
 
     @classmethod
-    def get_random_items_from_sequence(
-        cls, seq: typing.Sequence[Any], k: int
-    ) -> typing.List[Any]:
+    def get_random_items_from_sequence(cls, seq: typing.Sequence[Any], k: int) -> list[Any]:
         """
         从给定的序列中随机选择 k 个元素。
         :param seq: 输入的序列, 可以是任何类型的序列（如列表、元组等）。
@@ -102,9 +91,7 @@ class RandomUtil:
         return random.sample(seq, k)
 
     @classmethod
-    def get_random_distinct_items_from_sequence(
-        cls, seq: typing.Sequence[Any], k: int
-    ) -> typing.Set[Any]:
+    def get_random_distinct_items_from_sequence(cls, seq: typing.Sequence[Any], k: int) -> set[Any]:
         """
         随机获得列表中的一定量的不重复元素, 返回Set
 
@@ -130,7 +117,7 @@ class RandomUtil:
         if k > len(seq):
             raise ValueError(f"{k=} must be less than or equal to the length of {seq=}")
 
-        res: typing.Set[Any] = set()
+        res: set[Any] = set()
         cnt = 0
 
         while len(res) < k:
@@ -257,14 +244,10 @@ class RandomUtil:
             随机浮点数生成器
         """
         for _ in range(length):
-            yield cls.get_random_float_with_range_and_precision(
-                start, end, precision=precision
-            )
+            yield cls.get_random_float_with_range_and_precision(start, end, precision=precision)
 
     @classmethod
-    def get_random_float_with_range_and_precision(
-        cls, start: float, end: float, *, precision: int = 3
-    ) -> float:
+    def get_random_float_with_range_and_precision(cls, start: float, end: float, *, precision: int = 3) -> float:
         """
         返回随机浮点数
 
@@ -304,8 +287,8 @@ class RandomUtil:
     @classmethod
     def get_random_complexes_with_range_and_precision(
         cls,
-        real_range: typing.Tuple[float, float],
-        imag_range: typing.Tuple[float, float],
+        real_range: tuple[float, float],
+        imag_range: tuple[float, float],
         *,
         precision: int = 3,
         length: int = 10,
@@ -330,15 +313,13 @@ class RandomUtil:
             随机复数生成器
         """
         for _ in range(length):
-            yield cls.get_random_complex_with_range_and_precision(
-                real_range, imag_range, precision=precision
-            )
+            yield cls.get_random_complex_with_range_and_precision(real_range, imag_range, precision=precision)
 
     @classmethod
     def get_random_complex_with_range_and_precision(
         cls,
-        real_range: typing.Tuple[float, float],
-        imag_range: typing.Tuple[float, float],
+        real_range: tuple[float, float],
+        imag_range: tuple[float, float],
         *,
         precision: int = 3,
     ) -> complex:
@@ -359,12 +340,8 @@ class RandomUtil:
         complex
             随机复数
         """
-        real_part = cls.get_random_float_with_range_and_precision(
-            *real_range, precision=precision
-        )
-        imag_part = cls.get_random_float_with_range_and_precision(
-            *imag_range, precision=precision
-        )
+        real_part = cls.get_random_float_with_range_and_precision(*real_range, precision=precision)
+        imag_part = cls.get_random_float_with_range_and_precision(*imag_range, precision=precision)
 
         return complex(real_part, imag_part)
 
@@ -472,14 +449,14 @@ class RandomUtil:
         return basic_str.capitalize()
 
 
-class CharsetUtil(object):
+class CharsetUtil:
     ISO_8859_1: typing.Final[str] = "ISO-8859-1"
     UTF_8: typing.Final[str] = "UTF-8"
     GBK: typing.Final[str] = "GBK"
 
 
-class BooleanUtil(object):
-    TRUE_SET: typing.FrozenSet[str] = frozenset([
+class BooleanUtil:
+    TRUE_SET: frozenset[str] = frozenset([
         "true",
         "yes",
         "y",
@@ -493,7 +470,7 @@ class BooleanUtil(object):
         "對",
         "√",
     ])
-    FALSE_SET: typing.FrozenSet[str] = frozenset([
+    FALSE_SET: frozenset[str] = frozenset([
         "false",
         "no",
         "n",
@@ -606,9 +583,7 @@ class BooleanUtil(object):
         return cls.to_string(value, "YES", "NO", strict_mode=strict_mode)
 
     @classmethod
-    def to_string(
-        cls, value: bool, true_str: str, false_str: str, *, strict_mode: bool = False
-    ) -> str:
+    def to_string(cls, value: bool, true_str: str, false_str: str, *, strict_mode: bool = False) -> str:
         """
         将boolean转换为字符串
         :param value: Boolean值
@@ -740,7 +715,7 @@ class BooleanUtil(object):
         return bool(value)
 
 
-class SequenceUtil(object):
+class SequenceUtil:
     EMPTY: typing.Final[str] = ""
     SPACE: typing.Final[str] = " "
 
@@ -873,7 +848,7 @@ class SequenceUtil(object):
         return False
 
     @classmethod
-    def new_list(cls, capacity: int, fill_val: Any = None) -> typing.List[Any]:
+    def new_list(cls, capacity: int, fill_val: Any = None) -> list[Any]:
         """
         根据给定容量创建列表
 
@@ -933,9 +908,7 @@ class SequenceUtil(object):
         return len(lst) - old_length
 
     @classmethod
-    def resize(
-        cls, lst: typing.Sequence[Any], new_length: int, *, fill_val: Any = None
-    ) -> typing.Sequence[Any]:
+    def resize(cls, lst: typing.Sequence[Any], new_length: int, *, fill_val: Any = None) -> typing.Sequence[Any]:
         """
         调整序列的长度, 如果新长度小于原长度, 则截断, 如果新长度大于原长度, 则填充默认值。
 
@@ -1101,9 +1074,7 @@ class SequenceUtil(object):
         return lst[idx]
 
     @classmethod
-    def get_first_n_item_from_iter(
-        cls, iterable: typing.Iterable[Any], n: int
-    ) -> typing.Iterable[Any]:
+    def get_first_n_item_from_iter(cls, iterable: typing.Iterable[Any], n: int) -> typing.Iterable[Any]:
         """
         从序列中获取前n个元素
 
@@ -1284,9 +1255,7 @@ class StringUtil(SequenceUtil):
         return True
 
     @classmethod
-    def is_blank(
-        cls, s: typing.Optional[str], *, raise_type_exception: bool = False
-    ) -> bool:
+    def is_blank(cls, s: str | None, *, raise_type_exception: bool = False) -> bool:
         """
         判断给定的字符串是否为空, 空字符串包括null、空字符串: ""、空格、全角空格、制表符、换行符, 等不可见字符, \\n
 
@@ -1490,9 +1459,7 @@ class StringUtil(SequenceUtil):
         return s.endswith(suffix)
 
     @classmethod
-    def is_surround(
-        cls, s: str, prefix: str, suffix: str, case_insensitive: bool = True
-    ) -> bool:
+    def is_surround(cls, s: str, prefix: str, suffix: str, case_insensitive: bool = True) -> bool:
         """
         判断字符串是否由指定前后缀包围
 
@@ -1597,7 +1564,7 @@ class StringUtil(SequenceUtil):
             return s
 
     @classmethod
-    def empty_to_none(cls, s: str) -> typing.Optional[str]:
+    def empty_to_none(cls, s: str) -> str | None:
         """
         当给定字符串为空字符串时, 转换为null
         :param s: 被转换的字符串
@@ -1619,9 +1586,7 @@ class StringUtil(SequenceUtil):
             return s
 
     @classmethod
-    def to_bytes(
-        cls, byte_or_str: typing.Union[bytes, str], encoding=CharsetUtil.UTF_8
-    ) -> bytes:
+    def to_bytes(cls, byte_or_str: bytes | str, encoding=CharsetUtil.UTF_8) -> bytes:
         """
         将字节序列或者字符串转换成字节序列
         :param byte_or_str: 待转换对象
@@ -1635,9 +1600,7 @@ class StringUtil(SequenceUtil):
             return byte_or_str.encode(encoding)
 
     @classmethod
-    def to_str(
-        cls, byte_or_str: typing.Union[bytes, str], encoding=CharsetUtil.UTF_8
-    ) -> str:
+    def to_str(cls, byte_or_str: bytes | str, encoding=CharsetUtil.UTF_8) -> str:
         """
         将字节序列或者字符串转换成字符串
         :param byte_or_str: 待转换对象
@@ -1760,7 +1723,7 @@ class StringUtil(SequenceUtil):
         return "".join(new_str_lst)
 
     @classmethod
-    def get_random_strs(cls, n: int, *, chars: typing.Optional[str] = None) -> str:
+    def get_random_strs(cls, n: int, *, chars: str | None = None) -> str:
         """
         返回给定数量的随机字符串
 
@@ -1827,34 +1790,24 @@ class StringUtil(SequenceUtil):
                 return title + " "
             return title
 
-        def get_max_length_from_dict(
-            data: typing.Mapping[str, Any], level: int = 0
-        ) -> tuple[int, int]:
+        def get_max_length_from_dict(data: typing.Mapping[str, Any], level: int = 0) -> tuple[int, int]:
             max_key_length = 0
             max_value_length = 0
             for key, value in data.items():
                 if isinstance(value, dict):
-                    sub_max_key_length, sub_max_value_length = get_max_length_from_dict(
-                        value, level + 1
-                    )
+                    sub_max_key_length, sub_max_value_length = get_max_length_from_dict(value, level + 1)
                     max_key_length = max(max_key_length, sub_max_key_length)
                     max_value_length = max(max_value_length, sub_max_value_length)
                 elif isinstance(value, list):
                     for item in value:
                         if isinstance(item, dict):
-                            sub_max_key_length, sub_max_value_length = (
-                                get_max_length_from_dict(item, level + 1)
-                            )
+                            sub_max_key_length, sub_max_value_length = get_max_length_from_dict(item, level + 1)
                             max_key_length = max(max_key_length, sub_max_key_length)
-                            max_value_length = max(
-                                max_value_length, sub_max_value_length
-                            )
+                            max_value_length = max(max_value_length, sub_max_value_length)
                         else:
                             raise TypeError(f"Unsupported type: {type(item)}")
                 else:
-                    max_key_length = max(
-                        max_key_length, get_length_with_level(str(key), level)
-                    )
+                    max_key_length = max(max_key_length, get_length_with_level(str(key), level))
                     max_value_length = max(max_value_length, cls.get_width(str(value)))
 
             return max_key_length, max_value_length
@@ -1875,9 +1828,7 @@ class StringUtil(SequenceUtil):
                         if isinstance(item, dict):
                             append_content_lines(v, level + 1)
                         else:
-                            raise TypeError(
-                                f"Unsupported type: {type(item)} in nested dict"
-                            )
+                            raise TypeError(f"Unsupported type: {type(item)} in nested dict")
                 else:
                     _append_content_line(k, v, level)
 
@@ -1902,9 +1853,7 @@ class StringUtil(SequenceUtil):
             if current_value_padding_length > 0:
                 value_padding = " " * current_value_padding_length
 
-            content.append(
-                f"{prefix}{level_padding}{key}{key_padding}{symbol}{value}{value_padding}{sufix}"
-            )
+            content.append(f"{prefix}{level_padding}{key}{key_padding}{symbol}{value}{value_padding}{sufix}")
 
         max_key_length, max_value_length = get_max_length_from_dict(data)
         print(f"{max_key_length=}")
@@ -1917,9 +1866,7 @@ class StringUtil(SequenceUtil):
         padding_length = (box_width - cls.get_width(title) - 2) // 2
 
         # 预生成框的顶部边框
-        top_border = (
-            "+" + "-" * padding_length + f"{title}" + "-" * padding_length + "+"
-        )
+        top_border = "+" + "-" * padding_length + f"{title}" + "-" * padding_length + "+"
 
         # 生成框的内容
         content: list[str] = []
@@ -1931,17 +1878,10 @@ class StringUtil(SequenceUtil):
         bottom_border = "+" + "-" * (box_width - 2) + "+"
 
         # 获取修正值
-        border_modification_length = cls.get_width(bottom_border) - cls.get_width(
-            top_border
-        )
+        border_modification_length = cls.get_width(bottom_border) - cls.get_width(top_border)
         if border_modification_length > 0:
             top_border = (
-                "+"
-                + "-" * border_modification_length
-                + "-" * padding_length
-                + f"{title}"
-                + "-" * padding_length
-                + "+"
+                "+" + "-" * border_modification_length + "-" * padding_length + f"{title}" + "-" * padding_length + "+"
             )
 
         # 合并所有部分
@@ -2032,9 +1972,7 @@ class StringUtil(SequenceUtil):
             如果对齐方式不是 "left", "right" 或 "center", 则抛出异常
         """
         if align not in ["left", "right", "center"]:
-            raise ValueError(
-                f"align must be 'left', 'right' or 'center', but got {align}"
-            )
+            raise ValueError(f"align must be 'left', 'right' or 'center', but got {align}")
         if align in ["left", "right"]:
             return cls._align_text(text, len(text) + 1, padding, align)
         else:
@@ -2090,7 +2028,7 @@ class StringUtil(SequenceUtil):
         return "".join(common_str_lst)
 
     @classmethod
-    def group_by_length(cls, s: str, n: int) -> typing.List[str]:
+    def group_by_length(cls, s: str, n: int) -> list[str]:
         """
         根据制定的长度分组字符串
 
@@ -2148,17 +2086,13 @@ class StringUtil(SequenceUtil):
             res_lst.append(i[::-1])
 
         integer_str = ",".join(res_lst)
-        decimal_str = (
-            "." + decimal_part if StringUtil.is_not_blank(decimal_part) else ""
-        )
+        decimal_str = "." + decimal_part if StringUtil.is_not_blank(decimal_part) else ""
         sign_str = "-" if negative_flg else ""
 
         return f"{sign_str}{integer_str}{decimal_str}"
 
     @classmethod
-    def append_if_missing(
-        cls, s: str, suffix: str, case_insensitive: bool = True
-    ) -> str:
+    def append_if_missing(cls, s: str, suffix: str, case_insensitive: bool = True) -> str:
         """
         如果给定字符串不是以给定的字符串为结尾，则在尾部添加结尾字符串
 
@@ -2258,9 +2192,7 @@ class StringUtil(SequenceUtil):
 
     @classmethod
     @UnCkeckFucntion()
-    def get_roman_range(
-        cls, start: int, end: int, step: int = 1
-    ) -> typing.Generator[str, None, None]:
+    def get_roman_range(cls, start: int, end: int, step: int = 1) -> typing.Generator[str, None, None]:
         """
         跟 range 函数一样生成罗马数字序列
 
@@ -2361,9 +2293,7 @@ class StringUtil(SequenceUtil):
             return s
 
     @classmethod
-    def _align_text(
-        cls, text: str, width: int, padding: str = " ", align: str = "left"
-    ) -> str:
+    def _align_text(cls, text: str, width: int, padding: str = " ", align: str = "left") -> str:
         if align == "left":
             return text.rjust(width, padding)
         elif align == "right":
@@ -2372,7 +2302,7 @@ class StringUtil(SequenceUtil):
             return text.center(width, padding)
 
 
-class DatetimeUtil(object):
+class DatetimeUtil:
     wtb = [
         "sun",
         "mon",
@@ -2580,9 +2510,7 @@ class DatetimeUtil(object):
         return tz
 
     @classmethod
-    def get_random_date(
-        cls, start: typing.Optional[date] = None, end: typing.Optional[date] = None
-    ) -> date:
+    def get_random_date(cls, start: date | None = None, end: date | None = None) -> date:
         """
         返回随机日期
 
@@ -2611,8 +2539,8 @@ class DatetimeUtil(object):
     @classmethod
     def get_random_datetime(
         cls,
-        start: typing.Optional[datetime] = None,
-        end: typing.Optional[datetime] = None,
+        start: datetime | None = None,
+        end: datetime | None = None,
         *,
         random_tz: bool = False,
     ) -> datetime:
@@ -2621,7 +2549,8 @@ class DatetimeUtil(object):
 
         *Example*
 
-        >>> cls.get_random_datetime(random_tz=True) # datetime.datetime(1947, 12, 21, 9, 9, 39, tzinfo=<DstTzInfo 'Kwajalein' LMT+11:09:00 STD>)
+        >>> cls.get_random_datetime(random_tz=True)
+        datetime.datetime(1947, 12, 21, 9, 9, 39, tzinfo=<DstTzInfo 'Kwajalein' LMT+11:09:00 STD>)
         >>> cls.get_random_datetime() # datetime.datetime(1981, 7, 28, 13, 14, 35)
         >>> cls.get_random_datetime(random_tz=False) # datetime.datetime(1947, 12, 21, 9, 9, 39)
 
@@ -2643,9 +2572,7 @@ class DatetimeUtil(object):
         random_second = RandomUtil.get_random_val_from_range(0, 60)
 
         # 拼接 datetime 对象
-        random_datetime = random_datetime.replace(
-            hour=random_hour, minute=random_minute, second=random_second
-        )
+        random_datetime = random_datetime.replace(hour=random_hour, minute=random_minute, second=random_second)
         if random_tz:
             tz_info = cls.get_random_tz()
             random_datetime = random_datetime.replace(tzinfo=tz_info)
@@ -2713,9 +2640,7 @@ class DatetimeUtil(object):
         return days_in_month
 
     @classmethod
-    def get_age(
-        cls, birthday: datetime, *, use_float_format: bool = False
-    ) -> typing.Union[int, float]:
+    def get_age(cls, birthday: datetime, *, use_float_format: bool = False) -> int | float:
         """
         根据给定生日返回年龄
         :param birthday: 给定生日
@@ -2740,9 +2665,7 @@ class DatetimeUtil(object):
         # birth_dt_with_fix_year = datetime(9999, birthday.month, birthday.day)
         # now_dt_with_fix_year = datetime(9999, now.month, now.day)
 
-        if birthday.month > now.month or (
-            birthday.month == now.month and birthday.day > now.day
-        ):
+        if birthday.month > now.month or (birthday.month == now.month and birthday.day > now.day):
             age -= 1
 
         return age
@@ -2783,22 +2706,18 @@ class DatetimeUtil(object):
         return res_dt.strftime("%H:%M:%S")
 
     @classmethod
-    def conver_time(
-        cls, value: int, from_unit: TimeUnit, to_unit: TimeUnit
-    ) -> int | float:
+    def conver_time(cls, value: int, from_unit: TimeUnit, to_unit: TimeUnit) -> int | float:
         if value is None:
             raise ValueError("value cannot be None")
 
         return value * from_unit.value.unit_val_in_ns / to_unit.value.unit_val_in_ns
 
 
-class RadixUtil(object):
+class RadixUtil:
     ZERO = "0"
 
     @classmethod
-    def convert_base(
-        cls, num: typing.Union[int, str], from_base: int, to_base: int
-    ) -> str:
+    def convert_base(cls, num: int | str, from_base: int, to_base: int) -> str:
         """
         进制转换
 
@@ -2817,7 +2736,7 @@ class RadixUtil(object):
             转换后的字符串
         """
 
-        def to_decimal(num: typing.Union[int, str], from_base: int) -> int:
+        def to_decimal(num: int | str, from_base: int) -> int:
             if isinstance(num, int):
                 return num
             return int(num, base=from_base)
@@ -2831,9 +2750,7 @@ class RadixUtil(object):
                 num //= base
             # PERF 倒转字符串效率低, 应该优化
             digits.reverse()
-            return "".join(
-                map(lambda x: str(x) if int(x) < 10 else chr(int(x) + 55), digits)
-            )
+            return "".join(map(lambda x: str(x) if int(x) < 10 else chr(int(x) + 55), digits))
 
         decimal_val = to_decimal(num, from_base)
         return from_decimal(decimal_val, to_base)

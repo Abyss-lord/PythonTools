@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
 """
 -------------------------------------------------
 @File       :   constant.py
@@ -31,12 +30,8 @@ QuarterTuple = namedtuple(
     ],
 )
 TimeUnitTuple = namedtuple("TimeUnitTuple", ["desc", "unit_val_in_ns"])
-WeekTuple = namedtuple(
-    "WeekTuple", ["name", "chinese_name", "alias", "calendar_value", "iso8601_value"]
-)
-MonthTuple = namedtuple(
-    "MonthTuple", ["name", "chinese_name", "alias", "calendar_value"]
-)
+WeekTuple = namedtuple("WeekTuple", ["name", "chinese_name", "alias", "calendar_value", "iso8601_value"])
+MonthTuple = namedtuple("MonthTuple", ["name", "chinese_name", "alias", "calendar_value"])
 
 
 class Quarter(Enum):
@@ -71,42 +66,22 @@ class TimeUnit(Enum):
         return duration * self.value.unit_val_in_ns
 
     def to_micros(self, duration: int) -> int:
-        return (
-            duration
-            * self.value.unit_val_in_ns
-            // TimeUnit.MICROSECONDS.value.unit_val_in_ns
-        )
+        return duration * self.value.unit_val_in_ns // TimeUnit.MICROSECONDS.value.unit_val_in_ns
 
     def to_millis(self, duration: int) -> int:
-        return (
-            duration
-            * self.value.unit_val_in_ns
-            // TimeUnit.MILLISECONDS.value.unit_val_in_ns
-        )
+        return duration * self.value.unit_val_in_ns // TimeUnit.MILLISECONDS.value.unit_val_in_ns
 
     def to_seconds(self, duration: int) -> int:
-        return (
-            duration
-            * self.value.unit_val_in_ns
-            // TimeUnit.SECONDS.value.unit_val_in_ns
-        )
+        return duration * self.value.unit_val_in_ns // TimeUnit.SECONDS.value.unit_val_in_ns
 
     def to_minutes(self, duration: int) -> int:
-        return (
-            duration
-            * self.value.unit_val_in_ns
-            // TimeUnit.MINUTES.value.unit_val_in_ns
-        )
+        return duration * self.value.unit_val_in_ns // TimeUnit.MINUTES.value.unit_val_in_ns
 
     def to_hours(self, duration: int) -> int:
-        return (
-            duration * self.value.unit_val_in_ns // TimeUnit.HOURS.value.unit_val_in_ns
-        )
+        return duration * self.value.unit_val_in_ns // TimeUnit.HOURS.value.unit_val_in_ns
 
     def to_days(self, duration: int) -> int:
-        return (
-            duration * self.value.unit_val_in_ns // TimeUnit.DAYS.value.unit_val_in_ns
-        )
+        return duration * self.value.unit_val_in_ns // TimeUnit.DAYS.value.unit_val_in_ns
 
 
 class Week(Enum):

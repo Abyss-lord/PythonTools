@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
 """
 -------------------------------------------------
 @File       :   exception_util.py
@@ -16,7 +15,7 @@ Change Activity:
 # here put the import lib
 
 
-class ExceptionUtil(object):
+class ExceptionUtil:
     @classmethod
     def get_exception_message(cls, e) -> str:
         return str(e)

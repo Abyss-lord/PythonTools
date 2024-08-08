@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
 """
 -------------------------------------------------
 @File       :   basicvalidator.py
@@ -17,13 +16,12 @@ Change Activity:
 # here put the import lib
 import typing
 import unicodedata
-from typing import Union
 
 from ..pattern_pool import PatternPool
 from ..reutils import ReUtil
 
 
-class BasicValidator(object):
+class BasicValidator:
     FLOAT_CALCULATE_THREHOLD = 1e-7
 
     @classmethod
@@ -161,7 +159,7 @@ class BasicValidator(object):
         return not cls.is_chinese_integer_num(value)
 
     @classmethod
-    def is_two_num_equal(cls, num1: Union[int, float], num2: Union[int, float]) -> bool:
+    def is_two_num_equal(cls, num1: int | float, num2: int | float) -> bool:
         """
         判断两个数字是否相等, 允许误差范围为1e-7
 
@@ -216,9 +214,9 @@ class BasicValidator(object):
     @classmethod
     def is_between(
         cls,
-        val: Union[int, float],
-        min_val: Union[int, float],
-        max_val: Union[int, float],
+        val: int | float,
+        min_val: int | float,
+        max_val: int | float,
         *,
         raise_exception: bool = False,
     ) -> bool:

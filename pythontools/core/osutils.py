@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
 """
 -------------------------------------------------
 @File       :   osutils.py
@@ -26,7 +25,7 @@ from operator import eq
 from .basicutils import StringUtil
 
 
-class OsUtil(object):
+class OsUtil:
     @classmethod
     def is_exist(cls, p: str, *, raise_exception: bool = False) -> bool:
         """
@@ -219,9 +218,7 @@ class OsUtil(object):
         return format_time
 
     @classmethod
-    def list_dirs(
-        cls, p: str, ignore_hidden_dir: bool = True, *, check_exist: bool = False
-    ) -> typing.List[str]:
+    def list_dirs(cls, p: str, ignore_hidden_dir: bool = True, *, check_exist: bool = False) -> list[str]:
         """
         返回一个文件夹中的所有文件夹
 
@@ -259,7 +256,7 @@ class OsUtil(object):
         *,
         check_exist: bool = False,
         ignore_hidden_dir: bool = True,
-    ) -> typing.List[str]:
+    ) -> list[str]:
         """
         返回给定路径下的所有文件
 
@@ -323,9 +320,7 @@ class OsUtil(object):
         return extension
 
     @classmethod
-    def is_match_extension(
-        cls, p: str, extension: str, *, check_exist: bool = False
-    ) -> bool:
+    def is_match_extension(cls, p: str, extension: str, *, check_exist: bool = False) -> bool:
         """
         判断给定的文件路径是否与给定的扩展名匹配
 
@@ -358,9 +353,7 @@ class OsUtil(object):
         return eq(file_extension, extension) or eq(file_extension, "." + extension)
 
     @classmethod
-    def get_file_from_dir_by_extension(
-        cls, p: str, *, extension: str = "sql"
-    ) -> typing.List[str]:
+    def get_file_from_dir_by_extension(cls, p: str, *, extension: str = "sql") -> list[str]:
         """
         返回给定的扩展名匹配的文件
         :param p:  给定路径
@@ -385,14 +378,14 @@ class OsUtil(object):
         int
             行数
         """
-        with open(f, "r") as f_obj:
+        with open(f) as f_obj:
             i = -1
             for i, _ in enumerate(f_obj):
                 pass
         return i + 1
 
 
-class SysUtil(object):
+class SysUtil:
     @classmethod
     def get_platform_info(cls) -> str:
         """
@@ -506,9 +499,7 @@ class SysUtil(object):
             return False
 
     @classmethod
-    def get_system_property(
-        cls, name: str, default_value: str = "", *, quiet: bool = False
-    ) -> typing.Any:
+    def get_system_property(cls, name: str, default_value: str = "", *, quiet: bool = False) -> typing.Any:
         """
         获取指定名称的系统变量
 
@@ -530,14 +521,12 @@ class SysUtil(object):
             res = os.getenv(name)
         except Exception as e:
             if not quiet:
-                warnings.warn(
-                    f"get system property {name} error: {e}, will return default value, {default_value}"
-                )
+                warnings.warn(f"get system property {name} error: {e}, will return default value, {default_value}")
         else:
             return res if res is not None else default_value
 
     @classmethod
-    def get_system_properties(cls, quiet: bool = False) -> typing.Dict[str, str]:
+    def get_system_properties(cls, quiet: bool = False) -> dict[str, str]:
         """
         获取所有的系统变量
 

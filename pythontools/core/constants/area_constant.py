@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
 """
 -------------------------------------------------
 @File       :   area_constant.py
@@ -15,9 +14,8 @@ Change Activity:
 """
 
 # here put the import lib
-import typing
 
-PRO_DICT: typing.Dict[str, str] = {
+PRO_DICT: dict[str, str] = {
     "11": "北京",
     "12": "天津",
     "13": "河北",

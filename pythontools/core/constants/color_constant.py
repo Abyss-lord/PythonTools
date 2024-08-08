@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
 """
 -------------------------------------------------
 @File       :   color_constant.py
@@ -64,11 +63,7 @@ class Color:
     def __eq__(self, other) -> bool:
         if not isinstance(other, Color):
             return False
-        return (
-            self._red == other._red
-            and self._green == other._green
-            and self._blue == other._blue
-        )
+        return self._red == other._red and self._green == other._green and self._blue == other._blue
 
     def __repr__(self) -> str:
         return f"Color({self._red}, {self._green}, {self._blue})"

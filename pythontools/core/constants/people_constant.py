@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
 """
 -------------------------------------------------
 @File       :   people_constant.py
@@ -15,15 +14,14 @@ Change Activity:
 """
 
 # here put the import lib
-import typing
 from collections import namedtuple
 from enum import Enum
 
 Person = namedtuple("Person", ["sex", "sex_code"])
 
 
-MALE_SET: typing.FrozenSet[str] = frozenset(["MALE", "male", "男性", "男", "男的"])
-FEMALE_SET: typing.FrozenSet[str] = frozenset([
+MALE_SET: frozenset[str] = frozenset(["MALE", "male", "男性", "男", "男的"])
+FEMALE_SET: frozenset[str] = frozenset([
     "FEMALE",
     "female",
     "女性",

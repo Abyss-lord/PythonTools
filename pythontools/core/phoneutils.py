@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
 """
 -------------------------------------------------
 @File       :   phoneutils.py
@@ -141,12 +140,7 @@ class PhoneUtils:
         bool
             是否是有效的手机号码
         """
-        return (
-            cls.is_mobile_hk(phone)
-            or cls.is_mobile_tw(phone)
-            or cls.is_mobile_mo(phone)
-            or cls.is_mobile(phone)
-        )
+        return cls.is_mobile_hk(phone) or cls.is_mobile_tw(phone) or cls.is_mobile_mo(phone) or cls.is_mobile(phone)
 
     @classmethod
     @UnCkeckFucntion(WARNING_ENABLED)

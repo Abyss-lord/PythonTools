@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
 """
 -------------------------------------------------
 @File       :   zodiac.py
@@ -22,7 +21,7 @@ from ..decorator import UnCkeckFucntion
 WARNING_ENABLED = True
 
 
-class Zodiac(object):
+class Zodiac:
     DAY_ARR = [20, 19, 21, 20, 21, 22, 23, 23, 23, 24, 23, 22]
     ZODIACS = [
         "摩羯座",
@@ -73,9 +72,7 @@ class Zodiac(object):
             给定日期所属的星座
         """
 
-        return (
-            cls.ZODIACS[month] if day < cls.DAY_ARR[month] else cls.ZODIACS[month + 1]
-        )
+        return cls.ZODIACS[month] if day < cls.DAY_ARR[month] else cls.ZODIACS[month + 1]
 
     @classmethod
     def get_zodiac_by_date(cls, dt: date) -> str:

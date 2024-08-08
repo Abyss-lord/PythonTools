@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
 """
 -------------------------------------------------
 @File       :   structures.py
@@ -16,7 +15,7 @@ Change Activity:
 # here put the import lib
 
 from collections.abc import Mapping
-from typing import Any, Optional
+from typing import Any
 
 __all__ = ["ImmutableDict"]
 
@@ -49,7 +48,7 @@ class ImmutableDict(Mapping):
     def __len__(self):
         return len(self._data)
 
-    def get(self, key, default=None) -> Optional[Any]:
+    def get(self, key, default=None) -> Any | None:
         return self._data.get(key, default)
 
 

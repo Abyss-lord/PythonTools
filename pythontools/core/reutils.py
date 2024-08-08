@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
 """
 -------------------------------------------------
 @File       :   reutils.py
@@ -16,14 +15,13 @@ Change Activity:
 
 # here put the import lib
 import re
-import typing
 
 from .basicutils import SequenceUtil, StringUtil
 from .errors import ValidationError
 from .pattern_pool import RegexPool
 
 
-class ReUtil(object):
+class ReUtil:
     # 正则表达式匹配中文汉字
     RE_CHINESE = RegexPool.CHINESE
     # 正则表达式匹配中文字符串
@@ -51,7 +49,7 @@ class ReUtil(object):
     }
 
     @classmethod
-    def get_group_1(cls, pattern: re.Pattern, s: str) -> typing.Optional[str]:
+    def get_group_1(cls, pattern: re.Pattern, s: str) -> str | None:
         """
         获取匹配的第一个分组
 
@@ -75,7 +73,7 @@ class ReUtil(object):
         return cls.get_matched_group_by_idx(pattern, s, 0)
 
     @classmethod
-    def get_group_2(cls, pattern: re.Pattern, s: str) -> typing.Optional[str]:
+    def get_group_2(cls, pattern: re.Pattern, s: str) -> str | None:
         """
         获取匹配的第二个分组
 
@@ -104,7 +102,7 @@ class ReUtil(object):
         pattern: re.Pattern,
         s: str,
         group_index: int = 0,
-    ) -> typing.Optional[str]:
+    ) -> str | None:
         """
         获取指定的分组
 
@@ -133,7 +131,7 @@ class ReUtil(object):
         return SequenceUtil.get_item_by_idx(res, group_index)
 
     @classmethod
-    def get_matched_groups(cls, pattern: re.Pattern, s: str) -> typing.Tuple[str, ...]:
+    def get_matched_groups(cls, pattern: re.Pattern, s: str) -> tuple[str, ...]:
         """
         获取所有匹配的分组
 
@@ -155,9 +153,7 @@ class ReUtil(object):
         return matched.groups()
 
     @classmethod
-    def is_match(
-        cls, pattern: re.Pattern, s: str, *, raise_exception: bool = False
-    ) -> bool:
+    def is_match(cls, pattern: re.Pattern, s: str, *, raise_exception: bool = False) -> bool:
         """
         检查是否匹配
 

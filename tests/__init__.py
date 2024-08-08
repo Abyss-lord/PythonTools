@@ -1,12 +1,15 @@
 #!/usr/bin/env python
-# -*- coding:utf-8 -*-
 """
 -------------------------------------------------
-   File Name：     __init__.py
-   Description :
-   date：          2024/7/16
+@File       :   __init__.py
+@Date       :   2024/08/08
+@Desc       :   None
+@Version    :   1.0
 -------------------------------------------------
-   Change Activity:
-                   2024/7/16:
+Change Activity:
+@Date       :   2024/08/08
+@Author     :   Plord117
+@Desc       :   None
 -------------------------------------------------
 """
+# here put the import lib

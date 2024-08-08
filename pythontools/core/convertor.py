@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
 """
 -------------------------------------------------
 @File       :   convertor.py
@@ -15,15 +14,12 @@ Change Activity:
 """
 # here put the import lib
 
-import typing
 from typing import Any
 
 
 class BasicConvertor:
     @classmethod
-    def to_complex(
-        cls, value: Any, default_val: int = 0, *, strict_mode: bool = False
-    ) -> complex:
+    def to_complex(cls, value: Any, default_val: int = 0, *, strict_mode: bool = False) -> complex:
         """
 
         :param value: 待转换参数
@@ -34,9 +30,7 @@ class BasicConvertor:
         return complex(value, value)
 
     @classmethod
-    def to_int(
-        cls, value: Any, default_val: int = 0, *, strict_mode: bool = False
-    ) -> typing.Optional[int]:
+    def to_int(cls, value: Any, default_val: int = 0, *, strict_mode: bool = False) -> int | None:
         """
         转换为int
         :param value: 待转换参数
@@ -49,9 +43,7 @@ class BasicConvertor:
         return int(cls.to_float(value))
 
     @classmethod
-    def to_float(
-        cls, value: Any, default_val: str = "", *, strict_mode: bool = False
-    ) -> float:
+    def to_float(cls, value: Any, default_val: str = "", *, strict_mode: bool = False) -> float:
         """
         转换为Float
         :param value: 待转换的值
@@ -62,16 +54,12 @@ class BasicConvertor:
         return float(value)
 
     @classmethod
-    def to_number(
-        cls, value: Any, default_val: int = 0, *, strict_mode: bool = False
-    ) -> typing.Union[int, float]:
+    def to_number(cls, value: Any, default_val: int = 0, *, strict_mode: bool = False) -> int | float:
         # TODO 待实现
         return 1
 
     @classmethod
-    def to_bool(
-        cls, value: Any, default_val: bool = False, *, strict_mode: bool = False
-    ) -> bool:
+    def to_bool(cls, value: Any, default_val: bool = False, *, strict_mode: bool = False) -> bool:
         """
         转换为布尔值
         :param value: 待转换的值
@@ -82,9 +70,7 @@ class BasicConvertor:
         return bool(value)
 
     @classmethod
-    def to_str(
-        cls, value: Any, default_val: str = "", *, strict_mode: bool = False
-    ) -> str:
+    def to_str(cls, value: Any, default_val: str = "", *, strict_mode: bool = False) -> str:
         """
         转换为字符串值
         :param value: 待转换的值

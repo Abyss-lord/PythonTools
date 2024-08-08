@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
 """
 -------------------------------------------------
 @File       :   collectionutil.py
@@ -18,14 +17,12 @@ Change Activity:
 import itertools as it
 import typing
 from collections import abc
-from typing import Any, Dict, List, Set, Tuple
+from typing import Any
 
 
 class CollectionUtil:
     @classmethod
-    def nested_dict_iter(
-        cls, nested_dict: typing.Mapping[Any, Any]
-    ) -> typing.Generator[Any, Any, Any]:
+    def nested_dict_iter(cls, nested_dict: typing.Mapping[Any, Any]) -> typing.Generator[Any, Any, Any]:
         """
         返回嵌套字典最深层及的键值对
 
@@ -57,9 +54,7 @@ class CollectionUtil:
                 yield key, value
 
     @classmethod
-    def get_powerset(
-        cls, iterable: typing.Iterable
-    ) -> typing.Generator[it.chain, Any, Any]:
+    def get_powerset(cls, iterable: typing.Iterable) -> typing.Generator[it.chain, Any, Any]:
         """
         返回iterable的幂集
 

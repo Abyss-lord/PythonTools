@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
 """
 -------------------------------------------------
 @File       :   validator.py
@@ -24,7 +23,7 @@ from ..convertor import BasicConvertor
 from ..pattern_pool import PatternPool
 
 
-class DatetimeValidator(object):
+class DatetimeValidator:
     @classmethod
     def is_valid_birthday(cls, birthday: str) -> bool:
         """

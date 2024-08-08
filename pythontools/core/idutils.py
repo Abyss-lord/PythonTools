@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
 """
 -------------------------------------------------
 @File       :   idutils.py
@@ -27,12 +26,12 @@ from .pattern_pool import PatternPool
 from .validators.datetime_validator import DatetimeValidator
 
 
-class IDCard(object):
+class IDCard:
     def __init__(self, id: str):
         self.id: str = id
         self.province_code: str = BasicConvertor.to_str(StringUtil.sub_lst(id, 0, 2))
         self.area_code: str = BasicConvertor.to_str(StringUtil.sub_lst(id, 0, 6))
-        self.birthday: typing.Optional[datetime] = IDCardUtil.get_birthday_from_id(id)
+        self.birthday: datetime | None = IDCardUtil.get_birthday_from_id(id)
 
     def __repr__(self) -> str:
         return (
@@ -95,12 +94,12 @@ class IDCard(object):
         return AREA_INFO.get(self.area_code)
 
 
-class IDCardUtil(object):
+class IDCardUtil:
     # 最小身份证位数
     CHINA_ID_MIN_LENGTH: typing.Final[int] = 15
     # 最长身份证位数
     CHINA_ID_MAX_LENGTH: typing.Final[int] = 18
-    AREA_LST: typing.List[str] = list(AREA_INFO.keys())
+    AREA_LST: list[str] = list(AREA_INFO.keys())
 
     @classmethod
     def generate_random_valid_card(cls, gender: str = "男") -> IDCard:
@@ -118,15 +117,11 @@ class IDCardUtil(object):
             身份证实例
         """
         default_code_length = 18
-        random_id = cls.generate_random_valid_id(
-            code_length=default_code_length, gender=gender
-        )
+        random_id = cls.generate_random_valid_id(code_length=default_code_length, gender=gender)
         return cls.get_card_from_id(random_id)
 
     @classmethod
-    def generate_random_valid_id(
-        cls, *, code_length: int = 18, gender: str = "男"
-    ) -> str:
+    def generate_random_valid_id(cls, *, code_length: int = 18, gender: str = "男") -> str:
         """
         获取随机ID
 
@@ -300,7 +295,7 @@ class IDCardUtil(object):
             return "X"
 
     @classmethod
-    def get_birthday_from_id(cls, s: str) -> typing.Optional[datetime]:
+    def get_birthday_from_id(cls, s: str) -> datetime | None:
         """
         从 ID 获取生日 datetime 对象
 
