@@ -111,6 +111,8 @@ class Week(Enum):
         else:
             raise TypeError("name must be int or str")
 
+        return None
+
     def get_value(self) -> int:
         return self.value.calendar_value
 
@@ -191,6 +193,8 @@ class Month(Enum):
                     return month_obj
         else:
             raise TypeError("name must be int or str")
+
+        return None
 
     def get_value(self) -> int:
         return self.value.calendar_value
