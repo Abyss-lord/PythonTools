@@ -1687,6 +1687,70 @@ class StringUtil(SequenceUtil):
         return s.ljust(length, fill_char)
 
     @classmethod
+    def sub_before(cls, s: str, separator: str, use_last_separator: bool = False) -> str:
+        """
+        截取分隔字符串之前的字符串，不包括分隔字符串本身。
+
+        Parameters
+        ----------
+        s : str
+            被查找的字符串
+        separator : str
+            分隔字符串
+        use_last_separator : bool, optional
+            是否查找最后一个分隔字符串（多次出现分隔字符串时选取最后一个）, by default False
+
+        Returns
+        -------
+        str
+            切割后的字符串
+        """
+        if cls.is_blank(s):
+            return cls.EMPTY
+
+        if cls.is_blank(separator):
+            return s
+
+        try:
+            separator_idx = s.index(separator) if not use_last_separator else s.rindex(separator)
+        except ValueError:
+            return s
+        else:
+            return s[:separator_idx]
+
+    @classmethod
+    def sub_after(cls, s: str, separator: str, use_last_separator: bool = False) -> str:
+        """
+        截取分隔字符串之后的字符串，不包括分隔字符串本身。
+
+        Parameters
+        ----------
+        s : str
+            被查找的字符串
+        separator : str
+            分隔字符串
+        use_last_separator : bool, optional
+            是否查找最后一个分隔字符串（多次出现分隔字符串时选取最后一个）, by default False
+
+        Returns
+        -------
+        str
+            切割后的字符串
+        """
+        if cls.is_blank(s):
+            return cls.EMPTY
+
+        if cls.is_blank(separator):
+            return s
+
+        try:
+            separator_idx = s.index(separator) if not use_last_separator else s.rindex(separator)
+        except ValueError:
+            return s
+        else:
+            return s[separator_idx + 1 :]
+
+    @classmethod
     def get_center_msg(cls, s: str, fill_char: str, length: int) -> str:
         """
         获取打印信息, 信息左右两侧由指定字符填充
