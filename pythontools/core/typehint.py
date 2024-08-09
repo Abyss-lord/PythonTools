@@ -19,4 +19,6 @@ from typing import TypeAlias, TypeVar
 # here put the import lib
 StrOrBytesPath: TypeAlias = str | bytes | PathLike[str] | PathLike[bytes]
 FileDescriptorOrPath: TypeAlias = int | StrOrBytesPath
+PrimitiveType: TypeAlias = int | float | str | bool | bytes | bytearray | memoryview
+ContainerType: TypeAlias = list | tuple | set | frozenset | dict
 T = TypeVar("T")

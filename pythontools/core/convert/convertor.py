@@ -16,8 +16,12 @@ Change Activity:
 
 from typing import Any
 
+from .convert_factory import ConvertFactory
+
 
 class BasicConvertor:
+    FACTORY = ConvertFactory()
+
     @classmethod
     def to_complex(cls, value: Any, default_val: int = 0, *, strict_mode: bool = False) -> complex:
         """
@@ -70,5 +74,16 @@ class BasicConvertor:
         return bool(value)
 
     @classmethod
-    def to_str(cls, value: Any, default_val: str = "", *, strict_mode: bool = False) -> str:
-        return f"{value}"
+    def to_str(cls, value: Any, default_val: str = "", *, raise_exception: bool = False) -> str:
+        if not raise_exception:
+            return cls.convert_quietly(str, value, default_val)
+        else:
+            return cls.convert(str, value, default_val)
+
+    @classmethod
+    def convert_quietly(cls, t: type, value: Any, default_val: Any = None) -> Any:
+        return cls.FACTORY.convert(t, value, default_val, raise_exception=False)
+
+    @classmethod
+    def convert(cls, t: type, value: Any, default_val: Any = None) -> Any:
+        return cls.FACTORY.convert(t, value, default_val, raise_exception=False)
