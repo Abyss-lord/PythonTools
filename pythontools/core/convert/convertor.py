@@ -71,11 +71,4 @@ class BasicConvertor:
 
     @classmethod
     def to_str(cls, value: Any, default_val: str = "", *, strict_mode: bool = False) -> str:
-        """
-        转换为字符串值
-        :param value: 待转换的值
-        :param default_val: 转换失败的默认值
-        :param strict_mode: 是否启用严格模式, 严格模式的情况下, 转换失败就会直接报错, 否则转换失败的情况返回默认值
-        :return: 如果入参是None, 则返回None, 否则返回转换后的字符串
-        """
         return f"{value}"
