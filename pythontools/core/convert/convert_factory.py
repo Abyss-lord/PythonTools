@@ -18,7 +18,7 @@ from collections.abc import Mapping
 from typing import Any
 
 from ..decorator import Singleton
-from .converters import Converter, StringConverter
+from .converters import BooleanConverter, Converter, FloatConverter, IntegerConverter, StringConverter
 
 
 @Singleton
@@ -30,6 +30,9 @@ class ConvertFactory:
 
     def __initialize(self):
         self.converter_dict[str] = StringConverter()
+        self.converter_dict[int] = IntegerConverter()
+        self.converter_dict[float] = FloatConverter()
+        self.converter_dict[bool] = BooleanConverter()
 
     def convert(
         self, target_type: type, value: Any, default_value: Any, raise_exception: bool

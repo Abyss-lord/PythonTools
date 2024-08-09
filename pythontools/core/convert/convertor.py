@@ -20,7 +20,7 @@ from .convert_factory import ConvertFactory
 
 
 class BasicConvertor:
-    FACTORY = ConvertFactory()
+    FACTORY: ConvertFactory = ConvertFactory()
 
     @classmethod
     def to_complex(cls, value: Any, default_val: int = 0, *, strict_mode: bool = False) -> complex:
@@ -34,44 +34,36 @@ class BasicConvertor:
         return complex(value, value)
 
     @classmethod
-    def to_int(cls, value: Any, default_val: int = 0, *, strict_mode: bool = False) -> int | None:
-        """
-        转换为int
-        :param value: 待转换参数
-        :param default_val: 转换失败的默认值
-        :param strict_mode: 是否启用严格模式, 严格模式的情况下, 转换失败就会直接报错, 否则转换失败的情况返回默认值
-        :return: 如果入参是None, 则返回None, 否则返回转换后的INT值
-        """
-        if value is None:
-            return None
-        return int(cls.to_float(value))
+    def to_int(cls, value: Any, default_val: int = 0, *, raise_exception: bool = False) -> int:
+        if not raise_exception:
+            return cls.convert_quietly(int, value, default_val)
+        else:
+            return cls.convert(int, value, default_val)
 
     @classmethod
-    def to_float(cls, value: Any, default_val: str = "", *, strict_mode: bool = False) -> float:
-        """
-        转换为Float
-        :param value: 待转换的值
-        :param default_val: 转换失败的默认值
-        :param strict_mode: 是否启用严格模式, 严格模式的情况下, 转换失败就会直接报错, 否则转换失败的情况返回默认值
-        :return: 如果入参是None, 则返回None, 否则返回转换后的浮点数
-        """
-        return float(value)
+    def to_float(cls, value: Any, default_val: float = 0.0, *, raise_exception: bool = False) -> float:
+        if not raise_exception:
+            return cls.convert_quietly(float, value, default_val)
+        else:
+            return cls.convert(float, value, default_val)
 
     @classmethod
-    def to_number(cls, value: Any, default_val: int = 0, *, strict_mode: bool = False) -> int | float:
-        # TODO 实现转换数字逻辑
-        return 1
+    def to_number(cls, value: Any, default_val: int | float, *, raise_exception: bool = False) -> int | float:
+        int_convert_result = cls.to_int(value, -1, raise_exception=raise_exception)
+        float_convert_result = cls.to_float(value, float("inf"), raise_exception=raise_exception)
+        if float_convert_result == float("inf") and int_convert_result == -1:
+            return default_val
+        elif float_convert_result == float("inf"):
+            return int_convert_result
+        else:
+            return float_convert_result
 
     @classmethod
-    def to_bool(cls, value: Any, default_val: bool = False, *, strict_mode: bool = False) -> bool:
-        """
-        转换为布尔值
-        :param value: 待转换的值
-        :param default_val: 转换失败的默认值
-        :param strict_mode: 是否启用严格模式, 严格模式的情况下, 转换失败就会直接报错, 否则转换失败的情况返回默认值
-        :return: 如果入参是None, 则返回None, 否则返回转换后的布尔值
-        """
-        return bool(value)
+    def to_bool(cls, value: Any, default_val: bool = False, *, raise_exception: bool = False) -> bool:
+        if not raise_exception:
+            return cls.convert_quietly(bool, value, default_val)
+        else:
+            return cls.convert(bool, value, default_val)
 
     @classmethod
     def to_str(cls, value: Any, default_val: str = "", *, raise_exception: bool = False) -> str:
@@ -86,4 +78,4 @@ class BasicConvertor:
 
     @classmethod
     def convert(cls, t: type, value: Any, default_val: Any = None) -> Any:
-        return cls.FACTORY.convert(t, value, default_val, raise_exception=False)
+        return cls.FACTORY.convert(t, value, default_val, raise_exception=True)
