@@ -26,6 +26,7 @@ from typing import Any
 import pytz
 
 from .constants.datetime_constant import Quarter, TimeUnit
+from .constants.string_constant import CharPool
 from .convertor import BasicConvertor
 from .decorator import UnCkeckFucntion
 
@@ -1138,7 +1139,7 @@ class SequenceUtil:
         return next((i for i in iterable if func(i)), default_val)
 
     @classmethod
-    def is_all_ele_equal(cls, iterable: typing.Iterable[Any]) -> bool:
+    def is_all_element_equal(cls, iterable: typing.Iterable[Any]) -> bool:
         """
         判断序列中是否所有元素相等
 
@@ -1299,10 +1300,55 @@ class StringUtil(SequenceUtil):
         if s is None or len(s) == 0:
             return False
         for c in s:
-            if c not in string.whitespace:
+            if not c.isspace():
                 return False
 
         return True
+
+    @classmethod
+    def is_ascii_control(cls, s: str) -> bool:
+        """
+        判断字符串是否全为ASCII控制字符
+
+        Parameters
+        ----------
+        s : str
+            待判断字符串
+
+        Returns
+        -------
+        bool
+            如果字符串中的每个字符都是ASCII控制字符, 则返回True, 否则返回False
+        """
+        for c in s:
+            if not (ord(c) < 32 or ord(c) == 127):
+                return False
+        return True
+
+    @classmethod
+    def is_file_separator(cls, s: str) -> bool:
+        """
+        判断给定字符是否是文件分隔符, 即 / 或 \
+
+        Parameters
+        ----------
+        s : str
+            待检测字符
+
+        Returns
+        -------
+        bool
+            如果是文件分隔符返回True, 否则返回False
+
+        Raises
+        ------
+        ValueError
+            如果字符串长度不为1则抛出异常
+        """
+        if (length := cls.get_length(s)) != 1:
+            raise ValueError(f"expected a character, but string of length {length} found")
+
+        return cls.equals_any(s, CharPool.SLASH, CharPool.BACKSLASH)
 
     @classmethod
     def is_blank(cls, s: str | None, *, raise_type_exception: bool = False) -> bool:
@@ -1664,6 +1710,65 @@ class StringUtil(SequenceUtil):
             return byte_or_str.decode(encoding)
 
     @classmethod
+    def convert_to_circled(cls, char: str) -> str:
+        """
+        将字母、数字转换为带圈的字符：
+
+        Parameters
+        ----------
+        char : str
+            待转换字符
+
+        Returns
+        -------
+        str
+            转换后的带圈字符
+
+        Raises
+        ------
+        ValueError
+            如果 char 不是单个字符则抛出异常
+        """
+        if (length := cls.get_length(char)) != 1:
+            raise ValueError(f"expected a character, but string of length {length} found")
+        if "0" <= char <= "9":
+            # 带圈数字的 Unicode 编码从 ① (2460) 开始
+            return chr(ord(char) + 0x245F)
+        elif "A" <= char <= "Z":
+            # 带圈大写字母的 Unicode 编码从 Ⓐ (24B6) 开始
+            return chr(ord(char) + 0x24B6 - ord("A"))
+        elif "a" <= char <= "z":
+            # 带圈小写字母的 Unicode 编码从 ⓐ (24D0) 开始
+            return chr(ord(char) + 0x24D0 - ord("a"))
+        else:
+            # 非数字或字母字符，返回原字符
+            return char
+
+    @classmethod
+    def get_circled_number(cls, number: int) -> str:
+        """
+        将[1-20]数字转换为带圈的字符：
+
+        Parameters
+        ----------
+        number : int
+            待转换数字
+
+        Returns
+        -------
+        str
+            转换后的带圈字符
+
+        Raises
+        ------
+        ValueError
+            如果 number 不是[1-20]范围的数字则抛出异常
+        """
+        if 1 <= number <= 20:
+            raise ValueError("number should be between 1 and 20")
+        return chr(ord("①") + number - 1)
+
+    @classmethod
     def fill_before(cls, s: str, fill_char: str, length: int) -> str:
         """
         将已有字符串填充为规定长度, 如果已有字符串超过这个长度则返回这个字符串。
@@ -1796,6 +1901,33 @@ class StringUtil(SequenceUtil):
         if case_insensitive:
             return s1.lower() == s2.lower()
         return s1.strip() == s2.strip()
+
+    @classmethod
+    def equals_any(cls, s: str, *args: str, case_insensitive: bool = True) -> bool:
+        """
+        判断字符串 s 等于任何一个给定的字符串 args 中的字符串, 则返回 True, 否则返回 False.
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串 s
+        args : str
+            待比较的字符串列表
+        case_insensitive : bool, optional
+            是否忽略大小写, by default True
+
+        Returns
+        -------
+        bool
+            如果字符串 s 等于任何一个给定的字符串 args 中的字符串, 则返回 True, 否则返回 False.
+        """
+        if cls.is_empty(args):
+            return False
+        for arg in args:
+            if cls.equals(s, arg, case_insensitive=case_insensitive):
+                return True
+
+        return False
 
     @classmethod
     def hide(cls, s: str, start: int, end: int, *, replace_char: str = "*") -> str:
@@ -2377,6 +2509,7 @@ class StringUtil(SequenceUtil):
         str
             移除后的字符串
         """
+        # NOTE 兼容3.9之前的版本，3.9之后可以直接调用str.removesuffix()方法
         if cls.is_endswith(s, suffix, case_insensitive=case_insensitive):
             return s[: -len(suffix)]
         else:
@@ -2401,6 +2534,7 @@ class StringUtil(SequenceUtil):
         str
             移除后的字符串
         """
+        # NOTE 兼容3.9之前的版本，3.9之后可以直接调用str.removesuffix()方法
         if cls.is_startswith(s, prefix, case_insensitive=case_insensitive):
             return s[len(prefix) :]
         else:
