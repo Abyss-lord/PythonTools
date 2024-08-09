@@ -1468,7 +1468,7 @@ class StringUtil(SequenceUtil):
         return s.startswith(prefix)
 
     @classmethod
-    def is_starts_with_any(cls, s: str, *prefixes: str) -> bool:
+    def is_starts_with_any(cls, s: str, *prefixes: str, case_insensitive: bool = False) -> bool:
         """
         判断给定字符串是否以任何一个字符串开始.
         如果 prefixes 为空或者s为空, 则返回False.
@@ -1477,6 +1477,8 @@ class StringUtil(SequenceUtil):
         ----------
         s : str
             待检测字符串
+        case_insensitive : bool, optional
+            是否忽略大小写, by default False
 
         Returns
         -------
@@ -1486,32 +1488,7 @@ class StringUtil(SequenceUtil):
         if cls.is_empty(prefixes) or cls.is_blank(s):
             return False
         for prefix in prefixes:
-            if cls.is_startswith(s, prefix, case_insensitive=False):
-                return True
-
-        return False
-
-    @classmethod
-    def is_starts_with_any_ignore_case(cls, s: str, *prefixes: str) -> bool:
-        """
-        判断一个字符串是否以任何一个给定字符串开始, 忽略大小写.
-        如果 prefixes 为空或者s为空, 则返回False.
-
-        Parameters
-        ----------
-        s : str
-            待检测字符串
-
-        Returns
-        -------
-        bool
-            一个字符串是否以任何一个给定字符串开始, 忽略大小写
-        """
-        if cls.is_empty(prefixes) or cls.is_blank(s):
-            return False
-
-        for prefix in prefixes:
-            if cls.is_startswith(s, prefix, case_insensitive=True):
+            if cls.is_startswith(s, prefix, case_insensitive=case_insensitive):
                 return True
 
         return False
@@ -1580,7 +1557,7 @@ class StringUtil(SequenceUtil):
         return s.startswith(prefix) and s.endswith(suffix)
 
     @classmethod
-    def is_ends_with_any(cls, s: str, *suffixes: str) -> bool:
+    def is_ends_with_any(cls, s: str, *suffixes: str, case_insensitive: bool = False) -> bool:
         """
         判断一个字符串 s 是否以任何一个给定字符串结尾
         如果 suffixes 为空或者s为空, 则返回False.
@@ -1589,6 +1566,8 @@ class StringUtil(SequenceUtil):
         ----------
         s : str
             待检测字符串
+        case_insensitive : bool, optional
+            是否忽略大小写, by default False
 
         Returns
         -------
@@ -1598,31 +1577,7 @@ class StringUtil(SequenceUtil):
         if cls.is_empty(suffixes) or cls.is_blank(s):
             return False
         for suffix in suffixes:
-            if cls.is_endswith(s, suffix, case_insensitive=False):
-                return True
-
-        return False
-
-    @classmethod
-    def is_ends_with_any_ignore_case(cls, s: str, *suffixes: str) -> bool:
-        """
-        判断一个字符串 s 是否以任何一个给定字符串结尾, 忽略大小写
-        如果 suffixes 为空或者s为空, 则返回False.
-
-        Parameters
-        ----------
-        s : str
-            待检测字符串
-
-        Returns
-        -------
-        bool
-            字符串 s 是否以任何一个给定字符串结尾, 忽略大小写
-        """
-        if cls.is_empty(suffixes) or cls.is_blank(s):
-            return False
-        for suffix in suffixes:
-            if cls.is_endswith(s, suffix, case_insensitive=True):
+            if cls.is_endswith(s, suffix, case_insensitive=case_insensitive):
                 return True
 
         return False
