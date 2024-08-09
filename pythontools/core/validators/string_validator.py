@@ -54,7 +54,7 @@ class StringValidator:
 
         # PERF 不应该用try-except作为分支逻辑
         try:
-            return isinstance(json.loads(s), (dict, list))
+            return isinstance(json.loads(s), dict | list)
         except (TypeError, ValueError, OverflowError):
             pass
 
@@ -249,7 +249,22 @@ class StringValidator:
 
     @classmethod
     def is_tel_400800(cls, s: str, *, raise_exception: bool = False) -> bool:
-        return ReUtil.is_match(PatternPool.TEL_400_800)
+        """
+        返回是否为400-800电话号码
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            如果匹配失败是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            给定字符串是否为400-800电话号码
+        """
+        return ReUtil.is_match(PatternPool.TEL_400_800, s, raise_exception=raise_exception)
 
     @classmethod
     def is_email(cls, s: str, *, raise_exception: bool = False) -> bool:
@@ -483,12 +498,456 @@ class StringValidator:
 
     @classmethod
     def is_password(cls, s: str, *, raise_exception: bool = False) -> bool:
+        """
+        判断是否为密码
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            匹配失败是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            是否为密码
+        """
         return ReUtil.is_match(PatternPool.PASSWORD, s, raise_exception=raise_exception)
 
     @classmethod
     def is_strong_password(cls, s: str, *, raise_exception: bool = False) -> bool:
+        """
+        判断是否为强密码
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            如果匹配失败是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            给定字符串是否为强密码
+        """
         return ReUtil.is_match(PatternPool.STRONG_PASSWORD, s, raise_exception=raise_exception)
 
     @classmethod
     def is_blank_line(cls, s: str, *, raise_exception: bool = False) -> bool:
+        """
+        判断是否为空行
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            如果匹配失败是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            给定字符串是否为空行
+        """
         return ReUtil.is_match(PatternPool.BLANK_LINE, s, raise_exception=raise_exception)
+
+    @classmethod
+    def is_wechat_account(cls, s: str, *, raise_exception: bool = False) -> bool:
+        """
+        判断是否为微信号
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            如果匹配失败是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            给定字符串是否为微信号
+        """
+        return ReUtil.is_match(PatternPool.WECHAT, s, raise_exception=raise_exception)
+
+    @classmethod
+    def is_train_number(cls, s: str, *, raise_exception: bool = False) -> bool:
+        """
+        判断是否为火车车次号
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            如果匹配失败是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            给定字符串是否为火车车次号
+        """
+        return ReUtil.is_match(PatternPool.TRAIN_NUMBER, s, raise_exception=raise_exception)
+
+    @classmethod
+    def is_time_in_24_hour_format(cls, s: str, *, raise_exception: bool = False) -> bool:
+        """
+        判断是否为24小时制时间
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            如果匹配失败是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            给定字符串是否为24小时制时间
+        """
+        return ReUtil.is_match(PatternPool.TIME_IN_24_HOUR, s, raise_exception=raise_exception)
+
+    @classmethod
+    def is_time_in_12_hour_format(cls, s: str, *, raise_exception: bool = False) -> bool:
+        """
+        判断是否为12小时制时间
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            如果匹配失败是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            给定字符串是否为12小时制时间
+        """
+        return ReUtil.is_match(PatternPool.TIME_IN_12_HOUR, s, raise_exception=raise_exception)
+
+    @classmethod
+    def is_chinese_province_name(cls, s: str, *, raise_exception: bool = False) -> bool:
+        """
+        判断是否为中文省份名称
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            如果匹配失败是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            给定字符串是否为中文省份名称
+        """
+        return ReUtil.is_match(PatternPool.CHINESE_PROVINCE, s, raise_exception=raise_exception)
+
+    @classmethod
+    def is_linux_file_path(cls, s: str, *, raise_exception: bool = False) -> bool:
+        """
+        判断是否为linux文件路径
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            如果匹配失败是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            给定字符串是否为linux文件路径
+        """
+        return ReUtil.is_match(PatternPool.LINUX_FILE_PATH, s, raise_exception=raise_exception)
+
+    @classmethod
+    def is_windows_file_path(cls, s: str, *, raise_exception: bool = False) -> bool:
+        """
+        判断是否为windows文件路径
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            如果匹配失败是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            给定字符串是否为windows文件路径
+        """
+        return ReUtil.is_match(PatternPool.WINDOWS_FILE_PATH, s, raise_exception=raise_exception)
+
+    @classmethod
+    def is_hk_id(cls, s: str, *, raise_exception: bool = False) -> bool:
+        """
+        判断是否为香港身份证号
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            如果匹配失败是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            给定字符串是否为香港身份证号
+        """
+        return ReUtil.is_match(PatternPool.ID_NUMBER_HK, s, raise_exception=raise_exception)
+
+    @classmethod
+    def is_mo_id(cls, s: str, *, raise_exception: bool = False) -> bool:
+        """
+        判断是否为澳门身份证号
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            如果匹配失败是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            给定字符串是否为澳门身份证号
+        """
+        return ReUtil.is_match(PatternPool.ID_NUMBER_MO, s, raise_exception=raise_exception)
+
+    @classmethod
+    def is_tw_id(cls, s: str, *, raise_exception: bool = False) -> bool:
+        """
+        判断是否是台湾身份证号
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            如果匹配失败是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            给定字符串是否为台湾身份证
+        """
+        return ReUtil.is_match(PatternPool.ID_NUMBER_TW, s, raise_exception=raise_exception)
+
+    @classmethod
+    def has_no_letter(cls, s: str, *, raise_exception: bool = False) -> bool:
+        """
+        判断给定字符串是否不包含英文字母
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            如果匹配失败是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            给定字符串是否不包含英文字母
+        """
+        return ReUtil.is_match(PatternPool.HAS_NO_LETTER, s, raise_exception=raise_exception)
+
+    @classmethod
+    def is_java_class_path(cls, s: str, *, raise_exception: bool = False) -> bool:
+        """
+        判断给定字符串是否为java类路径
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            如果匹配失败是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            给定字符串是否为java类路径
+        """
+        return ReUtil.is_match(PatternPool.JAVA_CLASS_PATH, s, raise_exception=raise_exception)
+
+    @classmethod
+    def is_chinese_soldier_id(cls, s: str, *, raise_exception: bool = False) -> bool:
+        """
+        判断给定字符串是否是军官证号、士兵证号
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            如果匹配失败是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            给定字符串是否是军官证号、士兵证号
+        """
+        return ReUtil.is_match(PatternPool.CHINESE_SOLDIER_ID, s, raise_exception=raise_exception)
+
+    @classmethod
+    def is_non_positive_integer(cls, s: str, *, raise_exception: bool = False) -> bool:
+        """
+        判断给定字符串是否为非正整数
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            如果匹配失败是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            给定字符串是否为非正整数
+        """
+        return ReUtil.is_match(PatternPool.NON_POSITIVE_INTEGER, s, raise_exception=raise_exception)
+
+    @classmethod
+    def is_non_negative_integer(cls, s: str, *, raise_exception: bool = False) -> bool:
+        """
+        判断给定字符串是否为非负整数
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            如果匹配失败是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            给定字符串是否为非负整数
+        """
+        return ReUtil.is_match(PatternPool.NON_NEGATIVE_INTEGER, s, raise_exception=raise_exception)
+
+    @classmethod
+    def is_non_positive_float(cls, s: str, *, raise_exception: bool = False) -> bool:
+        """
+        判断给定字符串是否为非正浮点数
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            如果匹配失败是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            给定字符串是否为非正浮点数
+        """
+        return ReUtil.is_match(PatternPool.NON_POSITIVE_FLOAT, s, raise_exception=raise_exception)
+
+    @classmethod
+    def is_non_negative_float(cls, s: str, *, raise_exception: bool = False) -> bool:
+        """
+        判断给定字符串是否为非负浮点数
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            如果匹配失败是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            给定字符串是否为非负浮点数
+        """
+        return ReUtil.is_match(PatternPool.NON_NEGATIVE_FLOAT, s, raise_exception=raise_exception)
+
+    @classmethod
+    def is_imei(cls, s: str, *, raise_exception: bool = False) -> bool:
+        """
+        判断给定字符串是否为IMEI号
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            如果匹配失败是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            给定字符串是否为IMEI号
+        """
+        return ReUtil.is_match(PatternPool.IMEI, s, raise_exception=raise_exception)
+
+    @classmethod
+    def is_thunder_link(cls, s: str, *, raise_exception: bool = False) -> bool:
+        """
+        判断给定字符串是否为迅雷链接
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            如果匹配失败是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            给定字符串是否为迅雷链接
+        """
+        return ReUtil.is_match(PatternPool.THUNDER_LINK, s, raise_exception=raise_exception)
+
+    @classmethod
+    def is_magnet_link(cls, s: str, *, raise_exception: bool = False) -> bool:
+        """
+        判断给定字符串是否为磁力链接
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            如果匹配失败是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            给定字符串是否为磁力链接
+        """
+        return ReUtil.is_match(PatternPool.MAGNET_LINK, s, raise_exception=raise_exception)
+
+    @classmethod
+    def is_a_stock(cls, s: str, *, raise_exception: bool = False) -> bool:
+        """
+        判断给定字符串是否为A股代码
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            如果匹配失败是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            给定字符串是否为A股代码
+        """
+        return ReUtil.is_match(PatternPool.A_STOCK, s, raise_exception=raise_exception)
