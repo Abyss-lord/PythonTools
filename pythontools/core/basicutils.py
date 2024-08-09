@@ -27,7 +27,6 @@ import pytz
 
 from .constants.datetime_constant import Quarter, TimeUnit
 from .constants.string_constant import CharPool
-from .convert.convertor import BasicConvertor
 from .decorator import UnCkeckFucntion
 
 
@@ -499,7 +498,7 @@ class BooleanUtil:
         :param val: 待转换的值
         :return: 转换后的布尔值
         """
-        return BasicConvertor.to_bool(val)
+        return bool(val)
 
     @classmethod
     def negate(cls, state: bool, *, raise_exception: bool = False) -> bool:
@@ -1377,7 +1376,7 @@ class StringUtil(SequenceUtil):
         if not cls.is_string(s, raise_type_exception=raise_type_exception):
             return False
 
-        val = str(s)
+        val = str(s) if not isinstance(s, str) else s
         for c in val:
             if c in (string.ascii_letters + string.digits + string.punctuation):
                 return False
