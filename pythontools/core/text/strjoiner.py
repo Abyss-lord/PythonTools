@@ -48,6 +48,10 @@ class StrJoiner:
     def get_instance_from_joiner(other_joiner: "StrJoiner") -> "StrJoiner":
         return StrJoiner(other_joiner.delimiter, other_joiner.prefix, other_joiner.suffix)
 
+    @staticmethod
+    def get_instance(delimiter: str | None = None, prefix: str | None = None, suffix: str | None = None) -> "StrJoiner":
+        return StrJoiner(delimiter, prefix, suffix)
+
     def set_delimiter(self, delimiter: str) -> Self:
         self.delimiter = delimiter
         return self
@@ -69,6 +73,24 @@ class StrJoiner:
         return self
 
     def append(self, *values: Any) -> Self:
+        """
+        添加一个要合并的字符串或对象
+
+        Parameters
+        ----------
+        values : Any
+            要合并的字符串或对象
+
+        Returns
+        -------
+        Self
+            StrJoiner对象, 用于链式调用
+
+        Raises
+        ------
+        ValueError
+            如果空值处理模式不合法, 则抛出该异常
+        """
         if not self.__initialized:
             self._initialize()
 
