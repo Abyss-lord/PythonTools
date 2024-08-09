@@ -24,7 +24,7 @@ class ColorUtil:
     @classmethod
     def get_random_color(
         cls,
-    ) -> str:
+    ) -> Color:
         """
         获取随机十六进制表示的颜色
 

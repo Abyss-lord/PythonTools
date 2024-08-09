@@ -27,7 +27,7 @@ import pytz
 
 from .constants.datetime_constant import Quarter, TimeUnit
 from .constants.string_constant import CharPool
-from .convertor import BasicConvertor
+from .convert.convertor import BasicConvertor
 from .decorator import UnCkeckFucntion
 
 

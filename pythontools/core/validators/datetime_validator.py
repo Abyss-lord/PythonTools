@@ -19,7 +19,7 @@ __all__ = ["DatetimeValidator"]
 import datetime
 
 from ..basicutils import DatetimeUtil
-from ..convertor import BasicConvertor
+from ..convert.convertor import BasicConvertor
 from ..pattern_pool import PatternPool
 
 
@@ -57,7 +57,7 @@ class DatetimeValidator:
             year = BasicConvertor.to_int(matched.group(1))
             month = BasicConvertor.to_int(matched.group(3))
             day = BasicConvertor.to_int(matched.group(5))
-            return cls.is_valid_date(year, month, day)
+            return cls.is_valid_date(year, month, day)  # type: ignore
         return False
 
     @classmethod

@@ -21,7 +21,7 @@ from datetime import datetime
 from .basicutils import DatetimeUtil, SequenceUtil, StringUtil
 from .constants.area_constant import AREA_INFO, PRO_DICT
 from .constants.people_constant import Gender
-from .convertor import BasicConvertor
+from .convert.convertor import BasicConvertor
 from .pattern_pool import PatternPool
 from .validators.datetime_validator import DatetimeValidator
 
