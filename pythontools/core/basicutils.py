@@ -20,6 +20,7 @@ import random
 import string
 import time
 import typing
+from collections.abc import Set
 from datetime import date, datetime, timedelta, timezone, tzinfo
 from typing import Any
 
@@ -715,13 +716,14 @@ class BooleanUtil:
     def _check_boolean_value(cls, value: bool, *, strict_mode: bool = False) -> bool:
         if not isinstance(value, bool) and strict_mode:
             raise ValueError(f"{value} is not a boolean value")
-
+        StringUtil.EMPTY
         return bool(value)
 
 
 class SequenceUtil:
-    EMPTY: typing.Final[str] = ""
-    SPACE: typing.Final[str] = " "
+    EMPTY: typing.Final[str] = CharPool.EMPTY
+    SPACE: typing.Final[str] = CharPool.SPACE
+    INDEX_NOT_FOUND: typing.Final[int] = -1
 
     @classmethod
     def is_empty(cls, sequence: typing.Sequence[Any]) -> bool:
@@ -817,11 +819,73 @@ class SequenceUtil:
         :param sequence: 待检测序列
         :return: 返回None的索引, 如果不存在返回-1
         """
-        for i, item in enumerate(sequence):
-            if item is None:
-                return i
+        return cls.first_index_of(sequence, None)
 
-        return -1
+    @classmethod
+    def last_idx_of_none(cls, sequence: typing.Sequence[Any]) -> int:
+        """
+        返回序列中最后一个None元素的索引
+
+        Parameters
+        ----------
+        sequence : typing.Sequence[Any]
+            待检测序列
+
+        Returns
+        -------
+        int
+            最后一个None元素的索引位置
+        """
+        return cls.last_index_of(sequence, None)
+
+    @classmethod
+    def first_index_of(cls, sequence: typing.Sequence[Any], value: Any) -> int:
+        """
+        寻找序列中第一个指定元素的索引
+
+        Parameters
+        ----------
+        sequence : typing.Sequence[Any]
+            待检测序列
+        value : Any
+            待查找元素
+
+        Returns
+        -------
+        int
+            如果
+        """
+        if cls.is_empty(sequence):
+            return cls.INDEX_NOT_FOUND
+
+        idx = sequence.index(value)
+        return cls.INDEX_NOT_FOUND if idx == -1 else idx
+
+    @classmethod
+    def last_index_of(cls, sequence: typing.Sequence[Any], value: Any) -> int:
+        """
+        寻找序列中最后一个指定元素的索引
+
+        Parameters
+        ----------
+        sequence : typing.Sequence[Any]
+            待检测序列
+        value : Any
+            待查找元素
+
+        Returns
+        -------
+        int
+            如果存在则返回索引, 否则返回-1
+        """
+        if cls.is_empty(sequence):
+            return cls.INDEX_NOT_FOUND
+
+        length = len(sequence)
+        for i, item in enumerate(reversed(sequence)):
+            if item == value:
+                return length - i - 1
+        return cls.INDEX_NOT_FOUND
 
     @classmethod
     def contains_any(cls, sequence: typing.Sequence[Any], *args) -> bool:
@@ -1664,6 +1728,23 @@ class StringUtil(SequenceUtil):
             return byte_or_str.decode(encoding)
 
     @classmethod
+    def as_set(cls, *args, froze: bool = False) -> Set[Any]:
+        """
+        将多个字符串输入转换成集合
+
+        Parameters
+        ----------
+        froze : bool, optional
+            输出集合是否不可变, by default False
+
+        Returns
+        -------
+        Set[Any]
+            返回的集合
+        """
+        return set(args) if not froze else frozenset(args)
+
+    @classmethod
     def convert_to_circled(cls, char: str) -> str:
         """
         将字母、数字转换为带圈的字符：
@@ -2493,6 +2574,40 @@ class StringUtil(SequenceUtil):
             return s[len(prefix) :]
         else:
             return s
+
+    @classmethod
+    def abbreviate(cls, s: str, length: int, ellipsis: str = "...") -> str:
+        """
+        字符串缩略
+
+        Parameters
+        ----------
+        s : str
+            待缩略字符串
+        length : int
+            缩略后的最大长度, 小于4时抛出异常
+        ellipsis : str, optional
+            缩略后的省略号, by default "..."
+
+        Returns
+        -------
+        str
+            如果字符串是None或者为空, 则返回空字符串。\n
+            如果字符串长度小于等于指定长度, 则返回原字符串, 否则返回缩略后的字符串
+
+        Raises
+        ------
+        ValueError
+            如果 length 小于4, 则抛出异常
+        """
+        if length < 4:
+            raise ValueError(f"length must be greater than or equal to 4, but got {length}")
+        if cls.is_blank(s):
+            return cls.EMPTY
+        if cls.get_length(s) <= length:
+            return s
+        else:
+            return cls.sub_lst(s, 0, length - cls.get_length(ellipsis)) + ellipsis  # type: ignore
 
     @classmethod
     def _align_text(cls, text: str, width: int, padding: str = " ", align: str = "left") -> str:
