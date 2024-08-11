@@ -17,8 +17,8 @@ Change Activity:
 import typing
 import unicodedata
 
-from ..pattern_pool import PatternPool
-from ..reutils import ReUtil
+from ..constants.pattern_pool import PatternPool
+from ..utils.reutils import ReUtil
 
 
 class BasicValidator:
@@ -62,7 +62,7 @@ class BasicValidator:
         bool
             是否为整数
         """
-        if isinstance(value, (int, float, complex)):
+        if isinstance(value, int | float | complex):
             return True
         elif isinstance(value, str):
             if ReUtil.is_match(PatternPool.INTEGER, value):
@@ -87,10 +87,10 @@ class BasicValidator:
         bool
             是否是浮点数
         """
-        if isinstance(value, (int, float, complex)):
+        if isinstance(value, int | float | complex):
             return True
         elif isinstance(value, str):
-            if ReUtil.is_match(PatternPool.FLOAT, value):
+            if ReUtil.is_match(PatternPool.FLOAT_NUM, value):
                 return True
             else:
                 return cls.is_chinese_float_num(value)

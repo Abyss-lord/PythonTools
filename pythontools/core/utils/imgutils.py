@@ -14,8 +14,8 @@ Change Activity:
 """
 # here put the import lib
 
+from ..constants.color_constant import Color
 from .basicutils import RandomUtil
-from .constants.color_constant import Color
 
 
 class ColorUtil:

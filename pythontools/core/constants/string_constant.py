@@ -19,9 +19,11 @@ from collections import namedtuple
 from enum import Enum
 
 DesensitizedTypeTuple = namedtuple("DesensitizedTypeTuple", ["description"])
+PasswdStrengthTuple = namedtuple("PasswdStrengthTuple", ["name", "description", "strength"])
 
 
 class CharPool:
+    EMPTY: typing.Final[str] = ""
     SPACE: typing.Final[str] = " "
     TAB: typing.Final[str] = "	"
     DOT: typing.Final[str] = "."
@@ -86,3 +88,11 @@ class DesensitizedType(Enum):
             枚举值描述信息
         """
         return self.value.description
+
+
+class PasswdStrength(Enum):
+    EASY = PasswdStrengthTuple("EASY", "简单", 0)
+    MIDIUM = PasswdStrengthTuple("MIDIUM", "中等", 4)
+    STRONG = PasswdStrengthTuple("STRONG", "强", 7)
+    VERY_STRONG = PasswdStrengthTuple("VERY_STRONG", "非常强", 10)
+    EXTREMELY_STRONG = PasswdStrengthTuple("EXTREMELY_STRONG", "超强", 13)

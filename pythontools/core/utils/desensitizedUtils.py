@@ -14,9 +14,9 @@ Change Activity:
 """
 
 # here put the import lib
+from ..constants.string_constant import CharPool, DesensitizedType
+from ..decorator import UnCkeckFucntion
 from .basicutils import StringUtil
-from .constants.string_constant import CharPool, DesensitizedType
-from .decorator import UnCkeckFucntion
 
 DesensitizedType.mro
 

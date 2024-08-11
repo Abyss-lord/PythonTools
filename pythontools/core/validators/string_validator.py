@@ -16,9 +16,9 @@ Change Activity:
 # here put the import lib
 import json
 
-from ..basicutils import StringUtil
-from ..pattern_pool import PatternPool
-from ..reutils import ReUtil
+from ..constants.pattern_pool import PatternPool
+from ..utils.basicutils import StringUtil
+from ..utils.reutils import ReUtil
 
 
 class StringValidator:

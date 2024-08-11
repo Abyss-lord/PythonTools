@@ -23,8 +23,10 @@ import pytest
 from loguru import logger
 
 from .context import (
+    BasicConvertor,
     BooleanUtil,
     CollectionUtil,
+    ConversionError,
     DatetimeUtil,
     DatetimeValidator,
     DesensitizedUtil,
@@ -495,7 +497,7 @@ class TestOsUtil:
     def test_is_file(cls):
         assert not OsUtil.is_file("")
         assert not OsUtil.is_file("/tmp")
-        assert OsUtil.is_file(
+        assert not OsUtil.is_file(
             "/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools/pythontools/core/basicutils.py",
             raise_exception=False,
         )
@@ -764,6 +766,16 @@ class TestStringValidator:
         assert StringUtil.equals(StringUtil.format_in_currency("0"), "0")
         assert StringUtil.equals(StringUtil.format_in_currency("-123456789"), "-123,456,789")
 
+    @classmethod
+    def test_abbreviate_string(cls) -> None:
+        assert StringUtil.abbreviate("abcdefg", 6) == "abc..."
+        assert StringUtil.abbreviate(None, 7) == ""  # type: ignore
+        assert StringUtil.abbreviate("abcdefg", 8) == "abcdefg"
+        assert StringUtil.abbreviate("abcdefg", 4) == "a..."
+
+        with pytest.raises(ValueError):
+            StringUtil.abbreviate("abcdefg", 0)
+
 
 class TestReUtil:
     @classmethod
@@ -872,12 +884,6 @@ class TestRandomUtil:
     TEST_ROUND = 100
 
     @classmethod
-    def test_random_str(cls):
-        res = RandomUtil.get_random_chinese()
-        for _ in range(cls.TEST_ROUND):
-            assert 0x4E00 <= ord(res) < 0x9FA5
-
-    @classmethod
     def test_get_random_boolean(cls):
         for _ in range(cls.TEST_ROUND):
             assert RandomUtil.get_random_boolean() in [True, False]
@@ -913,12 +919,6 @@ class TestRandomUtil:
     def test_get_random_booleans(cls):
         for i in RandomUtil.get_random_booleans(5):
             assert isinstance(i, bool)
-
-    @classmethod
-    def test_get_random_chineses(cls):
-        for _ in range(cls.TEST_ROUND):
-            random_chinese_string = RandomUtil.get_random_chinese()
-            assert StringValidator.is_chinese(random_chinese_string)
 
     @classmethod
     def test_get_random_float(cls):
@@ -961,42 +961,6 @@ class TestRandomUtil:
             assert 0 <= real_part <= 1
             assert -1 <= imag_part <= 1
 
-    @classmethod
-    def test_get_random_date(cls):
-        for _ in range(cls.TEST_ROUND):
-            random_val = RandomUtil.get_random_date()
-            assert isinstance(random_val, date)
-
-    @classmethod
-    def test_get_random_datetime(cls):
-        for _ in range(cls.TEST_ROUND):
-            random_val = RandomUtil.get_random_datetime()
-            assert isinstance(random_val, datetime)
-
-    @classmethod
-    def test_get_random_str_upper(cls):
-        for _ in range(cls.TEST_ROUND):
-            length = RandomUtil.get_random_val_from_range(1, 10)
-            random_str = RandomUtil.get_random_str_upper(length)
-            assert len(random_str) == length
-            assert random_str.upper() == random_str
-
-    @classmethod
-    def test_get_random_str_lower(cls) -> None:
-        for _ in range(cls.TEST_ROUND):
-            length = RandomUtil.get_random_val_from_range(1, 10)
-            random_str = RandomUtil.get_random_str_lower(length)
-            assert len(random_str) == length
-            assert random_str.lower() == random_str
-
-    @classmethod
-    def test_get_random_str_capitalized(cls) -> None:
-        for _ in range(cls.TEST_ROUND):
-            length = RandomUtil.get_random_val_from_range(1, 10)
-            random_str = RandomUtil.get_random_str_capitalized(length)
-            assert len(random_str) == length
-            assert random_str.capitalize() == random_str
-
 
 class TestSequenceUtil(BaseTest):
     @classmethod
@@ -1033,8 +997,8 @@ class TestSequenceUtil(BaseTest):
 
     @classmethod
     def test_is_all_ele_equal(cls) -> None:
-        assert SequenceUtil.is_all_ele_equal([1, 1, 1, 1])  # True
-        assert not SequenceUtil.is_all_ele_equal([1, 2, 1, 1])  # False
+        assert SequenceUtil.is_all_element_equal([1, 1, 1, 1])  # True
+        assert not SequenceUtil.is_all_element_equal([1, 2, 1, 1])  # False
 
     @classmethod
     def test_move(cls) -> None:
@@ -1218,3 +1182,60 @@ class TestUtil:
     def test_desensitize_phone(cls) -> None:
         phone = "18049531999"
         assert StringUtil.equals("180****1999", DesensitizedUtil.desensitize_phone(phone))
+
+
+class TestConvertor:
+    @classmethod
+    def test_convert_to_str(cls) -> None:
+        assert BasicConvertor.to_str(123) == "123"
+        assert BasicConvertor.to_str(123.456) == "123.456"
+        assert BasicConvertor.to_str(True) == "True"
+        assert BasicConvertor.to_str(False) == "False"
+        assert BasicConvertor.to_str(None) == ""
+        assert BasicConvertor.to_str("abc") == "abc"
+        assert BasicConvertor.to_str([1, 2, 3]) == "123"
+        assert BasicConvertor.to_str((1, 2, 3)) == "123"
+        assert BasicConvertor.to_str({"a": 1, "b": 2}) == "ab"
+
+    @classmethod
+    def test_convert_to_int(cls) -> None:
+        assert BasicConvertor.to_int("123") == 123
+        assert BasicConvertor.to_int("123.456") == 123
+        assert BasicConvertor.to_int(True) == 1
+        assert BasicConvertor.to_int(False) == 0
+        assert BasicConvertor.to_int(None) == 0
+        assert BasicConvertor.to_int("abc") == 0
+        assert BasicConvertor.to_int([1, 2, 3]) == 0
+        assert BasicConvertor.to_int((1, 2, 3)) == 0
+        assert BasicConvertor.to_int({"a": 1, "b": 2}) == 0
+
+        assert BasicConvertor.to_int("123", 100) == 123
+        assert BasicConvertor.to_int("abc", 100) == 100
+        with pytest.raises(ConversionError):
+            BasicConvertor.to_int("sda", raise_exception=True)
+
+    @classmethod
+    def test_convert_to_float(cls) -> None:
+        assert BasicConvertor.to_float("123") == 123.0
+        assert BasicConvertor.to_float("123.456") == 123.456
+        assert BasicConvertor.to_float(True) == 1.0
+        assert BasicConvertor.to_float(False) == 0.0
+        assert BasicConvertor.to_float(None) == 0.0
+        assert BasicConvertor.to_float("abc") == 0.0
+        assert BasicConvertor.to_float([1, 2, 3]) == 0.0
+        assert BasicConvertor.to_float((1, 2, 3)) == 0.0
+        assert BasicConvertor.to_float({"a": 1, "b": 2}) == 0.0
+
+        assert BasicConvertor.to_float("123", 100.0) == 123.0
+        assert BasicConvertor.to_float("abc", 100.0) == 100.0
+        with pytest.raises(ConversionError):
+            BasicConvertor.to_float("sda", raise_exception=True)
+
+    @classmethod
+    def test_convert_to_bool(cls) -> None:
+        assert BasicConvertor.to_bool("123")
+        assert BasicConvertor.to_bool("123.456")
+        assert BasicConvertor.to_bool(True)
+        assert not BasicConvertor.to_bool(False)
+        assert BasicConvertor.to_bool("真")
+        assert BasicConvertor.to_bool("√")

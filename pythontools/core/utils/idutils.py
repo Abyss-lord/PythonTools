@@ -18,12 +18,13 @@ import random
 import typing
 from datetime import datetime
 
-from .basicutils import DatetimeUtil, SequenceUtil, StringUtil
-from .constants.area_constant import AREA_INFO, PRO_DICT
-from .constants.people_constant import Gender
-from .convert.convertor import BasicConvertor
-from .pattern_pool import PatternPool
-from .validators.datetime_validator import DatetimeValidator
+from ..constants.area_constant import AREA_INFO, PRO_DICT
+from ..constants.pattern_pool import PatternPool
+from ..constants.people_constant import Gender
+from ..convert.convertor import BasicConvertor
+from ..utils.basicutils import SequenceUtil, StringUtil
+from ..utils.datetimeutils import DatetimeUtil
+from ..validators.datetime_validator import DatetimeValidator
 
 
 class IDCard:

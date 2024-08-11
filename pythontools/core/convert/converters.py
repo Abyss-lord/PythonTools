@@ -18,10 +18,10 @@ from abc import ABC, abstractmethod
 from numbers import Complex, Number
 from typing import Any
 
+from ..constants.pattern_pool import PatternPool
 from ..decorator import Singleton
 from ..errors import ConversionError
-from ..pattern_pool import PatternPool
-from ..reutils import ReUtil
+from ..utils.reutils import ReUtil
 
 PRIMITIVE_TYPE = (int, float, str, bool)
 NUMERIC_TYPE = Number
@@ -127,8 +127,6 @@ class IntegerConverter(AbstractConverter):
         except Exception as err:
             if raise_exception:
                 raise ConversionError(value, self.type_name) from err
-
-        return default_value
 
         return default_value
 

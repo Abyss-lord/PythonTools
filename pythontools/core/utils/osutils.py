@@ -471,9 +471,9 @@ class SysUtil:
         ValueError
             如果不是Python2也不是Python3, 则抛出ValueError
         """
-        if sys.version_info >= (3, 0):
+        if sys.version_info >= (3, 0):  # noqa: UP036
             return False
-        if sys.version_info < (3, 0):
+        if sys.version_info < (3, 0):  # noqa: UP036
             return True
         raise ValueError("cannot determine if it's python2")
 

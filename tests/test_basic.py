@@ -78,6 +78,26 @@ class TestBasic:
         logger.debug(type(a))
         logger.debug(type(a).__bases__[0] is tuple)
 
+    def test_str_new_func(self):
+        s = "hello\tworld"
+
+        logger.debug(s.casefold())
+        logger.debug(s.expandtabs())
+
+    def test_type_t(self):
+        s = "asb"
+        logger.debug(type(s.__class__))
+
+    def test_number_mro(self) -> None:
+        from numbers import Number
+
+        s = complex(4, 3)
+        s = abs(s)
+        logger.debug(s)
+        logger.debug(isinstance(s, Number))
+        logger.debug(isinstance(1.3, Number))
+        logger.debug(isinstance(1, Number))
+
 
 class TestQuarterObject:
     def __init__(self, month: int) -> None:

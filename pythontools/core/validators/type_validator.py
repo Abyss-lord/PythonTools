@@ -16,7 +16,7 @@ Change Activity:
 # here put the import lib
 import inspect
 
-from ..typehint import T
+from ..constants.typehint import T
 
 
 class TypeValidator:

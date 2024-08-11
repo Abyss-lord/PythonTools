@@ -16,9 +16,9 @@ Change Activity:
 # here put the import lib
 import re
 
+from ..constants.pattern_pool import RegexPool
+from ..errors import ValidationError
 from .basicutils import SequenceUtil, StringUtil
-from .errors import ValidationError
-from .pattern_pool import RegexPool
 
 
 class ReUtil:
