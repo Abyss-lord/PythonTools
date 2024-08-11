@@ -20,7 +20,7 @@ import random
 import string
 import time
 import typing
-from collections.abc import Set
+from collections.abc import Sequence, Set
 from datetime import date, datetime, timedelta, timezone, tzinfo
 from typing import Any
 
@@ -757,6 +757,51 @@ class SequenceUtil:
         :return:
         """
         return not cls.is_empty(sequence)
+
+    @classmethod
+    def is_sub_equal(
+        cls, main_seq: Sequence[Any], start_idx: int, sub_seq: Sequence[Any], sub_start_idx: int, split_length: int
+    ) -> bool:
+        """
+        截取两个字符串的不同部分（长度一致），判断截取的子串是否相同 任意一个字符串为null返回false
+
+        Parameters
+        ----------
+        main_seq : Sequence[Any]
+            主要序列
+        start_idx : int
+            主要序列的起始位置
+        sub_seq : Sequence[Any]
+            次要序列
+        sub_start_idx : int
+            次要序列的起始位置
+        split_length : int
+            截取长度
+
+        Returns
+        -------
+        bool
+            子序列是否相同
+        """
+        if cls.is_empty(main_seq) or cls.is_empty(sub_seq):
+            return False
+
+        main_seq_len = len(main_seq)
+        sub_seq_len = len(sub_seq)
+        if start_idx < 0 or sub_start_idx < 0:
+            return False
+
+        if main_seq_len < start_idx + split_length or sub_seq_len < sub_start_idx + split_length:
+            return False
+
+        main_split_seq = main_seq[start_idx : start_idx + split_length]
+        sub_split_seq = sub_seq[sub_start_idx : sub_start_idx + split_length]
+
+        for i, j in zip(main_split_seq, sub_split_seq):
+            if i != j:
+                return False
+
+        return True
 
     @classmethod
     def reverse_sequence(cls, sequence: typing.Sequence[Any]) -> typing.Sequence:
@@ -1644,6 +1689,57 @@ class StringUtil(SequenceUtil):
                 return True
 
         return False
+
+    @classmethod
+    def has_number(cls, s: str) -> bool:
+        """
+        判断字符串是否包含数字
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+
+        Returns
+        -------
+        bool
+            字符串是否包含数字
+        """
+        return any(char.isdigit() for char in s)
+
+    @classmethod
+    def has_lowercase(cls, s: str) -> bool:
+        """
+        判断字符串是否包含小写字母
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+
+        Returns
+        -------
+        bool
+            字符串是否包含小写字母
+        """
+        return any(char.islower() for char in s)
+
+    @classmethod
+    def has_uppercase(cls, s: str) -> bool:
+        """
+        判断字符串是否包含大写字母
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+
+        Returns
+        -------
+        bool
+            字符串是否包含大写字母
+        """
+        return any(char.isupper() for char in s)
 
     @classmethod
     def none_to_empty(cls, s: str) -> str:
@@ -2576,6 +2672,180 @@ class StringUtil(SequenceUtil):
             return s
 
     @classmethod
+    def remove_char_at(cls, s: str, idx: int) -> str:
+        """
+        移除字符串中的指定位置的字符
+
+        Parameters
+        ----------
+        s : str
+            待移除字符串
+        idx : int
+            指定位置
+
+        Returns
+        -------
+        str
+            移除后的字符串
+        """
+        if idx < 0:
+            raise ValueError(f"idx must be greater than or equal to 0, but got {idx}")
+
+        length = cls.get_length(s)
+        if cls.is_blank(s):
+            return cls.EMPTY
+
+        if idx >= length or idx == length - 1:
+            return s[:-1]
+
+        return s[:idx] + s[idx + 1 :]
+
+    @classmethod
+    def remove_range(cls, s: str, start: int, end: int) -> str:
+        """
+        移除字符串中的指定范围的字符
+
+        Parameters
+        ----------
+        s : str
+            待移除字符串
+        start : int
+            起始位置
+        end : int
+            结束位置
+
+        Returns
+        -------
+        str
+            移除后的字符串
+        """
+        if start < 0 or end < 0:
+            raise ValueError(f"start and end must be greater than or equal to 0, but got {start} and {end}")
+
+        if start >= end:
+            raise ValueError(f"start must be less than end, but got {start} and {end}")
+
+        if cls.is_blank(s):
+            return cls.EMPTY
+
+        if end >= cls.get_length(s):
+            return s[:start]
+
+        return s[:start] + s[end:]
+
+    @classmethod
+    def remove_non_ascii(cls, s: str) -> str:
+        """
+        移除字符串中的非ASCII字符
+
+        Parameters
+        ----------
+        s : str
+            待移除字符串
+
+        Returns
+        -------
+        str
+            移除非ASCII后的字符串
+        """
+        return "".join(filter(lambda x: ord(x) < 128, s))
+
+    @classmethod
+    def replace_char_at(cls, s: str, idx: int, char: str) -> str:
+        """
+        替换字符串中的指定位置的字符
+
+        Parameters
+        ----------
+        s : str
+            待替换字符串
+        idx : int
+            指定位置
+        char : str
+            待替换字符
+
+        Returns
+        -------
+        str
+            替换后的字符串
+        """
+        if idx < 0:
+            raise ValueError(f"idx must be greater than or equal to 0, but got {idx}")
+
+        if cls.is_blank(s):
+            return cls.EMPTY
+
+        length = cls.get_length(s)
+
+        if idx >= length or idx == length - 1:
+            return s[:-1] + char
+
+        return s[:idx] + char + s[idx + 1 :]
+
+    @classmethod
+    def replace_range(cls, dest: str, source: str, start: int) -> str:
+        """
+        使用给定字符串替换指定位置的字符串
+
+        Parameters
+        ----------
+        dest : str
+            待替换字符串
+        source : str
+            替换字符串
+        start : int
+            替换起始位置
+
+        Returns
+        -------
+        str
+            替换后的字符串
+
+        Raises
+        ------
+        ValueError
+            如何 start 超出范围, 则抛出异常
+        """
+        if start < 0 or start > cls.get_length(dest):
+            raise ValueError(
+                f"start must be greater than or equal to 0 and less than {cls.get_length(dest)}, but got {start}"
+            )
+        if cls.is_blank(source) or cls.is_blank(dest):
+            return dest
+        source_len = cls.get_length(source)
+        return dest[:start] + str(source) + dest[start + source_len :]
+
+    @classmethod
+    def insert_str_at(cls, s: str, idx: int, sub_str: str) -> str:
+        """
+        在指定位置插入字符
+
+        Parameters
+        ----------
+        s : str
+            待插入字符串
+        idx : int
+            指定位置
+        sub_str : str
+            待插入字符
+
+        Returns
+        -------
+        str
+            插入后的字符串
+        """
+        if idx < 0:
+            raise ValueError(f"idx must be greater than or equal to 0, but got {idx}")
+        if cls.is_blank(s):
+            return sub_str
+
+        length = cls.get_length(s)
+        if idx >= length:
+            return s + sub_str
+
+        return s[:idx] + sub_str + s[idx:]
+
+    @classmethod
     def abbreviate(cls, s: str, length: int, ellipsis: str = "...") -> str:
         """
         字符串缩略
@@ -2608,6 +2878,24 @@ class StringUtil(SequenceUtil):
             return s
         else:
             return cls.sub_lst(s, 0, length - cls.get_length(ellipsis)) + ellipsis  # type: ignore
+
+    @classmethod
+    def get_vowels_from_str(cls, s: str) -> str:
+        """
+        获取字符串中的元音字母
+
+        Parameters
+        ----------
+        s : str
+            待获取元音字母的字符串
+
+        Returns
+        -------
+        str
+            元音字母字符串
+        """
+        vowels = "aeiouAEIOU"
+        return "".join(filter(lambda x: x in vowels, s))
 
     @classmethod
     def _align_text(cls, text: str, width: int, padding: str = " ", align: str = "left") -> str:
