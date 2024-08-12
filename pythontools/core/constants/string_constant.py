@@ -96,3 +96,13 @@ class PasswdStrength(Enum):
     STRONG = PasswdStrengthTuple("STRONG", "强", 7)
     VERY_STRONG = PasswdStrengthTuple("VERY_STRONG", "非常强", 10)
     EXTREMELY_STRONG = PasswdStrengthTuple("EXTREMELY_STRONG", "超强", 13)
+
+
+class CommonExpression:
+    INDEX_NOT_FOUND = -1
+
+
+class CharsetUtil:
+    ISO_8859_1: typing.Final[str] = "ISO-8859-1"
+    UTF_8: typing.Final[str] = "UTF-8"
+    GBK: typing.Final[str] = "GBK"
