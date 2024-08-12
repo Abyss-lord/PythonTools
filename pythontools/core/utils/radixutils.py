@@ -12,11 +12,14 @@ Change Activity:
 @Desc       :   None
 -------------------------------------------------
 """
+
 # here put the import lib
+from ..constants.string_constant import CommonExpression
 
 
 class RadixUtil:
     ZERO = "0"
+    INDEX_NOT_FOUND = CommonExpression.INDEX_NOT_FOUND
 
     @classmethod
     def convert_base(cls, num: int | str, from_base: int, to_base: int) -> str:
@@ -56,3 +59,30 @@ class RadixUtil:
 
         decimal_val = to_decimal(num, from_base)
         return from_decimal(decimal_val, to_base)
+
+    @classmethod
+    def get_lst_one_idx(cls, i: int) -> int:
+        """
+        返回十进制数i的二进制表示中最后一个1相对于末尾的位置
+
+        Parameters
+        ----------
+        i : int
+            待求的十进制数
+
+        Returns
+        -------
+        int
+            如果给定的十进制数小于0返回-1, 否则返回二进制表示中最后一个1相对于末尾的位置
+        """
+        if i <= 0:
+            return -1
+
+        base_to_expression = cls.convert_base(i, 10, 2)
+        length = len(base_to_expression)
+
+        for i, v in enumerate(base_to_expression):
+            if v == "1":
+                return length - i - 1
+
+        return cls.INDEX_NOT_FOUND
