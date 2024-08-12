@@ -212,7 +212,7 @@ class PhoneUtils:
         str
             前3位手机号
         """
-        return StringUtil.sub_lst(phone, 0, 3)
+        return StringUtil.sub_sequence(phone, 0, 3)
 
     @classmethod
     @UnCkeckFucntion(WARNING_ENABLED)
@@ -230,7 +230,7 @@ class PhoneUtils:
         str
             手机号中间4位
         """
-        return StringUtil.sub_lst(phone, 3, 7)
+        return StringUtil.sub_sequence(phone, 3, 7)
 
     @classmethod
     @UnCkeckFucntion(WARNING_ENABLED)
@@ -248,4 +248,4 @@ class PhoneUtils:
         str
             手机号后4位
         """
-        return StringUtil.sub_lst(phone, 7, 11)
+        return StringUtil.sub_sequence(phone, 7, 11)

@@ -433,3 +433,23 @@ class DatetimeUtil:
             raise ValueError("value cannot be None")
 
         return value * from_unit.value.unit_val_in_ns / to_unit.value.unit_val_in_ns
+
+    @classmethod
+    def datetime_to_ISO8601(cls, dt: datetime) -> str:
+        """
+        将datetime对象转换为ISO8601格式的字符串
+
+        Parameters
+        ----------
+        dt : datetime
+            待转换的datetime对象
+
+        Returns
+        -------
+        str
+            转换后的字符串
+        """
+        if dt is None:
+            raise ValueError("dt cannot be None")
+
+        return dt.isoformat()

@@ -16,6 +16,7 @@ Change Activity:
 
 import itertools as it
 import string
+import sys
 import typing
 from collections.abc import Sequence, Set
 from typing import Any
@@ -676,7 +677,7 @@ class SequenceUtil:
         return [i for i in lst if BooleanUtil.value_of(i)]
 
     @classmethod
-    def sub_lst(
+    def sub_sequence(
         cls,
         lst: typing.Sequence[Any],
         start: int,
@@ -846,27 +847,7 @@ class SequenceUtil:
             如果所有元素相等返回True, 否则返回False
         """
         g = it.groupby(iterable)
-        return next(g, True) and not next(g, False)
-
-    @classmethod
-    def is_items_eauql(cls, seq: typing.Sequence[Any]) -> bool:
-        """
-        判断序列中y元素是否都相等
-
-        Parameters
-        ----------
-        seq : typing.Sequence[Any]
-            待检测序列
-
-        Returns
-        -------
-        bool
-            如果所有元素相等或者序列为空返回 True, 否则返回False
-        """
-        if cls.is_empty(seq):
-            return True
-        first_item = seq[0]
-        return seq.count(first_item) == len(seq)
+        return next(g, True) and not next(g, False)  # type: ignore
 
     @classmethod
     def rotate(cls, seq: typing.Sequence[Any], move_length: int) -> typing.Sequence[Any]:
@@ -899,6 +880,74 @@ class SequenceUtil:
             res.append(i)
 
         return res
+
+    @classmethod
+    def get_chunks(
+        cls,
+        seq: typing.Sequence[Any],
+        chunk_size: int,
+    ) -> typing.Generator[typing.Sequence[Any], None, None]:
+        """
+        根据给定的大小, 将序列切分为多个块
+
+        Parameters
+        ----------
+        seq : typing.Sequence[Any]
+            待切分序列
+        chunk_size : int
+            给定的块大小
+
+        Returns
+        -------
+        typing.Generator[typing.Sequence[Any], None, None]
+            块序列的生成器
+
+        Yields
+        ------
+        Iterator[typing.Generator[typing.Sequence[Any], None, None]]
+            块序列的生成器
+
+        NOTES:
+        ------
+        参考:https://stackoverflow.com/a/312464
+        """
+        seq_length = cls.get_length(seq)
+        for i in range(0, seq_length, chunk_size):
+            yield seq[i : i + chunk_size]
+
+    @classmethod
+    def flatten_sequence(
+        cls,
+        seq: typing.Sequence[Any],
+    ) -> typing.Generator[Any, None, None]:
+        """
+        将嵌套序列展开
+
+        Example:
+        ----------
+        >>> lst = [1, [2, 3], 4, [5, [6, 7]]]
+        ... list(SequenceUtil.flatten_sequence(lst))
+        [1, 2, 3, 4, 5, 6, 7]
+
+        Parameters
+        ----------
+        seq : typing.Sequence[Any]
+            待展开序列
+
+        Returns
+        -------
+        None
+            展开后的序列
+
+        NOTES:
+        ------
+        refer: https://stackoverflow.com/a/2158532
+        """
+        for i in seq:
+            if isinstance(i, Sequence):
+                yield from cls.flatten_sequence(i)
+            else:
+                yield i
 
 
 class StringUtil(SequenceUtil):
@@ -2462,7 +2511,7 @@ class StringUtil(SequenceUtil):
         if cls.get_length(s) <= length:
             return s
         else:
-            return cls.sub_lst(s, 0, length - cls.get_length(ellipsis)) + ellipsis  # type: ignore
+            return cls.sub_sequence(s, 0, length - cls.get_length(ellipsis)) + ellipsis  # type: ignore
 
     @classmethod
     def get_vowels_from_str(cls, s: str) -> str:
@@ -2579,3 +2628,126 @@ class StringUtil(SequenceUtil):
             return text.ljust(width, padding)
         else:
             return text.center(width, padding)
+
+    @classmethod
+    def only_numerics(cls, s: str) -> str:
+        """
+        仅保留字符串中的数字
+
+        Parameters
+        ----------
+        s : str
+            待处理字符串
+
+        Returns
+        -------
+        str
+            仅保留数字的字符串
+        """
+        return "".join(filter(str.isdigit, s))
+
+    @classmethod
+    def only_alphabetic(cls, s: str) -> str:
+        """
+        仅保留字符串中的字母
+
+        Parameters
+        ----------
+        s : str
+            待处理字符串
+
+        Returns
+        -------
+        str
+            仅保留字母的字符串
+        """
+        return "".join(filter(str.isalpha, s))
+
+    @classmethod
+    def only_alphanumeric(cls, s: str) -> str:
+        """
+        仅保留字符串中的字母和数字
+
+        Parameters
+        ----------
+        s : str
+            待处理字符串
+
+        Returns
+        -------
+        str
+            仅保留字母和数字的字符串
+        """
+        return "".join(filter(str.isalnum, s))
+
+    @classmethod
+    def only_uppercase(cls, s: str) -> str:
+        """
+        仅保留字符串中的大写字母
+
+        Parameters
+        ----------
+        s : str
+            待处理字符串
+
+        Returns
+        -------
+        str
+            仅保留大写字母的字符串
+        """
+        return "".join(filter(str.isupper, s))
+
+    @classmethod
+    def only_lowercase(cls, s: str) -> str:
+        """
+        仅保留字符串中的小写字母
+
+        Parameters
+        ----------
+        s : str
+            待处理字符串
+
+        Returns
+        -------
+        str
+            仅保留小写字母的字符串
+        """
+        return "".join(filter(str.islower, s))
+
+    @classmethod
+    def only_printable(cls, s: str) -> str:
+        """
+        仅保留字符串中的可打印字符
+
+        Parameters
+        ----------
+        s : str
+            待处理字符串
+
+        Returns
+        -------
+        str
+            仅保留可打印字符的字符串
+        """
+        return "".join(filter(str.isprintable, s))
+
+    @classmethod
+    def only_ascii(cls, s: str) -> str:
+        """
+        仅保留字符串中的ASCII字符
+
+        Parameters
+        ----------
+        s : str
+            待处理字符串
+
+        Returns
+        -------
+        str
+            仅保留ASCII字符的字符串
+        """
+        # PERF 考虑版本兼容性问题
+        if sys.version_info[1] >= 7:
+            return "".join(filter(lambda x: x.isascii(), s))
+        else:
+            return "".join(filter(lambda x: ord(x) < 128, s))

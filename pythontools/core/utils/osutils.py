@@ -26,6 +26,9 @@ from .basicutils import StringUtil
 
 
 class OsUtil:
+    WINDOWS_LINE_ENDING = "\r\n"
+    LINUX_LINE_ENDING = "\n"
+
     @classmethod
     def is_exist(cls, p: str, *, raise_exception: bool = False) -> bool:
         """
@@ -383,6 +386,46 @@ class OsUtil:
             for i, _ in enumerate(f_obj):
                 pass
         return i + 1
+
+    @classmethod
+    def windows_to_linux_line_ending(cls, text: str | bytes) -> str:
+        """
+        将Windows换行符转换为Linux换行符
+
+        Parameters
+        ----------
+        text : str
+            待转换文本
+
+        Returns
+        -------
+        str
+            转换后的文本
+        """
+        if isinstance(text, bytes):
+            text = text.decode("utf-8")
+
+        return text.replace(cls.WINDOWS_LINE_ENDING, cls.LINUX_LINE_ENDING)
+
+    @classmethod
+    def linux_to_windows_line_ending(cls, text: str | bytes) -> str:
+        """
+        将Linux换行符转换为Windows换行符
+
+        Parameters
+        ----------
+        text : str
+            待转换文本
+
+        Returns
+        -------
+        str
+            转换后的文本
+        """
+        if isinstance(text, bytes):
+            text = text.decode("utf-8")
+
+        return text.replace(cls.LINUX_LINE_ENDING, cls.WINDOWS_LINE_ENDING)
 
 
 class SysUtil:

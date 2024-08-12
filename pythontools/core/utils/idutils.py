@@ -30,8 +30,8 @@ from ..validators.datetime_validator import DatetimeValidator
 class IDCard:
     def __init__(self, id: str):
         self.id: str = id
-        self.province_code: str = BasicConvertor.to_str(StringUtil.sub_lst(id, 0, 2))
-        self.area_code: str = BasicConvertor.to_str(StringUtil.sub_lst(id, 0, 6))
+        self.province_code: str = BasicConvertor.to_str(StringUtil.sub_sequence(id, 0, 2))
+        self.area_code: str = BasicConvertor.to_str(StringUtil.sub_sequence(id, 0, 6))
         self.birthday: datetime | None = IDCardUtil.get_birthday_from_id(id)
 
     def __repr__(self) -> str:
@@ -67,7 +67,7 @@ class IDCard:
         str
             性别
         """
-        gender_code = StringUtil.sub_lst(self.id, 16, 17)
+        gender_code = StringUtil.sub_sequence(self.id, 16, 17)
         gender_code = BasicConvertor.to_int(gender_code)
         gender_obj = Gender.get_gender_by_code(gender_code)
         return gender_obj.value.sex
@@ -238,12 +238,12 @@ class IDCardUtil:
         if cls.CHINA_ID_MAX_LENGTH != len(s):
             return False
 
-        pro_code = SequenceUtil.sub_lst(s, 0, 2)
+        pro_code = SequenceUtil.sub_sequence(s, 0, 2)
         # 校验省
         if pro_code not in PRO_DICT:
             return False
         # 校验生日
-        birthday = SequenceUtil.sub_lst(s, 6, 14)
+        birthday = SequenceUtil.sub_sequence(s, 6, 14)
         if not DatetimeValidator.is_valid_birthday(birthday):
             return False
         # 校验最后一位
@@ -285,7 +285,7 @@ class IDCardUtil:
         str
             校验位
         """
-        code17 = SequenceUtil.sub_lst(s, 0, 17)
+        code17 = SequenceUtil.sub_sequence(s, 0, 17)
         check_sum = 0
         for i in range(0, 17):
             check_sum += ((1 << (17 - i)) % 11) * BasicConvertor.to_int(code17[i])
@@ -312,7 +312,7 @@ class IDCardUtil:
         """
         if not cls.is_valid_id(s):
             return None
-        birthday = SequenceUtil.sub_lst(s, 6, 14)
+        birthday = SequenceUtil.sub_sequence(s, 6, 14)
         matched = PatternPool.BIRTHDAY_PATTERN.match(birthday)
 
         if matched is None:
