@@ -209,3 +209,23 @@ class ReUtil:
         """
         pattern = re.compile(reg)
         return cls.is_match(pattern, s, raise_exception=raise_exception)
+
+    @classmethod
+    def find_all(cls, pattern: re.Pattern, s: str, from_index: int = 0) -> list[str]:
+        """
+        找到所有匹配的字符串
+
+        Parameters
+        ----------
+        pattern : re.Pattern
+            编译后的正则模式
+        s : str
+            待匹配字符串
+
+        Returns
+        -------
+        list[str]
+            所有匹配的字符串列表
+        """
+        res = pattern.findall(s, from_index)
+        return res

@@ -14,9 +14,12 @@ Change Activity:
 """
 
 # here put the import lib
+import re
 from typing import Self
 
+from pythontools.core.errors import UnsupportedOperationError
 from pythontools.core.utils.basicutils import StringUtil
+from pythontools.core.utils.reutils import ReUtil
 
 from .finder import Finder
 
@@ -253,11 +256,134 @@ class StrFinder(AbstractStrFinder):
         self.text = ""
 
 
-class LengthFinder(AbstractStrFinder):
-    # TODO 实现查找逻辑
-    ...
-
-
 class PatternFinder(AbstractStrFinder):
-    # TODO 实现查找逻辑
-    ...
+    def __init__(
+        self,
+        text: str,
+        regex: str | re.Pattern,
+        case_insensitive: bool = False,
+    ) -> None:
+        self.pattern: re.Pattern = None  # type: ignore
+        self.case_insensitive = case_insensitive
+        self.matches: list[str] = []
+        super().__init__(text)
+        self._initialize_pattern(regex)
+
+    def _initialize_pattern(
+        self,
+        regex: str | re.Pattern,
+    ) -> None:
+        if isinstance(regex, str):
+            self.pattern = re.compile(regex, re.IGNORECASE if self.case_insensitive else 0)
+        else:
+            self.pattern = re.compile(regex.pattern, regex.flags)
+
+    def set_pattern(
+        self,
+        regex: str | re.Pattern,
+    ) -> Self:
+        """
+        设置使用的正则表达式模板
+
+        Parameters
+        ----------
+        regex : str | re.Pattern
+            新的正则表达式
+
+        Returns
+        -------
+        Self
+            Finder 对象本身, 方便链式调用
+        """
+        self._initialize_pattern(regex)
+        return self
+
+    def set_case_insensitive(self, case_insensitive: bool) -> Self:
+        """
+        设置是否忽略大小写
+
+        Parameters
+        ----------
+        case_insensitive : bool
+            是否忽略大小写
+
+        Returns
+        -------
+        Self
+            Finder对象本身, 方便链式调用
+        """
+        self.case_insensitive = case_insensitive
+        self._initialize_pattern(self.pattern)
+        return self
+
+    def set_reverse(self, reverse: bool) -> Self:
+        """
+        设置是否反向查找
+
+        Parameters
+        ----------
+        reverse : bool
+            是否反向查找
+
+        Returns
+        -------
+        Self
+            Finder对象本身, 方便链式调用
+
+        Raises
+        ------
+        UnsupportedOperationError
+            调用该方法时抛出异常
+        """
+        raise UnsupportedOperationError("Reverse is invalid for Pattern")
+
+    def start(self, from_idx: int) -> int:
+        """
+        开始查找起始字段索引
+
+        Parameters
+        ----------
+        from_idx : int
+            查找开始位置索引
+
+        Returns
+        -------
+        int
+            如果没有找到返回-1,否则返回开始位置索引
+        """
+        matches = ReUtil.find_all(self.pattern, self.text, from_idx)
+        if not matches:
+            return PatternFinder.INDEX_NOT_FOUND
+        else:
+            self.matches = matches
+            return StringUtil.first_index_of(self.text, from_idx, matches[0])
+
+    def end(self, start_idx: int) -> int:
+        """
+        根据给定的查找结果起始索引，返回结束位置索引
+
+        Parameters
+        ----------
+        start_idx : int
+            给定的查找结果索引, start 方法的返回值
+
+        Returns
+        -------
+        int
+            如果没有找到返回-1,否则返回结束位置索引
+        """
+        first_item = self.matches[0]
+        return start_idx + StringUtil.get_length(first_item) - 1
+
+    def reset(self) -> None:
+        """
+        重置各个参数和标志位
+        1. success: 是否找到
+        2. end_idx: 结束位置索引
+        3. text: 待查找的文本, Finder的核心是复用查找信息, 也就是说目标字符串是不变的, 变化的只有被查找文本。
+        4. matches: 匹配结果列表
+        """
+        self.success = False
+        self.set_end_idx(PatternFinder.INDEX_NOT_FOUND)
+        self.text = ""
+        self.matches = []
