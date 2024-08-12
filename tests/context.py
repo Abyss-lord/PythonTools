@@ -31,6 +31,8 @@ from pythontools.core.constants.people_constant import Gender  # noqa: F401
 from pythontools.core.convert.convertor import BasicConvertor  # noqa: F401
 from pythontools.core.decorator import Singleton, TraceUsedTime, UnCkeckFucntion  # noqa: F401
 from pythontools.core.errors import ConversionError, ValidationError  # noqa: F401
+from pythontools.core.io.fileutils import OsUtil  # noqa: F401
+from pythontools.core.text.finder.strfinder import AbstractStrFinder, PatternFinder, StrFinder  # noqa: F401
 from pythontools.core.text.strjoiner import StrJoiner  # noqa: F401
 from pythontools.core.utils.basicutils import (
     BooleanUtil,  # noqa: F401
@@ -40,8 +42,9 @@ from pythontools.core.utils.basicutils import (
 )
 from pythontools.core.utils.datetimeutils import DatetimeUtil  # noqa: F401
 from pythontools.core.utils.desensitizedUtils import DesensitizedUtil  # noqa: F401
+from pythontools.core.utils.encoding.graycode import GrayCode  # noqa: F401
 from pythontools.core.utils.idutils import IDCardUtil  # noqa: F401
-from pythontools.core.utils.osutils import OsUtil, SysUtil  # noqa: F401
+from pythontools.core.utils.osutils import SysUtil  # noqa: F401
 from pythontools.core.utils.radixutils import RadixUtil  # noqa: F401
 from pythontools.core.utils.reutils import ReUtil  # noqa: F401
 from pythontools.core.utils.typeutils import TypeUtil  # noqa: F401

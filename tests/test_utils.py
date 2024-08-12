@@ -812,6 +812,11 @@ class TestRadixUtil:
         assert RadixUtil.convert_base("10101010", 2, 8) == "252"
         assert RadixUtil.convert_base("252", 8, 2) == "10101010"
 
+    @classmethod
+    def test_get_lst_one_idx(cls) -> None:
+        assert RadixUtil.get_lst_one_idx(3) == 1
+        logger.debug(RadixUtil.get_lst_one_idx(1))
+
 
 class TestBooleanUtil:
     @classmethod
@@ -963,6 +968,59 @@ class TestRandomUtil:
 
 
 class TestSequenceUtil(BaseTest):
+    @classmethod
+    def test_get_chunks(cls) -> None:
+        test_seq_1 = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        chunks = SequenceUtil.get_chunks(test_seq_1, 3)
+        assert next(chunks) == [1, 2, 3]
+        assert next(chunks) == [4, 5, 6]
+        assert next(chunks) == [7, 8, 9]
+        with pytest.raises(StopIteration):
+            next(chunks)
+
+        test_seq_2 = [1, 2, 3, 4]
+        chunks = SequenceUtil.get_chunks(test_seq_2, 3)
+        assert next(chunks) == [1, 2, 3]
+        assert next(chunks) == [4]
+        with pytest.raises(StopIteration):
+            next(chunks)
+
+        test_seq_3: list[int] = []
+        chunks = SequenceUtil.get_chunks(test_seq_3, 3)
+        with pytest.raises(StopIteration):
+            next(chunks)
+
+        test_seq_4 = None
+        chunks = SequenceUtil.get_chunks(test_seq_4, 3)
+        with pytest.raises(ValueError):
+            next(chunks)
+
+    @classmethod
+    def test_(cls) -> None:
+        test_seq_1 = [1, [2, 3], 4, [5, [6, 7]]]
+        flatten_lst = SequenceUtil.flatten_sequence(test_seq_1)
+        assert list(flatten_lst) == [1, 2, 3, 4, 5, 6, 7]
+
+        test_seq_2 = [1, [2, 3], 4, [5, [6, 7]]]
+        flatten_lst = SequenceUtil.flatten_sequence(test_seq_2)
+        for i in range(1, 8):
+            assert next(flatten_lst) == i
+
+        test_seq_3 = [1, 2, 3, 4, 5]
+        flatten_lst = SequenceUtil.flatten_sequence(test_seq_3)
+        for i in range(1, 6):
+            assert next(flatten_lst) == i
+
+        test_seq_4 = []  # type: ignore
+        flatten_lst = SequenceUtil.flatten_sequence(test_seq_4)
+        with pytest.raises(StopIteration):
+            next(flatten_lst)
+
+        test_seq_5 = None  # type: ignore
+        flatten_lst = SequenceUtil.flatten_sequence(test_seq_5)  # type: ignore
+        with pytest.raises(TypeError):
+            next(flatten_lst)
+
     @classmethod
     def test_is_not_empty(cls) -> None:
         lst = [1, 2, 3]
