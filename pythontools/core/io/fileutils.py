@@ -533,8 +533,8 @@ class OsUtil:
         if check_exist:
             cls.is_exist(p, raise_exception=True)
 
-        create_time_in_nanoseconds = cls.get_create_time_in_nanoseconds(p, check_exist=True)
-        format_time = time.strftime(time_format, time.localtime(create_time_in_nanoseconds))
+        create_time_in_seconds = cls.get_create_time_in_seconds(p, check_exist=True)
+        format_time = time.strftime(time_format, time.localtime(create_time_in_seconds))
 
         return format_time
 
