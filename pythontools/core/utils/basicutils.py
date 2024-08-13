@@ -18,18 +18,12 @@ import itertools as it
 import string
 import sys
 import typing
-from collections.abc import Sequence, Set
+from collections.abc import Mapping, Sequence, Set
 from typing import Any
 
-from ..constants.string_constant import CharPool
+from ..constants.string_constant import CharPool, CharsetUtil
 from ..decorator import UnCkeckFucntion
 from .randomutils import RandomUtil
-
-
-class CharsetUtil:
-    ISO_8859_1: typing.Final[str] = "ISO-8859-1"
-    UTF_8: typing.Final[str] = "UTF-8"
-    GBK: typing.Final[str] = "GBK"
 
 
 class BooleanUtil:
@@ -440,10 +434,7 @@ class SequenceUtil:
         :param sequence: 待检测序列
         :return: 返回None的索引, 如果不存在返回-1
         """
-        for i, v in enumerate(sequence):
-            if v is None:
-                return i
-        return cls.INDEX_NOT_FOUND
+        return cls.first_index_of(sequence, 0, None)
 
     @classmethod
     def last_idx_of_none(cls, sequence: typing.Sequence[Any]) -> int:
@@ -460,10 +451,15 @@ class SequenceUtil:
         int
             最后一个None元素的索引位置
         """
-        return cls.last_index_of(sequence, None)
+        return cls.last_index_of(sequence, -1, None)
 
     @classmethod
-    def first_index_of(cls, sequence: typing.Sequence[Any], value: Any) -> int:
+    def first_index_of(
+        cls,
+        sequence: typing.Sequence[Any],
+        from_idx: int,
+        value: Any,
+    ) -> int:
         """
         寻找序列中第一个指定元素的索引
 
@@ -473,6 +469,8 @@ class SequenceUtil:
             待检测序列
         value : Any
             待查找元素
+        from_idx : int
+            查找起始索引
 
         Returns
         -------
@@ -481,12 +479,19 @@ class SequenceUtil:
         """
         if cls.is_empty(sequence):
             return cls.INDEX_NOT_FOUND
-
-        idx = sequence.index(value)
-        return cls.INDEX_NOT_FOUND if idx == -1 else idx
+        try:
+            idx = sequence.index(value, from_idx)
+        except ValueError:
+            return cls.INDEX_NOT_FOUND
+        return idx
 
     @classmethod
-    def last_index_of(cls, sequence: typing.Sequence[Any], value: Any) -> int:
+    def last_index_of(
+        cls,
+        sequence: typing.Sequence[Any],
+        from_idx: int,
+        value: Any,
+    ) -> int:
         """
         寻找序列中最后一个指定元素的索引
 
@@ -506,7 +511,11 @@ class SequenceUtil:
             return cls.INDEX_NOT_FOUND
 
         length = len(sequence)
+        # 计算倒序后的起始索引
+        from_idx = abs(from_idx) - 1 if from_idx < 0 else length - 1 - from_idx
         for i, item in enumerate(reversed(sequence)):
+            if from_idx > i:
+                continue
             if item == value:
                 return length - i - 1
         return cls.INDEX_NOT_FOUND
@@ -949,6 +958,65 @@ class SequenceUtil:
             else:
                 yield i
 
+    @classmethod
+    def split_sequence(cls, seq: typing.Sequence[Any], num_of_group: int) -> Sequence[Sequence[Any]]:
+        """
+        将序列切分成指定数量的组
+
+        Parameters
+        ----------
+        seq : typing.Sequence[Any]
+            待切分序列
+        num_of_group : int
+            给定的组数量
+
+        Returns
+        -------
+        Sequence[Sequence[Any]]
+            切分后的多个序列组成的列表
+
+        Raises
+        ------
+        ValueError
+            如果num_of_group小于等于0则抛出异常
+        """
+        if num_of_group <= 0:
+            raise ValueError("num_of_group should be greater than 0")
+
+        if num_of_group == 1:
+            return [seq]
+
+        length = cls.get_length(seq)
+        if length < num_of_group:
+            return [[i] for i in seq]
+
+        single_cnt_of_group = length / num_of_group
+        out = []
+        last = 0.0
+
+        while last < length:
+            out.append(seq[int(last) : int(last + single_cnt_of_group)])
+            last += single_cnt_of_group
+
+        return out
+
+    @classmethod
+    def split_half(cls, seq: typing.Sequence[Any]) -> Sequence[Sequence[Any]]:
+        """
+        将序列切分成前后两半
+
+        Parameters
+        ----------
+        seq : typing.Sequence[Any]
+            待切分序列
+
+        Returns
+        -------
+        typing.Tuple[typing.Sequence[Any], typing.Sequence[Any]]
+            切分后的前后两半序列
+        """
+        return cls.split_sequence(seq, 2)
+
 
 class StringUtil(SequenceUtil):
     # UNICODE 字符宽度
@@ -1068,6 +1136,19 @@ class StringUtil(SequenceUtil):
         return True
 
     @classmethod
+    def is_unicode_str(cls, s: str) -> bool:
+        """
+        判断字符串是否为unicode字符串
+
+        Parameters
+        ----------
+        s : str
+            待检测字符
+        """
+        code_point = ord(s)
+        return 0 <= code_point <= 0x10FFFF
+
+    @classmethod
     def is_file_separator(cls, s: str) -> bool:
         """
         判断给定字符是否是文件分隔符, 即 / 或 \
@@ -1170,7 +1251,7 @@ class StringUtil(SequenceUtil):
         return True
 
     @classmethod
-    def is_startswith(
+    def is_starts_with(
         cls,
         s: str,
         prefix: str,
@@ -1230,7 +1311,7 @@ class StringUtil(SequenceUtil):
         if cls.is_empty(prefixes) or cls.is_blank(s):
             return False
         for prefix in prefixes:
-            if cls.is_startswith(s, prefix, case_insensitive=case_insensitive):
+            if cls.is_starts_with(s, prefix, case_insensitive=case_insensitive):
                 return True
 
         return False
@@ -1648,24 +1729,59 @@ class StringUtil(SequenceUtil):
         strict_mode: bool = False,
     ) -> bool:
         """
+        判断两个字符串是否相等
 
-        :param s1:
-        :param s2:
-        :param case_insensitive:
-        :param strict_mode:
-        :return:
+        Parameters
+        ----------
+        s1 : str
+            待检测字符串 s1
+        s2 : str
+            待检测字符串 s2
+        case_insensitive : bool, optional
+            是否忽略大小写, by default True
+        strict_mode : bool, optional
+            是否启用严格模式,即是否调用strip()函数, by default False
+
+        Returns
+        -------
+        bool
+            返回两个字符串是否相等
         """
+        if (s1 is None and s2 is not None) or (s1 is not None and s2 is None):
+            return False
+
+        if s1 is None or s2 is None:
+            return True
+
         if strict_mode:
             return s1 == s2
+
         s1 = s1.strip()
         s2 = s2.strip()
 
         if len(s1) != len(s2):
             return False
 
-        if case_insensitive:
-            return s1.lower() == s2.lower()
-        return s1.strip() == s2.strip()
+        for i, j in zip(s1, s2):
+            if case_insensitive:
+                if i.lower() != j.lower() and i.upper() != j.upper():
+                    return False
+            else:
+                if i != j:
+                    return False
+
+        return True
+
+    @classmethod
+    def not_equals(
+        cls,
+        s1: str,
+        s2: str,
+        *,
+        case_insensitive: bool = True,
+        strict_mode: bool = False,
+    ) -> bool:
+        return not cls.equals(s1, s2, case_insensitive=case_insensitive, strict_mode=strict_mode)
 
     @classmethod
     def equals_any(cls, s: str, *args: str, case_insensitive: bool = True) -> bool:
@@ -2300,7 +2416,7 @@ class StringUtil(SequenceUtil):
             移除后的字符串
         """
         # NOTE 兼容3.9之前的版本，3.9之后可以直接调用str.removesuffix()方法
-        if cls.is_startswith(s, prefix, case_insensitive=case_insensitive):
+        if cls.is_starts_with(s, prefix, case_insensitive=case_insensitive):
             return s[len(prefix) :]
         else:
             return s
@@ -2751,3 +2867,171 @@ class StringUtil(SequenceUtil):
             return "".join(filter(lambda x: x.isascii(), s))
         else:
             return "".join(filter(lambda x: ord(x) < 128, s))
+
+    @classmethod
+    def first_index_of(
+        cls,
+        sequence: Sequence[str],
+        from_index: int,
+        value: str,
+        case_insensitive: bool = True,
+    ) -> int:
+        """
+        在给定的字符串序列中查找指定字符串的第一个索引
+
+        Parameters
+        ----------
+        sequence : Sequence[str]
+            待查找的字符串序列
+        value : str
+            目标字符串
+        case_insensitive : bool, optional
+            是否忽略大小写, by default True
+
+        Returns
+        -------
+        int
+            如果找到目标字符串, 则返回其索引, 否则返回 -1
+        """
+        if cls.is_empty(sequence):
+            return cls.INDEX_NOT_FOUND
+        sub_seq_length = cls.get_length(value)
+        split_main_seq = sequence[from_index:]
+
+        for i in range(len(split_main_seq)):
+            if cls.is_sub_equal(split_main_seq, i, value, 0, sub_seq_length, case_insensitive=case_insensitive):
+                return i + from_index
+
+        return cls.INDEX_NOT_FOUND
+
+    @classmethod
+    def last_index_of(
+        cls,
+        sequence: Sequence[str],
+        from_idx: int,
+        value: str,
+        case_insensitive: bool = True,
+    ) -> int:
+        """
+        在给定的字符串序列中查找指定字符串的最后一个索引
+
+        Parameters
+        ----------
+        sequence : Sequence[str]
+            待查找的字符串序列
+        value : str
+            目标字符串
+        case_insensitive : bool, optional
+            是否忽略大小写, by default True
+
+        Returns
+        -------
+        int
+            如果找到目标字符串, 则返回其索引, 否则返回 -1
+        """
+        if cls.is_empty(sequence):
+            return cls.INDEX_NOT_FOUND
+
+        main_seq_length: int = cls.get_length(sequence)
+        sub_seq_length = cls.get_length(value)
+        from_idx = abs(from_idx) - 1 if from_idx < 0 else main_seq_length - 1 - from_idx
+
+        for i in range(from_idx - 1, -1):
+            if cls.is_sub_equal(sequence, i, value, 0, sub_seq_length, case_insensitive=case_insensitive):
+                return i
+
+        return cls.INDEX_NOT_FOUND
+
+    @classmethod
+    def is_sub_equal(
+        cls,
+        main_seq: Sequence[str],
+        start_idx: int,
+        sub_seq: Sequence[str],
+        sub_start_idx: int,
+        split_length: int,
+        case_insensitive: bool = True,
+    ) -> bool:
+        """
+        截取两个字符串的不同部分（长度一致），判断截取的子串是否相同 任意一个字符串为null返回false
+
+        Parameters
+        ----------
+        main_seq : Sequence[Any]
+            主要字符串
+        start_idx : int
+            主要字符串的起始位置
+        sub_seq : Sequence[Any]
+            次要字符串
+        sub_start_idx : int
+            次要字符串的起始位置
+        split_length : int
+            截取长度
+
+        Returns
+        -------
+        bool
+            子字符串是否相同
+        """
+        if cls.is_empty(main_seq) or cls.is_empty(sub_seq):
+            return False
+
+        main_seq_len = len(main_seq)
+        sub_seq_len = len(sub_seq)
+        if start_idx < 0 or sub_start_idx < 0:
+            return False
+
+        if main_seq_len < start_idx + split_length or sub_seq_len < sub_start_idx + split_length:
+            return False
+
+        main_split_seq = main_seq[start_idx : start_idx + split_length]
+        sub_split_seq = sub_seq[sub_start_idx : sub_start_idx + split_length]
+
+        for i, j in zip(main_split_seq, sub_split_seq):
+            tmp_i = i
+            tmp_j = j
+            if case_insensitive:
+                tmp_i = tmp_i.lower()
+                tmp_j = tmp_j.lower()
+
+            if tmp_i != tmp_j:
+                return False
+
+        return True
+
+    @classmethod
+    def count_letter_by_type(cls, s: str) -> Mapping[str, int]:
+        """
+        统计字符串中各类字符的数量
+
+        Parameters
+        ----------
+        s : str
+            待统计字符串
+
+        Returns
+        -------
+        Mapping[str, int]
+            各类字符的数量
+        """
+        basic_dict = {
+            "upper": 0,
+            "lower": 0,
+            "digit": 0,
+            "other": 0,
+            "whitespaces": 0,
+        }
+
+        for c in s:
+            if c in string.ascii_lowercase:
+                basic_dict["lower"] += 1
+            elif c in string.ascii_uppercase:
+                basic_dict["upper"] += 1
+            elif c in string.digits:
+                basic_dict["digit"] += 1
+            elif c in string.whitespace:
+                basic_dict["whitespaces"] += 1
+            else:
+                basic_dict["other"] += 1
+
+        return basic_dict
