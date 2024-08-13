@@ -32,3 +32,8 @@ class ConversionError(Exception):
 
     def __str__(self) -> str:
         return f"ConversionError: {self.value}, type:{type(self.value)} cannot be converted to {self.type_name}"
+
+
+class UnsupportedOperationError(Exception):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
