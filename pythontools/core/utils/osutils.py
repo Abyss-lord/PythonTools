@@ -47,7 +47,7 @@ class SysUtil:
             是否是 Mac 平台
         """
         platform_info = cls.get_platform_info()
-        if StringUtil.is_startswith(platform_info, "macos", case_insensitive=True):
+        if StringUtil.is_starts_with(platform_info, "macos", case_insensitive=True):
             return True
         return False
 
@@ -66,7 +66,7 @@ class SysUtil:
         1. 依赖 platform 库
         """
         platform_info = cls.get_platform_info()
-        if StringUtil.is_startswith(platform_info, "linux", case_insensitive=True):
+        if StringUtil.is_starts_with(platform_info, "linux", case_insensitive=True):
             return True
         return False
 
@@ -85,7 +85,7 @@ class SysUtil:
         1. 依赖 platform 库
         """
         platform_info = cls.get_platform_info()
-        if StringUtil.is_startswith(platform_info, "windows", case_insensitive=True):
+        if StringUtil.is_starts_with(platform_info, "windows", case_insensitive=True):
             return True
         return False
 

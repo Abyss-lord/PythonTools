@@ -428,7 +428,7 @@ class DatetimeUtil:
         return res_dt.strftime("%H:%M:%S")
 
     @classmethod
-    def conver_time(cls, value: int, from_unit: TimeUnit, to_unit: TimeUnit) -> int | float:
+    def conver_time(cls, value: int | float, from_unit: TimeUnit, to_unit: TimeUnit) -> int | float:
         if value is None:
             raise ValueError("value cannot be None")
 
