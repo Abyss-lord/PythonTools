@@ -44,11 +44,6 @@ class TestBasic:
         logger.info(tzinfo)
         logger.info(time.daylight)
 
-    def test_context(self):
-        s = "/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools/README.md"
-        with open(s, "rb") as f:
-            logger.info(type(f))
-
     def test_sys_args(self):
         pass
 
