@@ -18,7 +18,7 @@ import calendar
 
 import pytest
 
-from .context import DesensitizedType, Gender, Month, Quarter, TimeUnit, Week
+from .context_test import DesensitizedType, Gender, Month, Quarter, TimeUnit, Week
 
 
 class TestQuarterObject:

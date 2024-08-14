@@ -17,7 +17,7 @@ Change Activity:
 import pytest
 from loguru import logger
 
-from .context import GrayCode
+from .context_test import GrayCode
 
 
 class TestGrayCode:

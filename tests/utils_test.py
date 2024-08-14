@@ -22,7 +22,7 @@ from datetime import date, datetime, timedelta
 import pytest
 from loguru import logger
 
-from .context import (
+from .context_test import (
     BasicConvertor,
     BooleanUtil,
     CollectionUtil,
@@ -518,7 +518,7 @@ class TestIdUtil:
 
     @classmethod
     def test_is_valid_id_18(cls):
-        assert IDCardUtil.is_valid_id_18("110105199804246510")
+        assert IDCardUtil.is_valid_id_18("420902200505081317")
         assert not IDCardUtil.is_valid_id_18("1101051998042465")
         assert not IDCardUtil.is_valid_id_18("a10105199804246510")
         assert not IDCardUtil.is_valid_id_18("110105199813246510")
@@ -528,6 +528,14 @@ class TestIdUtil:
         _ = "123456789012345"
         # with pytest.raises(NotImplementedError):
         #     IDCardUtil.is_valid_id(id)
+
+    @classmethod
+    def test_generate_id(cls) -> None:
+        s = IDCardUtil.generate_random_valid_18_id()
+        card = IDCardUtil.generate_random_valid_card()
+        logger.debug(
+            f"{s=}, {card=}, {card.get_age()=}, {card.get_area()=}, {card.get_province()=}, {card.get_gender()=}"
+        )
 
 
 # class TestSysUtil:

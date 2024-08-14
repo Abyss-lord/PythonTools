@@ -17,7 +17,7 @@ Change Activity:
 import pytest
 from loguru import logger
 
-from .context import (
+from .context_test import (
     AbstractStrFinder,
     CharsetUtil,
     FnvHash,
