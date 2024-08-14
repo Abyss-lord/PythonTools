@@ -21,6 +21,7 @@ import datetime
 from ..constants.pattern_pool import PatternPool
 from ..convert.convertor import BasicConvertor
 from ..utils.datetimeutils import DatetimeUtil
+from ..utils.reutils import ReUtil
 
 
 class DatetimeValidator:
@@ -52,11 +53,11 @@ class DatetimeValidator:
         """
 
         # PERF 增加更多支持的日期格式
-        matched = PatternPool.BIRTHDAY_PATTERN.match(birthday)
+        matched = ReUtil.is_match(PatternPool.BIRTHDAY_PATTERN, birthday)
         if matched:
-            year = BasicConvertor.to_int(matched.group(1))
-            month = BasicConvertor.to_int(matched.group(3))
-            day = BasicConvertor.to_int(matched.group(5))
+            year = BasicConvertor.to_int(ReUtil.get_matched_group_by_idx(PatternPool.BIRTHDAY_PATTERN, birthday, 1))
+            month = BasicConvertor.to_int(ReUtil.get_matched_group_by_idx(PatternPool.BIRTHDAY_PATTERN, birthday, 3))
+            day = BasicConvertor.to_int(ReUtil.get_matched_group_by_idx(PatternPool.BIRTHDAY_PATTERN, birthday, 5))
             return cls.is_valid_date(year, month, day)  # type: ignore
         return False
 

@@ -18,13 +18,16 @@ import random
 import typing
 from datetime import datetime
 
+from pythontools.core.constants.pattern_pool import PatternPool
+
 from ..constants.area_constant import AREA_INFO, PRO_DICT
-from ..constants.pattern_pool import PatternPool
 from ..constants.people_constant import Gender
 from ..convert.convertor import BasicConvertor
 from ..utils.basicutils import SequenceUtil, StringUtil
 from ..utils.datetimeutils import DatetimeUtil
+from ..utils.reutils import ReUtil
 from ..validators.datetime_validator import DatetimeValidator
+from ..validators.string_validator import StringValidator
 
 
 class IDCard:
@@ -40,7 +43,7 @@ class IDCard:
             f"id='{self.id}', "
             f"province='{self.get_province()}', "
             f"area='{self.get_area()}', "
-            f"birthday='{self.birthday.strftime('%Y-%m-%d')}', "
+            f"birthday='{self.birthday.strftime('%Y-%m-%d')}', "  # type: ignore
             f"age={self.get_age()}, "
             f"gender={self.get_gender()}"
             f")"
@@ -67,9 +70,9 @@ class IDCard:
         str
             性别
         """
-        gender_code = StringUtil.sub_sequence(self.id, 16, 17)
-        gender_code = BasicConvertor.to_int(gender_code)
-        gender_obj = Gender.get_gender_by_code(gender_code)
+        gender_code_str = StringUtil.sub_sequence(self.id, 16, 17)
+        gender_code_int = BasicConvertor.to_int(gender_code_str)
+        gender_obj = Gender.get_gender_by_code(gender_code_int)
         return gender_obj.value.sex
 
     def get_province(self) -> str:
@@ -81,7 +84,7 @@ class IDCard:
         str
             省份信息
         """
-        return PRO_DICT.get(BasicConvertor.to_str(self.province_code))
+        return PRO_DICT.get(BasicConvertor.to_str(self.province_code), "")
 
     def get_area(self) -> str:
         """
@@ -92,7 +95,7 @@ class IDCard:
         str
             地区信息
         """
-        return AREA_INFO.get(self.area_code)
+        return AREA_INFO.get(self.area_code, "")
 
 
 class IDCardUtil:
@@ -101,6 +104,63 @@ class IDCardUtil:
     # 最长身份证位数
     CHINA_ID_MAX_LENGTH: typing.Final[int] = 18
     AREA_LST: list[str] = list(AREA_INFO.keys())
+
+    @classmethod
+    def convert_18_to_15(cls, id_card: str) -> str:
+        """
+        将 18 位身份证转换成 15 位身份证
+
+        Parameters
+        ----------
+        id_card : str
+            待转换 18 位身份证
+
+        Returns
+        -------
+        str
+            15 位身份证
+
+        Raises
+        ------
+        ValueError
+            如果给出的 18 位身份证不是有效的, 则抛出异常
+        """
+        if not cls.is_valid_id_18(id_card):
+            raise ValueError("id card is invalid")
+
+        length = StringUtil.get_length(id_card)
+
+        return StringUtil.sub_sequence(id_card, 0, 6) + StringUtil.sub_sequence(id_card, 8, length - 1)
+
+    @classmethod
+    def convert_15_to_18(cls, id_card: str) -> str:
+        """
+        将 15 位身份证转换成 18 位身份证
+
+        Parameters
+        ----------
+        id_card : str
+            待转换 15 位身份证
+
+        Returns
+        -------
+        str
+            18 位身份证
+
+        Raises
+        ------
+        ValueError
+            如果给出的 15 位身份证不是有效的, 则抛出异常
+        """
+        if not cls.is_valid_id_15(id_card):
+            raise ValueError("id card is invalid")
+
+        birthday = "19" + StringUtil.sub_sequence(id_card, 6, 12)
+        province_code = StringUtil.sub_sequence(id_card, 0, 6)
+        sequence_code = StringUtil.sub_sequence(id_card, 12)
+        core_17 = f"{province_code}{birthday}{sequence_code}"
+        check_sum = cls.get_check_sum(core_17)
+        return f"{core_17}{check_sum}"
 
     @classmethod
     def generate_random_valid_card(cls, gender: str = "男") -> IDCard:
@@ -192,8 +252,16 @@ class IDCardUtil:
         str
             随机15位身份证
         """
-        # TODO 实现15位身份证生成逻辑
-        return ""
+        area = random.choice(cls.AREA_LST)
+        birthday = DatetimeUtil.get_random_date(
+            start=datetime(1900, 1, 1),
+            end=datetime(1999, 10, 1),
+        )
+        sequence_code = random.randint(10, 99)
+        gender_enum_obj = Gender.get_gender_by_name(gender)
+        gender_code = gender_enum_obj.value.sex_code
+
+        return f"{area}{birthday.strftime('%y%m%d')}{sequence_code}{gender_code}"
 
     @classmethod
     def is_valid_id(cls, s: str) -> bool:
@@ -238,12 +306,12 @@ class IDCardUtil:
         if cls.CHINA_ID_MAX_LENGTH != len(s):
             return False
 
-        pro_code = SequenceUtil.sub_sequence(s, 0, 2)
+        pro_code = StringUtil.sub_sequence(s, 0, 2)
         # 校验省
         if pro_code not in PRO_DICT:
             return False
         # 校验生日
-        birthday = SequenceUtil.sub_sequence(s, 6, 14)
+        birthday = StringUtil.sub_sequence(s, 6, 14)
         if not DatetimeValidator.is_valid_birthday(birthday):
             return False
         # 校验最后一位
@@ -267,8 +335,22 @@ class IDCardUtil:
             是否合规
 
         """
-        # TODO 实现15位身份证校验逻辑
-        return True
+
+        if cls.CHINA_ID_MIN_LENGTH != StringUtil.get_length(s):
+            return False
+
+        if StringValidator.is_number(s):
+            province_code = StringUtil.sub_sequence(s, 0, 2)
+            # 校验省
+            if province_code not in PRO_DICT:
+                return False
+
+            birthday = "19" + StringUtil.sub_sequence(s, 6, 12)
+
+            return DatetimeValidator.is_valid_birthday(birthday)
+
+        else:
+            return False
 
     @classmethod
     def get_check_sum(cls, s: str) -> str:
@@ -312,16 +394,16 @@ class IDCardUtil:
         """
         if not cls.is_valid_id(s):
             return None
-        birthday = SequenceUtil.sub_sequence(s, 6, 14)
-        matched = PatternPool.BIRTHDAY_PATTERN.match(birthday)
+        birthday = StringUtil.sub_sequence(s, 6, 14)
+        matched = ReUtil.is_match(PatternPool.BIRTHDAY_PATTERN, birthday)
 
-        if matched is None:
+        if not matched:
             return None
         # 采用正则匹配的方式获取生日信息
         # NOTE 如果上面进行了有效性验证, 那么必然匹配, 所以不需要再次判断
-        year = BasicConvertor.to_int(matched.group(1))
-        month = BasicConvertor.to_int(matched.group(3))
-        day = BasicConvertor.to_int(matched.group(5))
+        year = BasicConvertor.to_int(ReUtil.get_matched_group_by_idx(PatternPool.BIRTHDAY_PATTERN, birthday, 1))
+        month = BasicConvertor.to_int(ReUtil.get_matched_group_by_idx(PatternPool.BIRTHDAY_PATTERN, birthday, 3))
+        day = BasicConvertor.to_int(ReUtil.get_matched_group_by_idx(PatternPool.BIRTHDAY_PATTERN, birthday, 5))
         return datetime(year, month, day)
 
     @classmethod
