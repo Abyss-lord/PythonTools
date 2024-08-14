@@ -512,12 +512,14 @@ class SequenceUtil:
 
         length = len(sequence)
         # 计算倒序后的起始索引
-        from_idx = abs(from_idx) - 1 if from_idx < 0 else length - 1 - from_idx
-        for i, item in enumerate(reversed(sequence)):
-            if from_idx > i:
-                continue
-            if item == value:
-                return length - i - 1
+        if from_idx == 0:
+            from_idx = length - 1
+        else:
+            from_idx = length - abs(from_idx) if from_idx < 0 else from_idx
+
+        for i in range(from_idx, -1, -1):
+            if sequence[i] == value:
+                return i
         return cls.INDEX_NOT_FOUND
 
     @classmethod
@@ -690,7 +692,7 @@ class SequenceUtil:
         cls,
         lst: typing.Sequence[Any],
         start: int,
-        end: int,
+        end: int | None = None,
         *,
         include_last: bool = False,
     ) -> typing.Sequence[Any]:
@@ -718,6 +720,8 @@ class SequenceUtil:
         ValueError
             如果开始位置大于结束位置、开始位置大于等于序列长度、开始位置小于0则抛出异常
         """
+        if end is None:
+            end = cls.get_length(lst)
         if start < 0 or start > end or start >= len(lst):
             raise ValueError(f"Start index {start} is out of range")
 
@@ -1850,6 +1854,39 @@ class StringUtil(SequenceUtil):
         return "".join(new_str_lst)
 
     @classmethod
+    def sub_sequence(
+        cls,
+        lst: Sequence[Any],
+        start: int,
+        end: int | None = None,
+        *,
+        include_last: bool = False,
+    ) -> str:
+        """
+        根据给定的字符串获取子字符串
+
+        Parameters
+        ----------
+        lst : Sequence[Any]
+            主字符串
+        start : int
+            子字符串起始索引
+        end : int
+            子字符串结束索引
+        include_last : bool, optional
+            是否包含end索引位置的元素, by default False
+
+        Returns
+        -------
+        str
+            子字符串
+        """
+        if end is None:
+            end = cls.get_length(lst)
+        sub_seq = super().sub_sequence(lst, start, end, include_last=include_last)
+        return "".join(sub_seq)
+
+    @classmethod
     def get_random_strs(cls, n: int, *, chars: str | None = None) -> str:
         """
         返回给定数量的随机字符串
@@ -2934,9 +2971,12 @@ class StringUtil(SequenceUtil):
 
         main_seq_length: int = cls.get_length(sequence)
         sub_seq_length = cls.get_length(value)
-        from_idx = abs(from_idx) - 1 if from_idx < 0 else main_seq_length - 1 - from_idx
+        if from_idx == 0:
+            from_idx = main_seq_length - 1
+        else:
+            from_idx = main_seq_length - abs(from_idx) if from_idx < 0 else from_idx
 
-        for i in range(from_idx - 1, -1):
+        for i in range(from_idx, -1, -1):
             if cls.is_sub_equal(sequence, i, value, 0, sub_seq_length, case_insensitive=case_insensitive):
                 return i
 
