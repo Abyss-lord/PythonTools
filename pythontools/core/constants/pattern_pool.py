@@ -18,6 +18,10 @@ import re
 
 
 class RegexPool:
+    # 数字
+    NUMBER = r"\d+"
+    # 英文
+    LETTER = "[a-zA-Z]+"
     # 生日
     BIRTHDAY = "^(\\d{2,4})([/\\-.年]?)(\\d{1,2})([/\\-.月]?)(\\d{1,2})日?$"
     # 十五位身份证号表达式
@@ -151,6 +155,10 @@ class RegexPool:
 
 
 class PatternPool:
+    # 数字
+    NUMBER = re.compile(RegexPool.NUMBER)
+    # 英文
+    LETTER = re.compile(RegexPool.LETTER)
     # 十五位身份证号表达式
     ID_NUMBER_15_PATTERN = re.compile(RegexPool.ID_NUMBER_15_REGEX)
     # 十八位身份证号表达式 identity_util

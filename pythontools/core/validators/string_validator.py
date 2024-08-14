@@ -23,6 +23,54 @@ from ..utils.reutils import ReUtil
 
 class StringValidator:
     @classmethod
+    def is_number(
+        cls,
+        s: str,
+        *,
+        raise_exception: bool = False,
+    ) -> bool:
+        """
+        通过正则的方式判断是否只有数字组成
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            匹配失败是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            如果 raise_exception=False, 且匹配成功返回 True, 否则返回 False。
+        """
+        return ReUtil.is_match(PatternPool.NUMBER, s, raise_exception=raise_exception)
+
+    @classmethod
+    def is_letter(
+        cls,
+        s: str,
+        *,
+        raise_exception: bool = False,
+    ) -> bool:
+        """
+        返回正则方式判断字符串是否只有英文字母组成
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            匹配失败是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            如果 raise_exception=False, 且匹配成功返回 True, 否则返回 False。
+        """
+        return ReUtil.is_match(PatternPool.LETTER, s, raise_exception=raise_exception)
+
+    @classmethod
     def is_json(cls, s: str) -> bool:
         """
         判断字符串是否是json字符串
