@@ -23,6 +23,7 @@ from pythontools.core.utils.encoding.hash.hash import Hash32, Hash64, Hash128
 
 
 class MetroHash(Hash128, Hash64, Hash32):
+    # TODO 实现该哈希类
     # 64位加盐
     k0_64 = 0xD6D018F5
     k1_64 = 0xA2AA033B

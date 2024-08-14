@@ -48,9 +48,11 @@ class Quarter(Enum):
 
         raise KeyError
 
-    @staticmethod
-    def get_chinese_format(quarter: "Quarter") -> str:
-        return quarter.value.chinese_name
+    def get_chinese_format(self) -> str:
+        return self.value.chinese_name
+
+    def get_name(self) -> str:
+        return self.value.name
 
 
 class TimeUnit(Enum):
@@ -112,6 +114,9 @@ class Week(Enum):
             raise TypeError("name must be int or str")
 
         return None
+
+    def get_name(self) -> str:
+        return self.value.name
 
     def get_value(self) -> int:
         return self.value.calendar_value
