@@ -117,14 +117,17 @@ class DatetimeUtil:
         return datetime.now().second
 
     @classmethod
-    def this_millisecond(cls) -> int:
+    def this_millisecond(cls) -> int | float:
         """
+        返回当前毫秒数
 
-        :return:
+        Returns
+        -------
+        int | float
+            当前毫秒数
         """
-        datetime.now
-
-        raise NotImplementedError()
+        current_seconds = time.time()
+        return cls.conver_time(current_seconds, TimeUnit.SECONDS, TimeUnit.MILLISECONDS)
 
     @classmethod
     def this_ts(cls) -> float:
@@ -218,18 +221,19 @@ class DatetimeUtil:
         return pytz.timezone(random_tz)  # type: ignore
 
     @classmethod
-    def get_local_tz(cls) -> tzinfo:
+    def get_local_tz(cls) -> tzinfo | None:
         """
         获取默认时区
         :return: timezone实例
         """
-        if time.daylight != 0:
-            offset_seconds = time.altzone
-        else:
-            offset_seconds = time.timezone
+        # 获取当前时间的UTC时间
+        utc_time = datetime.now(pytz.utc)
 
-        tz = pytz.timezone(timedelta(seconds=offset_seconds))
-        return tz
+        # 获取当前时区的时间
+        local_time = utc_time.astimezone()
+
+        # 获取当前时区
+        return local_time.tzinfo
 
     @classmethod
     def get_random_date(cls, start: date | None = None, end: date | None = None) -> date:
@@ -429,7 +433,7 @@ class DatetimeUtil:
 
     @classmethod
     def conver_time(cls, value: int | float, from_unit: TimeUnit, to_unit: TimeUnit) -> int | float:
-        if value is None:
+        if value is None or from_unit is None or to_unit is None:
             raise ValueError("value cannot be None")
 
         return value * from_unit.value.unit_val_in_ns / to_unit.value.unit_val_in_ns
@@ -450,6 +454,6 @@ class DatetimeUtil:
             转换后的字符串
         """
         if dt is None:
-            raise ValueError("dt cannot be None")
+            raise TypeError("dt cannot be None")
 
         return dt.isoformat()
