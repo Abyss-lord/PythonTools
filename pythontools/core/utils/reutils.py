@@ -70,7 +70,7 @@ class ReUtil:
         1. 依赖于`get_matched_group_by_idx`方法
         """
         cls.is_match(pattern, s, raise_exception=False)
-        return cls.get_matched_group_by_idx(pattern, s, 0)
+        return cls.get_matched_group_by_idx(pattern, s, 1)
 
     @classmethod
     def get_group_2(cls, pattern: re.Pattern, s: str) -> str | None:
@@ -94,14 +94,14 @@ class ReUtil:
         1. 依赖于`get_matched_group_by_idx`方法
         """
         cls.is_match(pattern, s, raise_exception=False)
-        return cls.get_matched_group_by_idx(pattern, s, 1)
+        return cls.get_matched_group_by_idx(pattern, s, 2)
 
     @classmethod
     def get_matched_group_by_idx(
         cls,
         pattern: re.Pattern,
         s: str,
-        group_index: int = 0,
+        group_index: int = 1,
     ) -> str | None:
         """
         获取指定的分组
@@ -128,7 +128,7 @@ class ReUtil:
         if StringUtil.is_blank(s):
             return None
         res = cls.get_matched_groups(pattern, s)
-        return SequenceUtil.get_item_by_idx(res, group_index)
+        return SequenceUtil.get_item_by_idx(res, group_index - 1)
 
     @classmethod
     def get_matched_groups(cls, pattern: re.Pattern, s: str) -> tuple[str, ...]:
