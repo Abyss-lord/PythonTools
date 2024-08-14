@@ -14,6 +14,7 @@ Change Activity:
 """
 
 # here put the import lib
+import pytest
 from loguru import logger
 
 from .context import GrayCode
@@ -42,3 +43,7 @@ class TestGrayCode:
 
         for i in generator:
             logger.debug(i)
+
+        with pytest.raises(ValueError):
+            for i in GrayCode.gray_code_generator(-1):
+                logger.debug(i)

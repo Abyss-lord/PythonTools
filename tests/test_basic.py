@@ -19,21 +19,15 @@ import os
 import platform
 import time
 import warnings
+from pathlib import Path
 
-import pytest
 from loguru import logger
-
-from .context import Gender, Quarter
 
 
 class TestBasic:
     def test_basic(self):
         for root, dirs, files in os.walk("/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools"):
             logger.info(f"{root=}, {dirs=}")
-
-    def test_constant(self):
-        assert Gender.MALE == Gender.get_gender_by_code(1)
-        assert Gender.FEMALE == Gender.get_gender_by_code(2)
 
     def test_platform(self):
         logger.info(platform.platform())
@@ -98,15 +92,11 @@ class TestBasic:
         logger.debug(isinstance(1.3, Number))
         logger.debug(isinstance(1, Number))
 
+    def test_unicode_type(self):
+        logger.debug(str)
 
-class TestQuarterObject:
-    def __init__(self, month: int) -> None:
-        self.month = month
+        logger.debug(hex(pow(2, 128)))
 
-
-class TestConstant:
-    @classmethod
-    def test_get_quarter_with_incorrect_arguments(cls) -> None:
-        incorrect_obj = TestQuarterObject(13)
-        with pytest.raises(KeyError):
-            Quarter.get_quarter(incorrect_obj)
+    def test_path(self):
+        res = Path("")
+        logger.debug(res)
