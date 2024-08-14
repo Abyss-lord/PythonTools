@@ -1,20 +1,39 @@
+default_language_version:
+  python: python3.11
 repos:
--   repo: https://github.com/pre-commit/pre-commit-hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v3.4.0
     hooks:
-    -   id: check-yaml
-    -   id: check-json
-    -   id: check-toml
-    -   id: check-case-conflict
-    -   id: end-of-file-fixer
-        exclude: migrations/
-    -   id: trailing-whitespace
-    -   id: check-added-large-files  # 检查大文件的提交
+      - id: check-yaml # 尝试加载所有的 yaml 文件并验证语法
+      - id: check-json # 尝试加载所有的 json 文件并验证语法
+      - id: check-toml # 尝试加载所有的 toml 文件并验证语法
+      - id: check-xml # 尝试加载所有的 xml 文件并验证语法
+      - id: check-ast # 检查 python 的有效性
+      - id: check-case-conflict # 检查命名是否会在不区分大小写的环境中产生歧义，例如 MacOS HFS+ or Windows FAT.
+      - id: check-docstring-first # 检查docstring是否在文件开头
+      - id: end-of-file-fixer # 确保文件以换行符结尾并且仅以换行符结尾
+      - id: mixed-line-ending # 替换或检查混合行结尾
+      - id: name-tests-test # 检查测试文件名是否以 test.py结尾
+      - id: trailing-whitespace # 修剪尾随空白
+      - id: pretty-format-json # 格式化json文件
+      - id: check-added-large-files # 检查大文件的提交, 最大 500kb
         args: ["--maxkb=500"]
--   repo: https://github.com/astral-sh/ruff-pre-commit
+    # ruff linter+formatter
+  - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.4.10
     hooks:
       - id: ruff
         args:
           - --fix
       - id: ruff-format
+    # shell 脚本linter
+  - repo: https://github.com/detailyang/pre-commit-shell
+    rev: v1.0.6
+    hooks:
+      - id: shell-lint
+        args: [--format=json]
+    # Markdown 格式化
+  - repo: https://github.com/markdownlint/markdownlint
+    rev: v0.11.0
+    hooks:
+      - id: markdownlint
