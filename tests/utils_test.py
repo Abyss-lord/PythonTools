@@ -500,11 +500,11 @@ class TestIdUtil:
 
     @classmethod
     def test_convert_id_18_to_15(cls):
-        for _ in range(cls.TEST_ROUND):
-            id_str_18 = IDCardUtil.generate_random_valid_id()
-            _ = IDCardUtil.convert_18_to_15(id_str_18)
 
-        IDCardUtil.is_valid_id("623021000229381")
+        with pytest.raises(ValueError):
+            IDCardUtil.convert_18_to_15("522201200810135714")
+        assert IDCardUtil.is_valid_id_15(IDCardUtil.convert_18_to_15("42010019110218601X"))
+        assert not IDCardUtil.is_valid_id("623021000229381")
 
     @classmethod
     def test_convert_id_15_to_18(cls):

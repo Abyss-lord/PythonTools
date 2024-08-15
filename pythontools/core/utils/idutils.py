@@ -18,19 +18,58 @@ import random
 import typing
 from datetime import datetime
 
+from pythontools.core.constants.area_constant import AREA_INFO, PRO_DICT
 from pythontools.core.constants.pattern_pool import PatternPool
-
-from ..constants.area_constant import AREA_INFO, PRO_DICT
-from ..constants.people_constant import Gender
-from ..convert.convertor import BasicConvertor
-from ..utils.basicutils import SequenceUtil, StringUtil
-from ..utils.datetimeutils import DatetimeUtil
-from ..utils.reutils import ReUtil
-from ..validators.datetime_validator import DatetimeValidator
-from ..validators.string_validator import StringValidator
+from pythontools.core.constants.people_constant import Gender
+from pythontools.core.convert.convertor import BasicConvertor
+from pythontools.core.utils.basicutils import SequenceUtil, StringUtil
+from pythontools.core.utils.datetimeutils import DatetimeUtil
+from pythontools.core.utils.reutils import ReUtil
+from pythontools.core.validators.datetime_validator import DatetimeValidator
+from pythontools.core.validators.string_validator import StringValidator
 
 
 class IDCard:
+    """
+    ID Card 类
+
+
+    Examples
+    --------
+    >>> id_card = IDCard("511111199108319619")
+    >>> id_card.get_age()
+    32
+    >>> id_card.get_gender()
+    '男性'
+    >>> id_card.get_province()
+    '四川'
+    >>> id_card.get_area()
+    '四川省乐山市沙湾区'
+
+
+    Attributes
+    ----------
+    id : str
+        身份证号
+    province_code : str
+        省份代码
+    area_code : str
+        地区代码
+    birthday : datetime | None
+        出生日期
+
+    Methods
+    -------
+    get_age() -> float
+        获取年龄
+    get_gender() -> str
+        获取性别
+    get_province() -> str
+        获取登记省份信息
+    get_area() -> str
+        获取地区信息
+    """
+
     def __init__(self, id: str):
         self.id: str = id
         self.province_code: str = BasicConvertor.to_str(StringUtil.sub_sequence(id, 0, 2))
@@ -99,11 +138,66 @@ class IDCard:
 
 
 class IDCardUtil:
+    """
+    ID Card 工具类
+
+    Attributes
+    ----------
+    CHINA_ID_MIN_LENGTH : int
+        最小身份证位数
+    CHINA_ID_MAX_LENGTH : int
+        最长身份证位数
+    AREA_LST : list[str]
+        地区列表
+
+    Methods
+    -------
+    convert_18_to_15(id_card: str) -> str
+        将 18 位身份证转换成 15 位身份证
+    convert_15_to_18(id_card: str) -> str
+        将 15 位身份证转换成 18 位身份证
+    generate_random_valid_card(gender: str = "男") -> IDCard
+        构造随机身份证实例
+    generate_random_valid_id(code_length: int = 18, gender: str = "男") -> str
+        获取随机ID
+    generate_random_valid_18_id(gender: str = "男") -> str
+        生成 18 位随机ID
+    generate_random_valid_15_id(gender: str = "男") -> str
+        生成15位身份证
+    is_valid_id(s: str) -> bool
+        判断是否是合规的身份证 ID
+    is_valid_id_18(s: str) -> bool
+        是否是合规的18位身份证
+    is_valid_id_15(s: str) -> bool
+        检查是否是合规的15位身份证
+    get_card_from_id(id_card: str) -> IDCard
+        根据身份证号获取身份证实例
+    get_birthday_from_id(id_card: str) -> datetime | None
+        根据身份证号获取出生日期
+    get_check_sum(s: str) -> str
+        获取身份证校验码
+
+    NOTES:
+    -----
+    - 15 位身份证：省份 (2 位) + 地级市 (2 位) + 县级市 (2 位) + 出生年 (2 位) + 出生月 (2 位) + 出生日 (2 位) + 顺序号 (3 位)
+    - 18 位身份证：省份 (2 位) + 地级市 (2 位) + 县级市 (2 位) + 出生年 (4 位) + 出生月 (2 位) + 出生日 (2 位) + 顺序号 (3 位) + 校验位 (1 位)
+
+
+    SEE ALSO:
+    ---------
+    ref: https://juejin.cn/post/6844903705662210061?utm%255C_medium=be&utm%255C_source=weixinqun
+
+
+    """  # noqa: E501, W291
+
     # 最小身份证位数
     CHINA_ID_MIN_LENGTH: typing.Final[int] = 15
     # 最长身份证位数
     CHINA_ID_MAX_LENGTH: typing.Final[int] = 18
     AREA_LST: list[str] = list(AREA_INFO.keys())
+
+    def __init__(self) -> None:
+        raise NotImplementedError("This class is not allowed to be instantiated")
 
     @classmethod
     def convert_18_to_15(cls, id_card: str) -> str:
@@ -124,12 +218,24 @@ class IDCardUtil:
         ------
         ValueError
             如果给出的 18 位身份证不是有效的, 则抛出异常
+
+        NOTES:
+        -----
+        - 《国务院关于实行公民身份号码制度的决定》（国发〔1999〕15号），\
+            这个文件规定自1999年10月1日起在全国建立和实行公民身份号码制度，根据同年颁布的国家标准，公民身份号码升至现行的18位。
         """
         if not cls.is_valid_id_18(id_card):
             raise ValueError("id card is invalid")
 
         length = StringUtil.get_length(id_card)
-
+        # FIXME 如果有18位身份证生日是2月29日，那么直接变成190229会出错
+        dt = cls.get_birthday_from_id(id_card)
+        # 如果是有效身份证，则不会出现 None 的情况
+        if dt >= datetime(1999, 10, 1):  # type: ignore
+            raise ValueError(
+                "id card is invalid, because 《国务院关于实行公民身份号码制度的决定》, It stipulates that the system of\
+                    ID number shall be established and implemented throughout the country from October 1, 1999"
+            )
         return StringUtil.sub_sequence(id_card, 0, 6) + StringUtil.sub_sequence(id_card, 8, length - 1)
 
     @classmethod
