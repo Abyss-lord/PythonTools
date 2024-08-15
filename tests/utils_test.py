@@ -500,7 +500,6 @@ class TestIdUtil:
 
     @classmethod
     def test_convert_id_18_to_15(cls):
-
         with pytest.raises(ValueError):
             IDCardUtil.convert_18_to_15("522201200810135714")
         assert IDCardUtil.is_valid_id_15(IDCardUtil.convert_18_to_15("42010019110218601X"))
@@ -517,6 +516,88 @@ class TestIdUtil:
     def test_generate_random_idcard(cls):
         id_obj = IDCardUtil.generate_random_valid_card()
         logger.debug(id_obj)
+
+    @classmethod
+    def test_generate_random_id_15(cls):
+        for _ in range(cls.TEST_ROUND):
+            id_15 = IDCardUtil.generate_random_valid_15_id()
+            assert StringUtil.get_length(id_15) == 15
+            logger.debug(id_15)
+
+    @classmethod
+    def test_generate_random_id_18(cls):
+        for _ in range(cls.TEST_ROUND):
+            id_18 = IDCardUtil.generate_random_valid_18_id()
+            assert StringUtil.get_length(id_18) == 18
+            logger.debug(id_18)
+
+    @classmethod
+    def test_get_birthday_from_id_15(cls):
+        dt = IDCardUtil.get_birthday_from_id_15("630121370928661")
+        assert dt == datetime(1937, 9, 28)
+        dt = IDCardUtil.get_birthday_from_id_15("622700410218861")
+        assert dt == datetime(1941, 2, 18)
+        dt = IDCardUtil.get_birthday_from_id_15("513224510626811")
+        assert dt == datetime(1951, 6, 26)
+        dt = IDCardUtil.get_birthday_from_id_15("431023730316191")
+        assert dt == datetime(1973, 3, 16)
+        dt = IDCardUtil.get_birthday_from_id_15("640302580304711")
+        assert dt == datetime(1958, 3, 4)
+
+    @classmethod
+    def test_get_birthday_from_id_18(cls):
+        dt = IDCardUtil.get_birthday_from_id_18("331023195203187114")
+        assert dt == datetime(1952, 3, 18)
+        dt = IDCardUtil.get_birthday_from_id_18("35010219600101001X")
+        assert dt == datetime(1960, 1, 1)
+        dt = IDCardUtil.get_birthday_from_id_18("36042519700101001X")
+        assert dt == datetime(1970, 1, 1)
+        dt = IDCardUtil.get_birthday_from_id_18("370902194311104514")
+        assert dt == datetime(1943, 11, 10)
+        dt = IDCardUtil.get_birthday_from_id_18("370124198503168611")
+        assert dt == datetime(1985, 3, 16)
+
+    @classmethod
+    def test_get_birthday_from_id(cls):
+        dt = IDCardUtil.get_birthday_from_id("630121370928661")
+        assert dt == datetime(1937, 9, 28)
+        dt = IDCardUtil.get_birthday_from_id("622700410218861")
+        assert dt == datetime(1941, 2, 18)
+        dt = IDCardUtil.get_birthday_from_id("513224510626811")
+        assert dt == datetime(1951, 6, 26)
+        dt = IDCardUtil.get_birthday_from_id("431023730316191")
+        assert dt == datetime(1973, 3, 16)
+        dt = IDCardUtil.get_birthday_from_id("640302580304711")
+        assert dt == datetime(1958, 3, 4)
+
+        dt = IDCardUtil.get_birthday_from_id("331023195203187114")
+        assert dt == datetime(1952, 3, 18)
+        dt = IDCardUtil.get_birthday_from_id("330382195801305112")
+        assert dt == datetime(1958, 1, 30)
+        dt = IDCardUtil.get_birthday_from_id("36042519700101001X")
+        assert dt == datetime(1970, 1, 1)
+        dt = IDCardUtil.get_birthday_from_id("370902194311104514")
+        assert dt == datetime(1943, 11, 10)
+        dt = IDCardUtil.get_birthday_from_id("370124198503168611")
+        assert dt == datetime(1985, 3, 16)
+
+    @classmethod
+    def test_get_year_from_id(cls) -> None:
+        assert IDCardUtil.get_year_from_id("630121370928661") == 1937
+        assert IDCardUtil.get_year_from_id("622700410218861") == 1941
+        assert IDCardUtil.get_year_from_id("513224510626811") == 1951
+        assert IDCardUtil.get_year_from_id("431023730316191") == 1973
+        assert IDCardUtil.get_year_from_id("331023195203187114") == 1952
+        assert IDCardUtil.get_year_from_id("330382195801305112") == 1958
+
+    @classmethod
+    def test_get_month_from_id_18(cls) -> None:
+        assert IDCardUtil.get_month_from_id("331023195203187114") == 3
+        assert IDCardUtil.get_month_from_id("622700410218861") == 2
+        assert IDCardUtil.get_month_from_id("513224510626811") == 6
+        assert IDCardUtil.get_month_from_id("431023730316191") == 3
+        assert IDCardUtil.get_month_from_id("331023195203187114") == 3
+        assert IDCardUtil.get_month_from_id("330382195801305112") == 1
 
     @classmethod
     def test_get_birthday_from_id_with_wrong_args(cls):

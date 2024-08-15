@@ -228,7 +228,7 @@ class IDCardUtil:
             raise ValueError("id card is invalid")
 
         length = StringUtil.get_length(id_card)
-        # FIXME 如果有18位身份证生日是2月29日，那么直接变成190229会出错
+
         dt = cls.get_birthday_from_id(id_card)
         # 如果是有效身份证，则不会出现 None 的情况
         if dt >= datetime(1999, 10, 1):  # type: ignore
@@ -500,17 +500,135 @@ class IDCardUtil:
         """
         if not cls.is_valid_id(s):
             return None
-        birthday = StringUtil.sub_sequence(s, 6, 14)
-        matched = ReUtil.is_match(PatternPool.BIRTHDAY_PATTERN, birthday)
 
+        if StringUtil.get_length(s) == cls.CHINA_ID_MAX_LENGTH:
+            return cls.get_birthday_from_id_18(s)
+        elif StringUtil.get_length(s) == cls.CHINA_ID_MIN_LENGTH:
+            return cls.get_birthday_from_id_15(s)
+        else:
+            raise ValueError("id card length must be 15 or 18")
+
+    @classmethod
+    def get_birthday_from_id_18(cls, s: str) -> datetime | None:
+        """
+        从 18 位 ID 中获取对应的生日 Datetime 对象
+
+        Parameters
+        ----------
+        s : str
+            待提取 18 ID 字符串
+
+        Returns
+        -------
+        datetime | None
+            对应的生日 Datetime 对象, 如果身份证无效则返回 None
+        """
+        birthday = StringUtil.sub_sequence(s, 6, 14)
+        return cls.get_birthday_dt_obj_from_string(birthday)
+
+    @classmethod
+    def get_birthday_from_id_15(cls, s: str) -> datetime | None:
+        """
+        从 15 位 ID 中获取对应的生日 Datetime 对象
+
+        Parameters
+        ----------
+        s : str
+            待提取 15 ID 字符串
+
+        Returns
+        -------
+        datetime | None
+            对应的生日 Datetime 对象, 如果身份证无效则返回 None
+        """
+        birthday = "19" + StringUtil.sub_sequence(s, 6, 12)
+        return cls.get_birthday_dt_obj_from_string(birthday)
+
+    @classmethod
+    def get_birthday_dt_obj_from_string(cls, birthday: str) -> datetime | None:
+        """
+        从生日日期字符串中提取对应的 Datetime 对象
+
+        Parameters
+        ----------
+        birthday : str
+            生日日期字符串
+
+        Returns
+        -------
+        datetime | None
+            对应的 Datetime 对象, 如果字符串无效则返回 None
+        """
+        matched = ReUtil.is_match(PatternPool.BIRTHDAY_PATTERN, birthday)
         if not matched:
             return None
+
         # 采用正则匹配的方式获取生日信息
         # NOTE 如果上面进行了有效性验证, 那么必然匹配, 所以不需要再次判断
         year = BasicConvertor.to_int(ReUtil.get_matched_group_by_idx(PatternPool.BIRTHDAY_PATTERN, birthday, 1))
         month = BasicConvertor.to_int(ReUtil.get_matched_group_by_idx(PatternPool.BIRTHDAY_PATTERN, birthday, 3))
         day = BasicConvertor.to_int(ReUtil.get_matched_group_by_idx(PatternPool.BIRTHDAY_PATTERN, birthday, 5))
         return datetime(year, month, day)
+
+    @classmethod
+    def get_year_from_id(cls, s: str) -> int | None:
+        """
+        从 ID 信息中获取出生年
+
+        Parameters
+        ----------
+        s : str
+            身份证 ID
+
+        Returns
+        -------
+        int | None
+            如果身份证无效, 则返回 None, 否则返回出生年份
+        """
+        dt = cls.get_birthday_from_id(s)
+        if dt is None:
+            return -1
+        return dt.year
+
+    @classmethod
+    def get_month_from_id(cls, s: str) -> int | None:
+        """
+        从 ID 信息中获取出生月
+
+        Parameters
+        ----------
+        s : str
+            身份证 ID
+
+        Returns
+        -------
+        int | None
+            如果身份证无效, 则返回 None, 否则返回出生月份
+        """
+        dt = cls.get_birthday_from_id(s)
+        if dt is None:
+            return -1
+        return dt.month
+
+    @classmethod
+    def get_day_from_id(cls, s: str) -> int | None:
+        """
+        从 ID 信息中获取出生日
+
+        Parameters
+        ----------
+        s : str
+            身份证 ID
+
+        Returns
+        -------
+        int | None
+            如果身份证无效, 则返回 None, 否则返回出生日
+        """
+        dt = cls.get_birthday_from_id(s)
+        if dt is None:
+            return -1
+        return dt.day
 
     @classmethod
     def get_card_from_id(cls, id: str) -> IDCard:
