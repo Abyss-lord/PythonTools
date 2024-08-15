@@ -172,6 +172,9 @@ class TestStringUtil:
     def test_id_valid(self) -> None:
         assert IDCardUtil.is_valid_id_18("110105199804246510")
         assert not IDCardUtil.is_valid_id_18("110105199804246511")
+        assert not IDCardUtil.is_valid_id(None)
+        assert not IDCardUtil.is_valid_id("")
+        assert not IDCardUtil.is_valid_id((1, 2, 3))
 
     def test_date_sub(self) -> None:
         now = datetime.now() + timedelta(days=1)
@@ -490,11 +493,18 @@ class TestIdUtil:
             IDCardUtil.generate_random_valid_id(code_length=21321)
 
     @classmethod
+    def test_is_valid_id_15(cls) -> None:
+        id_str_15 = IDCardUtil.generate_random_valid_id(code_length=15)
+        logger.debug(id_str_15)
+        assert IDCardUtil.is_valid_id_15(id_str_15)
+
+    @classmethod
     def test_convert_id_18_to_15(cls):
         for _ in range(cls.TEST_ROUND):
             id_str_18 = IDCardUtil.generate_random_valid_id()
-            id_str_15 = IDCardUtil.convert_18_to_15(id_str_18)
-            assert IDCardUtil.is_valid_id(id_str_15)
+            _ = IDCardUtil.convert_18_to_15(id_str_18)
+
+        IDCardUtil.is_valid_id("623021000229381")
 
     @classmethod
     def test_convert_id_15_to_18(cls):

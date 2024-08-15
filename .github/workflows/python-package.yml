@@ -17,34 +17,44 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.11"]
-    timeout-minutes: 30
+
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
+      # 在非windows平台上安装依赖
+    - name: Install Dependencies On Non Windows Platforms
+      if: matrix.os != 'windows-latest'
       run: |
         python -m pip install --upgrade pip
-        python -m pip install flake8 pytest
-        python -m pip install loguru
-        python -m pip install pytz
+        pip install -r requirements-dev.txt
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Lint with flake8
+      # 在windows平台上安装依赖
+    - name: Install Dependencies On Windows Platforms
+      if: matrix.os == 'windows-latest'
       run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: Test with pytest
+        python -m pip install --upgrade pip
+        pip install -r requirements-dev.txt
+        if (Test-Path -Path '.\requirements.txt' -PathType Leaf) {pip install -r requirements.txt}
+      # 使用 ruff 进行检查和格式化
+    - name: Lint With Ruff
       run: |
-        pytest
-    - name: Generate coverage report
+        ruff check --fix
+        ruff format
+      # 生成测试报告xml
+    - name: Generate Coverage Client Report
       run: |
-        sh $GITHUB_WORKSPACE/bin/test.sh
-
+        coverage erase
+        coverage run -m pytest "$GITHUB_WORKSPACE/tests"
+        coverage report --omit="$GITHUB_WORKSPACE/tests/*"
+        coverage xml -i --omit="$GITHUB_WORKSPACE/tests/*"
+      env:
+        COVERAGE_RUN: True
+      # 上传测试报告到Codecov
     - name: Upload report to Codecov
       uses: codecov/codecov-action@v3
       with:
-        file: ./coverage.xml
+        files: ./coverage.xml
+        token: ${{ secrets.CODECOV_TOKEN }}
