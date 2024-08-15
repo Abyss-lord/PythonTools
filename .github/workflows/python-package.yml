@@ -5,9 +5,9 @@ name: Python package Check
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "feature-dev" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "feature-dev", "main" ]
 
 jobs:
   build:
@@ -17,7 +17,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.11"]
-
+    timeout-minutes: 30
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
@@ -40,3 +40,11 @@ jobs:
     - name: Test with pytest
       run: |
         pytest
+    - name: Generate coverage report
+      run: |
+        sh $GITHUB_WORKSPACE/bin/test.sh
+
+    - name: Upload report to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
