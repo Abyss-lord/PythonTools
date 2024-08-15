@@ -500,6 +500,7 @@ class TestIdUtil:
 
     @classmethod
     def test_convert_id_18_to_15(cls):
+
         with pytest.raises(ValueError):
             IDCardUtil.convert_18_to_15("522201200810135714")
         assert IDCardUtil.is_valid_id_15(IDCardUtil.convert_18_to_15("42010019110218601X"))
