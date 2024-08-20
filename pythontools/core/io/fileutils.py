@@ -125,7 +125,7 @@ class OsUtil:
             如果路径不存在且raise_exception=True, 则引发 FileNotFoundError 异常
         """
 
-        path_object = cls.__get_path_object(p)
+        path_object = cls.get_path_object(p)
 
         if path_object.exists():
             return True
@@ -162,7 +162,7 @@ class OsUtil:
         ValueError
             当给定路径不存在且 raise_exception=True 时, 则抛出 ValueError 异常
         """
-        path_obj = cls.__get_path_object(p)
+        path_obj = cls.get_path_object(p)
 
         if path_obj.is_dir():
             return True
@@ -202,7 +202,7 @@ class OsUtil:
             当给定路径不存在且 raise_exception=True 时, 则抛出 ValueError 异常
         """
 
-        path_obj = cls.__get_path_object(p)
+        path_obj = cls.get_path_object(p)
 
         if path_obj.is_file():
             return True
@@ -230,7 +230,7 @@ class OsUtil:
         bool
             是否是根目录
         """
-        path_obj = cls.__get_path_object(p)
+        path_obj = cls.get_path_object(p)
 
         return path_obj.is_mount()
 
@@ -252,7 +252,7 @@ class OsUtil:
         bool
             是否是隐藏文件夹或者
         """
-        path_obj = cls.__get_path_object(p)
+        path_obj = cls.get_path_object(p)
 
         basename = cls.get_basename_from_path(path_obj)
 
@@ -277,7 +277,7 @@ class OsUtil:
             是否含有隐藏文件夹
         """
 
-        path_obj = cls.__get_path_object(p)
+        path_obj = cls.get_path_object(p)
 
         while not cls.is_root_path(path_obj):
             if cls.is_ignore(path_obj):
@@ -301,7 +301,7 @@ class OsUtil:
         bool
             是否为空文件夹
         """
-        path_obj = cls.__get_path_object(p)
+        path_obj = cls.get_path_object(p)
         if not cls.is_dir(path_obj):
             return False
 
@@ -442,7 +442,7 @@ class OsUtil:
         if check_exist:
             cls.is_exist(p, raise_exception=True)
 
-        path_obj = cls.__get_path_object(p)
+        path_obj = cls.get_path_object(p)
         t = path_obj.stat().st_ctime_ns
         return t
 
@@ -555,7 +555,7 @@ class OsUtil:
         int
             文件最后修改时间(纳秒)
         """
-        path_obj = cls.__get_path_object(p)
+        path_obj = cls.get_path_object(p)
         if check_exist:
             cls.is_exist(p, raise_exception=True)
         t = path_obj.stat().st_mtime_ns
@@ -668,7 +668,7 @@ class OsUtil:
         """
         if check_exist:
             cls.is_dir(p, raise_exception=True)
-        path_obj = cls.__get_path_object(p)
+        path_obj = cls.get_path_object(p)
 
         if ignore_hidden_dir:
             return [i.absolute() for i in path_obj.rglob("*") if cls.is_dir(i) and not cls.is_contain_ignore(i)]
@@ -703,7 +703,7 @@ class OsUtil:
         """
         if check_exist:
             cls.is_dir(p, raise_exception=True)
-        path_obj = cls.__get_path_object(p)
+        path_obj = cls.get_path_object(p)
 
         wildcard = "*" if not extension else f"*.{extension}"
 
@@ -719,7 +719,7 @@ class OsUtil:
         :param p: 给定路径
         :return: 文件名称
         """
-        path_obj = cls.__get_path_object(p)
+        path_obj = cls.get_path_object(p)
         return path_obj.name
 
     @classmethod
@@ -744,7 +744,7 @@ class OsUtil:
         str
             文件后缀
         """
-        path_obj = cls.__get_path_object(p)
+        path_obj = cls.get_path_object(p)
 
         if check_exist:
             cls.is_file(path_obj, raise_exception=True)
@@ -832,7 +832,7 @@ class OsUtil:
         return text.replace(cls.LINUX_LINE_ENDING, cls.WINDOWS_LINE_ENDING)
 
     @classmethod
-    def __get_path_object(
+    def get_path_object(
         cls,
         p: str | PathLike[str],
     ) -> Path:
