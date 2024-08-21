@@ -21,7 +21,7 @@ from os import PathLike
 from typing import Any
 
 from pythontools.core.constants.string_constant import CharsetUtil
-from pythontools.core.io.fileutils import OsUtil
+from pythontools.core.io.fileutils import FileUtil
 
 
 class CsvUtil:
@@ -42,8 +42,8 @@ class CsvUtil:
         bool
             如果是 csv 文件，返回 True, 否则返回 False
         """
-        path_obj = OsUtil.get_path_object(f_name)
-        return OsUtil.is_match_extension(path_obj, cls.CSV_EXTENSION)
+        path_obj = FileUtil.get_path_object(f_name)
+        return FileUtil.is_match_extension(path_obj, cls.CSV_EXTENSION)
 
     @classmethod
     def get_dicts_from_csv(
@@ -53,11 +53,11 @@ class CsvUtil:
         newline: str = "",
         delimiter: str = ",",
     ) -> Generator[dict[str | Any, str | Any], Any, None]:
-        path_obj = OsUtil.get_path_object(f_name)
+        path_obj = FileUtil.get_path_object(f_name)
         with open(path_obj, encoding=encoding, newline=newline) as f_in:
             csv_reader = csv.DictReader(f_in, delimiter=delimiter)
             yield from csv_reader
-            OsUtil
+            FileUtil
 
     @classmethod
     def save_dicts_to_csv(
@@ -69,7 +69,7 @@ class CsvUtil:
         newline: str = "",
         delimiter: str = ",",
     ):
-        path_obj = OsUtil.get_path_object(f_name)
+        path_obj = FileUtil.get_path_object(f_name)
         path_obj.parent.mkdir(parents=True, exist_ok=True)
 
         with open(path_obj, "w", encoding=encoding, newline=newline) as f_out:

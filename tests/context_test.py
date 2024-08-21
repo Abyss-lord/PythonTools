@@ -37,7 +37,10 @@ from pythontools.core.constants.string_constant import (
 from pythontools.core.convert.convertor import BasicConvertor  # noqa: F401
 from pythontools.core.decorator import Singleton, TraceUsedTime, UnCkeckFucntion  # noqa: F401
 from pythontools.core.errors import ConversionError, UnsupportedOperationError, ValidationError  # noqa: F401
-from pythontools.core.io.fileutils import OsUtil  # noqa: F401
+from pythontools.core.io.fileutils import (
+    # noqa: F401
+    FileUtil,  # noqa: F401
+)
 from pythontools.core.text.csv.csv_structure import CsvConfig, CsvReader  # noqa: F401
 
 # from pythontools.core.text.csv.csv_utils import CsvUtil  # noqa: F401
