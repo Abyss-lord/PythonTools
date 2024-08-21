@@ -2,8 +2,6 @@ name: Run tests and publish report
 on:
   push:
     branches: [ "feature-dev" ]
-  pull_request:
-    branches: [ "feature-dev", "main" ]
 
 jobs:
   test:
@@ -38,5 +36,5 @@ jobs:
         if: always()
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: feature-dev
+          publish_branch: main
           publish_dir: allure-history
