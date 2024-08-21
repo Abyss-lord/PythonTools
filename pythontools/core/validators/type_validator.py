@@ -36,6 +36,11 @@ class TypeValidator:
             是否是 namedtuple 实例
         """
         t = type(instance)
+
+        return cls.is_namedtuple_class(t)
+
+    @classmethod
+    def is_namedtuple_class(cls, t: type) -> bool:
         base_cls = t.__bases__
         if len(base_cls) != 1 or base_cls[0] is tuple:
             return False

@@ -38,6 +38,9 @@ from pythontools.core.convert.convertor import BasicConvertor  # noqa: F401
 from pythontools.core.decorator import Singleton, TraceUsedTime, UnCkeckFucntion  # noqa: F401
 from pythontools.core.errors import ConversionError, UnsupportedOperationError, ValidationError  # noqa: F401
 from pythontools.core.io.fileutils import OsUtil  # noqa: F401
+from pythontools.core.text.csv.csv_structure import CsvConfig, CsvReader  # noqa: F401
+
+# from pythontools.core.text.csv.csv_utils import CsvUtil  # noqa: F401
 from pythontools.core.text.finder.strfinder import AbstractStrFinder, PatternFinder, StrFinder  # noqa: F401
 from pythontools.core.text.passwd import PasswdStrengthUtil  # noqa: F401
 from pythontools.core.text.strjoiner import NullMode, StrJoiner  # noqa: F401

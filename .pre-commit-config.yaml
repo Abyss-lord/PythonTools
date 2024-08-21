@@ -26,12 +26,6 @@ repos:
         args:
           - --fix
       - id: ruff-format
-    # shell 脚本linter
-  - repo: https://github.com/detailyang/pre-commit-shell
-    rev: v1.0.6
-    hooks:
-      - id: shell-lint
-        args: [--format=json]
     # Markdown 格式化
   - repo: https://github.com/markdownlint/markdownlint
     rev: v0.11.0
