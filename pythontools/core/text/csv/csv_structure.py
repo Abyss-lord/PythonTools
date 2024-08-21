@@ -426,7 +426,8 @@ class CsvReader:
             读取到的 CSV 数据, 包含 header 和 data
         """
         self._check_path()
-        with open(self.file_path, encoding=self.encoding) as csv_file:
+        path_obj = OsUtil.get_path_object(self.file_path)
+        with open(path_obj, encoding=self.encoding) as csv_file:
             reader = csv.reader(
                 csv_file,
                 delimiter=self.config.delimiter,
