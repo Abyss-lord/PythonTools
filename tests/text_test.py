@@ -14,12 +14,17 @@ Change Activity:
 """
 # here put the import lib
 
+from collections import namedtuple
+
+import allure  # type: ignore
 import pytest
 from loguru import logger
 
 from .context_test import (
     AbstractStrFinder,
     CharsetUtil,
+    CsvConfig,
+    CsvReader,
     FnvHash,
     NullMode,
     PasswdStrengthUtil,
@@ -32,112 +37,196 @@ from .context_test import (
 )
 
 
+@allure.feature("测试字符串拼接类StrJoiner")
+@allure.description("""
+                    测试字符串拼接类StrJoiner,该类用于拼接字符串
+                    """)
+@allure.tag("Text")
 class TestJoiner:
     @classmethod
-    def test_join_list_with_prefix_and_suffix(cls):
-        joiner = StrJoiner(",", prefix="(", suffix=")")
-        joiner.append("hello")
-        joiner.append("world")
-        assert joiner.get_merged_string() == "(hello,world)"
-        joiner.append(*[1, 2, 3]).append("4")
-        assert joiner.get_merged_string() == "(1,2,3,4)"
+    def setup_class(cls):
+        logger.debug("初始化")
 
     @classmethod
-    def test_join_list_with_separator(cls):
-        joiner = StrJoiner(" ")
-        joiner.append("hello")
-        joiner.append("world")
-        assert joiner.get_merged_string() == "hello world"
+    def teardown_class(cls):
+        logger.debug("清除")
 
-    @classmethod
-    def test_get_instance(cls):
-        joiner = StrJoiner.get_instance(",", prefix="(", suffix=")")
-        test_new_joiner_1 = StrJoiner.get_instance_from_joiner(joiner)
-        test_new_joiner_1.append("hello")
-        test_new_joiner_1.append("world")
-        assert test_new_joiner_1.get_merged_string() == "(hello,world)"
+    @allure.title("测试StrJoiner基础功能")
+    def test_joiner(self) -> None:
+        @allure.step("步骤1:测试前缀+正确参数+后缀")
+        def test_input_correct_args():
+            joiner = StrJoiner(",", prefix="(", suffix=")")
+            joiner.append("hello")
+            joiner.append("world")
+            assert joiner.get_merged_string() == "(hello,world)"
+            joiner.append(*[1, 2, 3]).append("4")
+            assert joiner.get_merged_string() == "(1,2,3,4)"
 
-        test_new_joiner_2 = StrJoiner.get_instance(" ")
-        test_new_joiner_2.append("hello")
-        test_new_joiner_2.append("world")
+        @allure.step("步骤2:测试指定分隔符")
+        def test_input_delimiter():
+            joiner = StrJoiner(" ")
+            joiner.append("hello")
+            joiner.append("world")
+            assert joiner.get_merged_string() == "hello world"
 
-        assert test_new_joiner_2.get_merged_string() == "hello world"
+        test_input_correct_args()
+        test_input_delimiter()
 
-    @classmethod
-    def test_not_initialized_joiner(cls):
-        joiner = StrJoiner.get_instance(",", prefix="(", suffix=")")
-        joiner.__initialized = False
-        assert joiner.get_merged_string() == StringUtil.EMPTY
+    @allure.title("测试获取实例")
+    def test_get_instance(self):
+        @allure.step("步骤1:测试获取实例")
+        def test_get_instance_by_static_method():
+            joiner = StrJoiner.get_instance(",", prefix="(", suffix=")")
+            test_new_joiner_1 = StrJoiner.get_instance_from_joiner(joiner)
+            test_new_joiner_1.append("hello")
+            test_new_joiner_1.append("world")
+            assert test_new_joiner_1.get_merged_string() == "(hello,world)"
 
-    @classmethod
+            test_new_joiner_2 = StrJoiner.get_instance(" ")
+            test_new_joiner_2.append("hello")
+            test_new_joiner_2.append("world")
+
+            assert test_new_joiner_2.get_merged_string() == "hello world"
+
+        test_get_instance_by_static_method()
+
+    @allure.title("测试重置实例")
+    def test_reset_joiner(cls):
+        @allure.story("测试重置实例")
+        @allure.step("步骤1:测试重置实例")
+        def test_reset_joiner():
+            joiner = StrJoiner.get_instance(",", prefix="(", suffix=")")
+            joiner.__initialized = False
+            assert joiner.get_merged_string() == StringUtil.EMPTY
+
+        test_reset_joiner()
+
+    @allure.title("测试设置实例属性")
     def test_set_params(cls):
-        joiner = StrJoiner.get_instance(",", prefix="(", suffix=")")
-        joiner.set_delimiter("|").set_prefix("[").set_suffix("]").set_empty_result("NULL").set_null_mode(NullMode.EMPTY)
-        joiner.append("hello").append("world")
-        assert joiner.get_merged_string() == "[hello|world]"
+        @allure.step("步骤1:测试链式调用")
+        def test_set_args_chain():
+            joiner = StrJoiner.get_instance(",", prefix="(", suffix=")")
+            joiner.set_delimiter("|").set_prefix("[").set_suffix("]").set_empty_result("NULL").set_null_mode(
+                NullMode.EMPTY
+            )
+            joiner.append("hello").append("world")
+            assert joiner.get_merged_string() == "[hello|world]"
 
-    @classmethod
+        @allure.step("步骤2:非链式调用")
+        def test_set_args_not_chain():
+            joiner = StrJoiner.get_instance(",", prefix="(", suffix=")")
+            joiner.set_delimiter("|")
+            joiner.set_prefix("[")
+            joiner.set_suffix("]")
+            joiner.set_empty_result("NULL")
+            joiner.set_null_mode(NullMode.EMPTY)
+            joiner.append("hello").append("world")
+            assert joiner.get_merged_string() == "[hello|world]"
+
+        test_set_args_chain()
+        test_set_args_not_chain()
+
+    @allure.title("测试不同Null值处理方式")
     def test_null_mode(cls):
-        joiner = StrJoiner.get_instance(",", prefix="(", suffix=")")
-        joiner.set_null_mode(NullMode.IGNORE)
-        joiner.append("hello").append(None).append(None)
-        assert joiner.get_merged_string() == "(hello)"
-
-        joiner.reset()
-        joiner.set_null_mode(NullMode.EMPTY)
-        joiner.append("hello").append(None).append(None)
-        assert joiner.get_merged_string() == "(hello,,)"
-
-        joiner.reset()
-        joiner.set_null_mode(NullMode.NULL_STRING)
-        joiner.append("hello").append(None).append(None)
-        assert joiner.get_merged_string() == "(hello,NONE,NONE)"
-
-        with pytest.raises(ValueError):
-            joiner.set_null_mode("invalid_null_mode")
+        @allure.step("步骤1:测试 IGNORE 模式")
+        def test_null_mode_ignore():
+            joiner = StrJoiner.get_instance(",", prefix="(", suffix=")")
+            joiner.set_null_mode(NullMode.IGNORE)
             joiner.append("hello").append(None).append(None)
+            assert joiner.get_merged_string() == "(hello)"
+
+        @allure.step("步骤2:测试 EMPTY 模式")
+        def test_null_mode_empty():
+            joiner = StrJoiner.get_instance(",", prefix="(", suffix=")")
+            joiner.set_null_mode(NullMode.EMPTY)
+            joiner.append("hello").append(None).append(None)
+            assert joiner.get_merged_string() == "(hello,,)"
+
+        @allure.step("步骤3:测试 NULL_STRING 模式")
+        def test_null_mode_null_string():
+            joiner = StrJoiner.get_instance(",", prefix="(", suffix=")")
+            joiner.set_null_mode(NullMode.NULL_STRING)
+            joiner.append("hello").append(None).append(None)
+            assert joiner.get_merged_string() == "(hello,NONE,NONE)"
+
+        @allure.step("步骤4:测试无效Null值处理方式")
+        @allure.severity(allure.severity_level.CRITICAL)
+        def test_invalid_null_mode():
+            joiner = StrJoiner.get_instance(",", prefix="(", suffix=")")
+            with pytest.raises(ValueError):
+                joiner.set_null_mode("invalid_null_mode")
+                joiner.append("hello").append(None).append(None)
+
+        test_null_mode_ignore()
+        test_null_mode_empty()
+        test_null_mode_null_string()
+        test_invalid_null_mode()
 
 
+@allure.feature("测试字符串拼接类StrFinder")
+@allure.description("""
+                    测试StrFinder,该类用于查找字符串
+                    """)
+@allure.tag("Text")
 class TestFinder:
-    @classmethod
-    def test_finder(cls) -> None:
-        test_finder_1 = StrFinder("abcabc", "ab")
-        test_finder_1.set_case_insensitive(True)
-        start_idx = test_finder_1.start(0)
+    @allure.story("测试StrFinder")
+    class TestStrFinder:
+        @allure.title("测试 StrFinder 基础功能")
+        def test_finder_basic_function(cls) -> None:
+            with allure.step("步骤1:测试查找字符串"):
+                test_finder_1 = StrFinder("abcabc", "ab")
+                test_finder_1.set_case_insensitive(True)
+                start_idx = test_finder_1.start(0)
 
-        assert start_idx == 0
-        assert test_finder_1.success
-        assert test_finder_1.end(start_idx) == 1
+                assert start_idx == 0
+                assert test_finder_1.success
+                assert test_finder_1.end(start_idx) == 1
 
-        test_finder_1.reset()
-        assert not test_finder_1.success
-        assert test_finder_1.end_idx == -1
-        assert test_finder_1.text == ""
+            with allure.step("步骤2:测试重置功能"):
+                test_finder_1.reset()
+                assert not test_finder_1.success
+                assert test_finder_1.end_idx == -1
+                assert test_finder_1.text == ""
 
-        test_finder_1.set_reverse(True).set_text("abcabc")
-        assert test_finder_1.start(0) == 3
+            with allure.step("步骤3:测试反向查找"):
+                test_finder_1.set_reverse(True).set_text("abcabc")
+                assert test_finder_1.start(0) == 3
 
-        test_finder_2 = StrFinder("abcabc", "assb")
-        start_idx = test_finder_2.set_case_insensitive(True).start(0)
-        assert start_idx == -1
+            with allure.step("步骤4:测试查找失败的情况"):
+                test_finder_2 = StrFinder("abcabc", "assb")
+                start_idx = test_finder_2.set_case_insensitive(True).start(0)
+                assert start_idx == -1
 
-        test_finder_2.reset()
-        test_finder_2.set_text("assbassb").set_case_insensitive(False)
-        start_idx = test_finder_2.start(3)
+            with allure.step("步骤5:测试忽略大小写"):
+                test_finder_2.reset()
+                test_finder_2.set_text("AssbAssb").set_case_insensitive(False)
+                test_finder_2.start(0)
+                assert not test_finder_2.success
+                assert test_finder_2.end_idx == -1
 
-        assert start_idx == 4
-        assert test_finder_2.success
-        assert test_finder_2.end(start_idx) == 7
+                test_finder_2.reset()
+                test_finder_2.set_text("AssbAssb").set_case_insensitive(True)
+                start_idx = test_finder_2.start(3)
+                assert start_idx == 4
+                assert test_finder_2.success
+                assert test_finder_2.end(start_idx) == 7
 
-    @classmethod
-    def test_create_abstract_finder_instance(cls) -> None:
-        with pytest.raises(TypeError):
-            AbstractStrFinder("abc")  # type: ignore
+    @allure.story("测试抽象类AbstractStrFinder")
+    class TestAbstractStrFinder:
+        @allure.title("测试实例化抽象类")
+        @allure.description("测试实例化抽象类AbstractStrFinder")
+        @allure.severity("critical")
+        def test_create_abstract_finder_instance(cls) -> None:
+            with allure.step("步骤1:测试实例化抽象类"):
+                with pytest.raises(TypeError):
+                    AbstractStrFinder("abc")  # type: ignore
 
-    @classmethod
-    def test_PatternFinder(cls) -> None:
-        finder = PatternFinder("SSSS13812345678", PatternPool.MOBILE)
-        assert finder.start(3) == 4
+    @allure.story("测试PatternFinder")
+    class TestPatternFinder:
+        @allure.title("测试 PatternFinder 基础功能")
+        def test_PatternFinder(self) -> None:
+            finder = PatternFinder("SSSS13812345678", PatternPool.MOBILE)
+            assert finder.start(3) == 4
 
 
 class TestPasswd:
@@ -176,3 +265,46 @@ class TestHash:
             h.hash("sdadsa")
 
         h.hash_32("hello world".encode(CharsetUtil.UTF_8))
+
+
+class TestCsv:
+    TEST_CSV_FILE = "tests/resources/test_csv.csv"
+
+    @classmethod
+    def test_get_config(cls) -> None:
+        config = CsvConfig()
+        assert config.delimiter == ","
+        assert not config.strict_mode
+        assert not config.skip_initial_space
+        assert config.lineterminator == "\r\n"
+        assert config.text_qualifier == '"'
+
+    @classmethod
+    def test_set_config(cls) -> None:
+        config = CsvConfig()
+        config.set_skip_initial_space(True).set_strict_mode(True).set_delimiter("|").set_lineterminator("\n")
+        assert config.delimiter == "|"
+        assert config.strict_mode
+        assert config.skip_initial_space
+        assert config.lineterminator == "\n"
+
+    @classmethod
+    def test_reader_get_header(cls) -> None:
+        reader = CsvReader(cls.TEST_CSV_FILE)
+        csv_data = reader.read()
+        logger.debug(csv_data.header)
+        for row in csv_data.data:
+            logger.debug(row)
+
+    @classmethod
+    def test_get_dicts_from_csv(cls) -> None:
+        data_dict = CsvReader.get_dicts_from_csv(cls.TEST_CSV_FILE)
+        for i in data_dict:
+            logger.debug(i)
+
+    @classmethod
+    def test_get_namedtuple_from_csv(cls) -> None:
+        Row = namedtuple("Row", ["id", "name", "age", "gender"])
+        namedtuple_lst = CsvReader.get_namedtuple_from_csv(cls.TEST_CSV_FILE, Row)
+        for row in namedtuple_lst:
+            logger.debug(row)
