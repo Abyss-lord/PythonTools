@@ -145,7 +145,7 @@ class BooleanUtil:
         :param strict_mode: 是否启动严格模式, 如果开启严格模式, 则不会使用BOOL进行布尔运算, 否则会进行布尔运算
         :return: 'on', 'off'
         """
-        return cls.to_string(value, "YES", "NO", strict_mode=strict_mode)
+        return cls.to_string(value, "ON", "OFF", strict_mode=strict_mode)
 
     @classmethod
     def to_str_yes_no(cls, value: bool, *, strict_mode: bool = True) -> str:
@@ -177,7 +177,7 @@ class BooleanUtil:
         return true_str if value else false_str
 
     @classmethod
-    def and_all(cls, *values, strict_mode: bool = True) -> bool:
+    def and_all(cls, *values) -> bool:
         """
         对Boolean数组取与
 
@@ -185,24 +185,20 @@ class BooleanUtil:
         ----------
         values : typing.List[bool]
             待检测Boolean数组
-        strict_mode : bool, optional
-            是否启动严格模式, 如果开启严格模式, 则不会使用BOOL进行布尔运算,否则会进行布尔运算, by default True
+
 
         Returns
         -------
         bool
-            _description_
+
 
         Raises
         ------
         ValueError
-            如果数组为空则抛出异常
+            _description_
         """
-        if SequenceUtil.is_empty(values):
-            raise ValueError("Empty sequence")
 
         for flg in values:
-            flg = cls._check_boolean_value(flg, strict_mode=strict_mode)
             if not flg:
                 return False
 

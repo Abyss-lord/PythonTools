@@ -16,6 +16,7 @@ Change Activity:
 
 import calendar
 import time
+from collections.abc import Generator
 from datetime import date, datetime, timedelta, tzinfo
 
 import pytz
@@ -25,7 +26,8 @@ from .randomutils import RandomUtil
 
 
 class DatetimeUtil:
-    wtb = [
+    UNITS = {"s": "seconds", "m": "minutes", "h": "hours", "D": "days", "W": "weeks"}
+    WTB = [
         "sun",
         "mon",
         "tue",
@@ -457,3 +459,59 @@ class DatetimeUtil:
             raise TypeError("dt cannot be None")
 
         return dt.isoformat()
+
+    @classmethod
+    def parse_period(cls, period: str) -> timedelta:
+        """
+        解析周期字符串, 如 "1D" 表示1天, "2W" 表示2周, "3M" 表示3个月, "4Y" 表示4年
+
+        Examples
+        --------
+        >>> parse_period("1D")
+        datetime.timedelta(days=1)
+        >>> parse_period("2W")
+        datetime.timedelta(days=14)
+        >>> parse_period("15m")
+        timedelta(minutes=15)
+        >>> parse_period("1W")
+        timedelta(weeks=1)
+
+        Parameters
+        ----------
+        period : str
+            代表时间间隔的字符串
+
+        Returns
+        -------
+        timedelta
+            timedelta对象,表示时间间隔
+
+        Notes
+        -----
+        ref: https://gist.github.com/dsakovych/c1714d0c17ac0955c4b3149d42f34af5
+        """
+        value = int(period[:-1])
+        unit = period[-1].lower()
+        if unit not in cls.UNITS:
+            raise ValueError(f"Invalid unit: {unit}")
+        kwargs = {cls.UNITS[unit]: value}
+        return timedelta(**kwargs)
+
+    @classmethod
+    def generate_dt_range(
+        cls,
+        start: str,
+        end: str,
+        period: str,
+    ) -> Generator[datetime, None, None]:
+        start_dt = datetime.fromisoformat(start)
+        end_dt = datetime.fromisoformat(end)
+        period_delta = cls.parse_period(period)
+
+        current_dt = start_dt
+
+        while current_dt < end_dt:
+            yield current_dt
+            current_dt = min(current_dt + period_delta, end_dt)
+            if current_dt >= end_dt:
+                break
