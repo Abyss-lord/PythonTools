@@ -486,7 +486,7 @@ class FileUtil:
             cls.is_exist(p, raise_exception=True)
 
         t = cls.get_create_time_in_nanoseconds(p, check_exist=True)
-        create_time_in_milliseconds = DatetimeUtil.conver_time(t, TimeUnit.NANOSECONDS, TimeUnit.MILLISECONDS)
+        create_time_in_milliseconds = DatetimeUtil.convert_time(t, TimeUnit.NANOSECONDS, TimeUnit.MILLISECONDS)
         return create_time_in_milliseconds
 
     @classmethod
@@ -515,7 +515,7 @@ class FileUtil:
             cls.is_exist(p, raise_exception=True)
 
         t = cls.get_create_time_in_nanoseconds(p, check_exist=True)
-        create_time_in_seconds = DatetimeUtil.conver_time(t, TimeUnit.NANOSECONDS, TimeUnit.SECONDS)
+        create_time_in_seconds = DatetimeUtil.convert_time(t, TimeUnit.NANOSECONDS, TimeUnit.SECONDS)
 
         return create_time_in_seconds
 
@@ -593,7 +593,7 @@ class FileUtil:
             文件最后修改时间(毫秒)
         """
         last_modify_time_in_nanoseconds = cls.get_last_modify_time_in_nanoseconds(p, check_exist=check_exist)
-        last_modify_time_in_mill = DatetimeUtil.conver_time(
+        last_modify_time_in_mill = DatetimeUtil.convert_time(
             last_modify_time_in_nanoseconds, TimeUnit.NANOSECONDS, TimeUnit.MILLISECONDS
         )
         return last_modify_time_in_mill
@@ -616,7 +616,7 @@ class FileUtil:
             文件最后修改时间(秒)
         """
         last_modify_time_in_nanoseconds = cls.get_last_modify_time_in_nanoseconds(p, check_exist=check_exist)
-        last_modify_time_in_second = DatetimeUtil.conver_time(
+        last_modify_time_in_second = DatetimeUtil.convert_time(
             last_modify_time_in_nanoseconds, TimeUnit.NANOSECONDS, TimeUnit.SECONDS
         )
 
