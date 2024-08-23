@@ -25,7 +25,6 @@ QuarterTuple = namedtuple(
     [
         "name",
         "chinese_name",
-        "func",
         "val",
     ],
 )
@@ -35,24 +34,45 @@ MonthTuple = namedtuple("MonthTuple", ["name", "chinese_name", "alias", "calenda
 
 
 class Quarter(Enum):
-    Q1 = QuarterTuple("Q1", "第一季度", lambda x: 1 <= x.month <= 3, 1)
-    Q2 = QuarterTuple("Q2", "第二季度", lambda x: 4 <= x.month <= 6, 2)
-    Q3 = QuarterTuple("Q3", "第三季度", lambda x: 7 <= x.month <= 9, 3)
-    Q4 = QuarterTuple("Q4", "第四季度", lambda x: 10 <= x.month <= 12, 4)
+    Q1 = QuarterTuple("Q1", "第一季度", 1)
+    Q2 = QuarterTuple("Q2", "第二季度", 2)
+    Q3 = QuarterTuple("Q3", "第三季度", 3)
+    Q4 = QuarterTuple("Q4", "第四季度", 4)
 
-    @staticmethod
-    def get_quarter(dt: datetime.datetime) -> "Quarter":
-        for q in Quarter:
-            if q.value.func(dt):
-                return q
+    @classmethod
+    def _get_quarter_by_month(cls, month: int) -> "Quarter":
+        if month in {1, 2, 3}:
+            return Quarter.Q1
+        elif month in {4, 5, 6}:
+            return Quarter.Q2
+        elif month in {7, 8, 9}:
+            return Quarter.Q3
+        elif month in {10, 11, 12}:
+            return Quarter.Q4
+        else:
+            raise ValueError("month must be in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]")
 
-        raise KeyError
+    @classmethod
+    def _get_quarter_by_date(cls, dt: datetime.datetime) -> "Quarter":
+        return cls._get_quarter_by_month(dt.month)
+
+    @classmethod
+    def get_quarter(cls, dt: datetime.datetime | int) -> "Quarter":
+        if isinstance(dt, datetime.date):
+            return cls._get_quarter_by_date(dt)
+        elif isinstance(dt, int):
+            return cls._get_quarter_by_month(dt)
+        else:
+            raise TypeError("dt must be datetime.datetime or int")
 
     def get_chinese_format(self) -> str:
         return self.value.chinese_name
 
     def get_name(self) -> str:
         return self.value.name
+
+    def get_val(self) -> int:
+        return self.value.val
 
 
 class TimeUnit(Enum):
@@ -104,11 +124,9 @@ class Week(Enum):
         elif isinstance(name, str):
             if name.startswith("星期") or name.startswith("周"):
                 last = name[-1]
-                chinese_format = cls._get_week_from_chinese_format(last)
-                if chinese_format:
+                if chinese_format := cls._get_week_from_chinese_format(last):
                     return chinese_format
-                numerical_format = cls._get_week_from_numerical_format(int(last))
-                if numerical_format:
+                if numerical_format := cls._get_week_from_numerical_format(int(last)):
                     return numerical_format
         else:
             raise TypeError("name must be int or str")
@@ -184,11 +202,13 @@ class Month(Enum):
     DECEMBER = MonthTuple("DECEMBER", "十二月", "dec", 12)
 
     @classmethod
-    def get_month(cls, name: int | str) -> Optional["Month"]:
+    def get_month(cls, name: int | str) -> "Month":
         if isinstance(name, int):
             for month in cls:
                 if month.get_value() == name:
                     return month
+
+            raise ValueError(f"Invalid month value: {name}")
         elif isinstance(name, str):
             if name.endswith("月"):
                 month_expression, _, _ = name.partition("月")
@@ -196,10 +216,10 @@ class Month(Enum):
                     return month_obj
                 if month_obj := cls._get_month_from_numerical_format(month_expression):
                     return month_obj
-        else:
-            raise TypeError("name must be int or str")
 
-        return None
+            raise ValueError(f"Invalid month name: {name}")
+
+        raise TypeError("name must be int or str")
 
     def get_value(self) -> int:
         return self.value.calendar_value
