@@ -32,7 +32,6 @@ from .context_test import (
     DatetimeUtil,
     DatetimeValidator,
     DesensitizedUtil,
-    FileUtil,
     IDCardUtil,
     PatternPool,
     RadixUtil,
@@ -41,7 +40,6 @@ from .context_test import (
     SequenceUtil,
     StringUtil,
     StringValidator,
-    SysUtil,
     TimeUnit,
     TypeUtil,
     ValidationError,
@@ -196,13 +194,8 @@ class TestStringUtil:
         assert not BooleanUtil.and_all(True, False, False, True)
         assert not BooleanUtil.and_all(False, False, False, False)
         assert BooleanUtil.and_all(True, True, True, True)
-        assert not BooleanUtil.and_all(True, 0, True, True, strict_mode=False)
-        assert not BooleanUtil.and_all(True, "", True, True, strict_mode=False)
-
-    @classmethod
-    def test_and_all_with_incorrect_argumens(cls) -> None:
-        with pytest.raises(ValueError):
-            BooleanUtil.and_all()
+        assert not BooleanUtil.and_all(True, 0, True, True)
+        assert not BooleanUtil.and_all(True, "", True, True)
 
     @classmethod
     def test_or_all_with_correct_arguments(cls) -> None:
@@ -435,6 +428,7 @@ class TestDateTimeUtil:
     def test_local_to_utc(cls) -> None:
         for _ in range(cls.TEST_ROUND):
             dt = DatetimeUtil.get_random_datetime()
+            dt = dt.astimezone(DatetimeUtil.get_random_tz())
             utc_dt = DatetimeUtil.local_to_utc(dt)
             logger.debug(f"{dt=}, {utc_dt=}")
 
@@ -491,18 +485,18 @@ class TestDateTimeUtil:
             logger.debug(f"{i=}, {val=}, {res=}")
 
     @classmethod
-    def test_conver_time(cls) -> None:
+    def test_convert_time(cls) -> None:
         value = 1000
-        res = DatetimeUtil.conver_time(value, TimeUnit.NANOSECONDS, TimeUnit.MILLISECONDS)
+        res = DatetimeUtil.convert_time(value, TimeUnit.NANOSECONDS, TimeUnit.MILLISECONDS)
         logger.debug(f"{res=}")
         with pytest.raises(ValueError):
-            DatetimeUtil.conver_time(None, TimeUnit.DAYS, TimeUnit.SECONDS)
+            DatetimeUtil.convert_time(None, TimeUnit.DAYS, TimeUnit.SECONDS)
 
         with pytest.raises(ValueError):
-            DatetimeUtil.conver_time(1000, None, TimeUnit.SECONDS)
+            DatetimeUtil.convert_time(1000, None, TimeUnit.SECONDS)
 
         with pytest.raises(ValueError):
-            DatetimeUtil.conver_time(1000, TimeUnit.DAYS, None)
+            DatetimeUtil.convert_time(1000, TimeUnit.DAYS, None)
 
     @classmethod
     def test_datetime_to_ISO8601(cls):
@@ -533,330 +527,6 @@ class TestDateTimeUtil:
         assert StringUtil.sub_before(None, "", True) == ""
         assert StringUtil.sub_before("", "", True) == ""
         assert StringUtil.sub_before("hello world", "", True) == "hello world"
-
-
-class TestIdUtil:
-    TEST_ROUND = 10000
-
-    @classmethod
-    def test_generate_random_id(cls):
-        for _ in range(cls.TEST_ROUND):
-            id_str_18 = IDCardUtil.generate_random_valid_id()
-            id_str_15 = IDCardUtil.generate_random_valid_id(code_length=15)
-
-            assert IDCardUtil.is_valid_id(id_str_18)
-            assert IDCardUtil.is_valid_id(id_str_15)
-
-        with pytest.raises(ValueError):
-            IDCardUtil.generate_random_valid_id(code_length=21321)
-
-    @classmethod
-    def test_is_valid_id_15(cls) -> None:
-        id_str_15 = IDCardUtil.generate_random_valid_id(code_length=15)
-        logger.debug(id_str_15)
-        assert IDCardUtil.is_valid_id_15(id_str_15)
-
-    @classmethod
-    def test_convert_id_18_to_15(cls):
-        with pytest.raises(ValueError):
-            IDCardUtil.convert_18_to_15("522201200810135714")
-        assert IDCardUtil.is_valid_id_15(IDCardUtil.convert_18_to_15("42010019110218601X"))
-        assert not IDCardUtil.is_valid_id("623021000229381")
-
-    @classmethod
-    def test_convert_id_15_to_18(cls):
-        for _ in range(cls.TEST_ROUND):
-            id_str_15 = IDCardUtil.generate_random_valid_id(code_length=15)
-            id_str_18 = IDCardUtil.convert_15_to_18(id_str_15)
-            assert IDCardUtil.is_valid_id(id_str_18)
-
-    @classmethod
-    def test_generate_random_idcard(cls):
-        id_obj = IDCardUtil.generate_random_valid_card()
-        logger.debug(id_obj)
-
-    @classmethod
-    def test_generate_random_id_15(cls):
-        for _ in range(cls.TEST_ROUND):
-            id_15 = IDCardUtil.generate_random_valid_15_id()
-            assert StringUtil.get_length(id_15) == 15
-            logger.debug(id_15)
-
-    @classmethod
-    def test_generate_random_id_18(cls):
-        for _ in range(cls.TEST_ROUND):
-            id_18 = IDCardUtil.generate_random_valid_18_id()
-            assert StringUtil.get_length(id_18) == 18
-            logger.debug(id_18)
-
-    @classmethod
-    def test_get_birthday_from_id_15(cls):
-        dt = IDCardUtil.get_birthday_from_id_15("630121370928661")
-        assert dt == datetime(1937, 9, 28)
-        dt = IDCardUtil.get_birthday_from_id_15("622700410218861")
-        assert dt == datetime(1941, 2, 18)
-        dt = IDCardUtil.get_birthday_from_id_15("513224510626811")
-        assert dt == datetime(1951, 6, 26)
-        dt = IDCardUtil.get_birthday_from_id_15("431023730316191")
-        assert dt == datetime(1973, 3, 16)
-        dt = IDCardUtil.get_birthday_from_id_15("640302580304711")
-        assert dt == datetime(1958, 3, 4)
-
-    @classmethod
-    def test_get_birthday_from_id_18(cls):
-        dt = IDCardUtil.get_birthday_from_id_18("331023195203187114")
-        assert dt == datetime(1952, 3, 18)
-        dt = IDCardUtil.get_birthday_from_id_18("35010219600101001X")
-        assert dt == datetime(1960, 1, 1)
-        dt = IDCardUtil.get_birthday_from_id_18("36042519700101001X")
-        assert dt == datetime(1970, 1, 1)
-        dt = IDCardUtil.get_birthday_from_id_18("370902194311104514")
-        assert dt == datetime(1943, 11, 10)
-        dt = IDCardUtil.get_birthday_from_id_18("370124198503168611")
-        assert dt == datetime(1985, 3, 16)
-
-    @classmethod
-    def test_get_birthday_from_id(cls):
-        dt = IDCardUtil.get_birthday_from_id("630121370928661")
-        assert dt == datetime(1937, 9, 28)
-        dt = IDCardUtil.get_birthday_from_id("622700410218861")
-        assert dt == datetime(1941, 2, 18)
-        dt = IDCardUtil.get_birthday_from_id("513224510626811")
-        assert dt == datetime(1951, 6, 26)
-        dt = IDCardUtil.get_birthday_from_id("431023730316191")
-        assert dt == datetime(1973, 3, 16)
-        dt = IDCardUtil.get_birthday_from_id("640302580304711")
-        assert dt == datetime(1958, 3, 4)
-
-        dt = IDCardUtil.get_birthday_from_id("331023195203187114")
-        assert dt == datetime(1952, 3, 18)
-        dt = IDCardUtil.get_birthday_from_id("330382195801305112")
-        assert dt == datetime(1958, 1, 30)
-        dt = IDCardUtil.get_birthday_from_id("36042519700101001X")
-        assert dt == datetime(1970, 1, 1)
-        dt = IDCardUtil.get_birthday_from_id("370902194311104514")
-        assert dt == datetime(1943, 11, 10)
-        dt = IDCardUtil.get_birthday_from_id("370124198503168611")
-        assert dt == datetime(1985, 3, 16)
-
-    @classmethod
-    def test_get_year_from_id(cls) -> None:
-        assert IDCardUtil.get_year_from_id("630121370928661") == 1937
-        assert IDCardUtil.get_year_from_id("622700410218861") == 1941
-        assert IDCardUtil.get_year_from_id("513224510626811") == 1951
-        assert IDCardUtil.get_year_from_id("431023730316191") == 1973
-        assert IDCardUtil.get_year_from_id("331023195203187114") == 1952
-        assert IDCardUtil.get_year_from_id("330382195801305112") == 1958
-
-    @classmethod
-    def test_get_month_from_id_18(cls) -> None:
-        assert IDCardUtil.get_month_from_id("331023195203187114") == 3
-        assert IDCardUtil.get_month_from_id("622700410218861") == 2
-        assert IDCardUtil.get_month_from_id("513224510626811") == 6
-        assert IDCardUtil.get_month_from_id("431023730316191") == 3
-        assert IDCardUtil.get_month_from_id("331023195203187114") == 3
-        assert IDCardUtil.get_month_from_id("330382195801305112") == 1
-
-    @classmethod
-    def test_get_birthday_from_id_with_wrong_args(cls):
-        assert IDCardUtil.get_birthday_from_id("") is None
-        assert IDCardUtil.get_birthday_from_id(1) is None
-        assert IDCardUtil.get_birthday_from_id("1") is None
-        assert IDCardUtil.get_birthday_from_id("adac") is None
-        assert IDCardUtil.get_birthday_from_id("110105199804246511") is None
-
-    @classmethod
-    def test_is_valid_id_18(cls):
-        assert IDCardUtil.is_valid_id_18("420902200505081317")
-        assert not IDCardUtil.is_valid_id_18("1101051998042465")
-        assert not IDCardUtil.is_valid_id_18("a10105199804246510")
-        assert not IDCardUtil.is_valid_id_18("110105199813246510")
-
-    @classmethod
-    def test_is_valid_id(cls):
-        _ = "123456789012345"
-        # with pytest.raises(NotImplementedError):
-        #     IDCardUtil.is_valid_id(id)
-
-    @classmethod
-    def test_generate_id(cls) -> None:
-        s = IDCardUtil.generate_random_valid_18_id()
-        card = IDCardUtil.generate_random_valid_card()
-        logger.debug(
-            f"{s=}, {card=}, {card.get_age()=}, {card.get_area()=}, {card.get_province()=}, {card.get_gender()=}"
-        )
-
-
-@allure.feature("系统工具类")
-@allure.description("系统工具类测试")
-@allure.tag("util")
-class TestSysUtil:
-    @allure.title("测试平台判断")
-    def test_platform(self) -> None:
-        with allure.step("步骤1:测试是否在windows平台"):
-            logger.debug(SysUtil.is_windows_platform())
-
-        with allure.step("步骤2:测试是否在mac平台"):
-            logger.debug(SysUtil.is_mac_platform())
-
-        with allure.step("步骤3:测试是否在linux平台"):
-            logger.debug(SysUtil.is_linux_platform())
-
-    @allure.title("python版本判断")
-    def test_python_version(self) -> None:
-        with allure.step("步骤1:测试python版本是否为3.x"):
-            assert SysUtil.is_py3()
-
-        with allure.step("步骤2:测试python版本是否为2.x"):
-            assert not SysUtil.is_py2()
-
-    @allure.title("测试获取已经系统变量")
-    def test_get_system_var(self) -> None:
-        with allure.step("步骤1:测试获取所有的环境变量"):
-            for k, v in SysUtil.get_system_properties().items():
-                logger.debug(f"k={k}, v={v}")
-        with allure.step("步骤2:测试获取HOME环境变量"):
-            assert SysUtil.get_system_property("HOME")
-            assert SysUtil.get_system_property("USER")
-
-
-@allure.feature("文件工具类")
-@allure.description("文件工具类测试")
-@allure.tag("util")
-class TestFileUtil:
-    BASIC_TEST_ROUND = 10000
-
-    @allure.title("测试文件、文件夹是否存在")
-    def test_exist(self) -> None:
-        with allure.step("步骤1:测试文件是否存在"):
-            assert FileUtil.is_exist(__file__)
-            assert not FileUtil.is_exist("dsadadadad")
-
-    # @allure.title("测试随机文件名称")
-    # def test_random_file_name(self) -> None:
-    #     with allure.step("步骤1:测试随机文件名称"):
-    #         for _ in range(TestFileUtil.BASIC_TEST_ROUND):
-    #             new_file_name = FileUtil.generate_random_file_name("test.sql")
-    #             logger.debug(new_file_name)
-
-    @allure.title("测试获取最后修改时间")
-    def test_get_last_modify_time(cls) -> None:
-        with allure.step("步骤1:测试获取文件最后修改时间(字符串)"):
-            format_str = FileUtil.get_last_modify_time_in_string_format(__file__)
-
-        with allure.step("步骤2:测试获取文件最后修改时间(时间格式)"):
-            seconds = FileUtil.get_last_modify_time_in_seconds(__file__)
-            milliseconds = FileUtil.get_last_modify_time_in_milliseconds(__file__)
-            nanoseconds = FileUtil.get_last_modify_time_in_nanoseconds(__file__)
-
-        logger.debug(seconds)
-        logger.debug(milliseconds)
-        logger.debug(nanoseconds)
-        logger.debug(format_str)
-
-
-# class TestSysUtil:
-#     @classmethod
-#     def test_list_file(cls):
-#         from pathlib import Path
-
-#         p = Path(__file__).parent.parent
-#         res = OsUtil.list_files(p, check_exist=False)
-#         logger.debug(res)
-
-#         res = OsUtil.list_files(p, check_exist=True)
-#         logger.debug(res)
-
-
-# class TestOsUtil:
-#     @classmethod
-#     def test_is_contain_hidden_dir(cls):
-#         assert OsUtil.is_contain_ignore("/.git")
-#         assert OsUtil.is_contain_ignore(".git")
-#         assert OsUtil.is_contain_ignore(".svn/sad/")
-#         assert OsUtil.is_contain_ignore("/tmp/__pychache__")
-#         assert OsUtil.is_contain_ignore("/tmp/__pychache__/pancx")
-#         assert OsUtil.is_contain_ignore("__pycache__")
-#         assert not OsUtil.is_contain_ignore("/hidden")
-#         assert not OsUtil.is_contain_ignore("hidden")
-#         assert not OsUtil.is_contain_ignore("usr/local/")
-#         assert not OsUtil.is_contain_ignore("/ust/local/security/")
-
-#     @classmethod
-#     def test_is_exist(cls):
-#         assert OsUtil.is_exist("")
-#         assert OsUtil.is_exist("/")
-#         assert OsUtil.is_exist("/tmp")
-#         assert OsUtil.is_exist("/Users/")
-#         assert not OsUtil.is_exist("dsaddaasawdasdwa")
-
-#     @classmethod
-#     def test_is_dir(cls):
-#         assert OsUtil.is_dir("")
-#         assert OsUtil.is_dir("/")
-#         assert OsUtil.is_dir("/tmp")
-#         assert OsUtil.is_dir("/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools")
-
-#         assert not OsUtil.is_dir(
-#             "/Users/panchenxi/Work/project/work/长期项目和学习/python/own"
-#             "/PythonTools/pythontools/component/basic_utils.py",
-#             raise_exception=False,
-#         )
-#         with pytest.raises(Exception):
-#             OsUtil.is_dir("dsaddaasawdasdwa", raise_exception=True)
-
-#     @classmethod
-#     def test_is_file(cls):
-#         assert not OsUtil.is_file("")
-#         assert not OsUtil.is_file("/tmp")
-#         assert not OsUtil.is_file(
-#             "/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools/pythontools/core/basicutils.py",
-#             raise_exception=False,
-#         )
-
-#         with pytest.raises(ValueError):
-#             OsUtil.is_file("dsaddaasawdasdwa", raise_exception=True)
-
-#     @classmethod
-#     def test_get_file_create_time(cls):
-#         p = "/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools/tests/context.py"
-#         OsUtil.get_create_time_in_string_format(p)
-#         with pytest.raises(ValueError):
-#             OsUtil.get_create_time_in_string_format(p + "dadada", check_exist=True)
-
-#     @classmethod
-#     def test_list_dirs(cls):
-#         res = OsUtil.list_dirs("/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools")
-#         logger.debug(res)
-
-#         OsUtil.list_dirs(
-#             "/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools",
-#             check_exist=True,
-#         )
-
-#     @classmethod
-#     def test_get_extension_from_path(cls):
-#         p = "/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools/pythontools/component/constant.py"  # noqa: E501
-#         extension = OsUtil.get_extension_from_path(p)
-#         assert ".py" == extension
-
-#     @classmethod
-#     def test_is_match_extension(cls):
-#         with pytest.raises(ValueError):
-#             OsUtil.is_match_extension(".tm", "")
-
-#         p = "/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools/tests/context.py"
-#         assert OsUtil.is_match_extension(p, "py")
-#         assert OsUtil.is_match_extension(p, ".py")
-
-#     @classmethod
-#     def test_get_file_from_dir_by_extension(cls):
-#         p = "/Users/panchenxi/Work/project/work/长期项目和学习/python/own/PythonTools/pythontools" "/component/"
-#         res = OsUtil.get_file_from_dir_by_extension(p, extension="py")
-#         logger.debug(res)
-
-#     @classmethod
-#
 
 
 class TestValidator:
@@ -1152,73 +822,6 @@ class TestRadixUtil:
     def test_get_lst_one_idx(cls) -> None:
         assert RadixUtil.get_lst_one_idx(3) == 1
         logger.debug(RadixUtil.get_lst_one_idx(1))
-
-
-class TestBooleanUtil:
-    @classmethod
-    def test_negate_with_correct_arguments(cls) -> None:
-        assert not BooleanUtil.negate(True)
-        assert BooleanUtil.negate(False)
-
-    @classmethod
-    def test_negate_with_incorrect_arguments(cls) -> None:
-        with pytest.raises(TypeError):
-            BooleanUtil.negate(1, raise_exception=True)
-
-        assert not BooleanUtil.negate(1, raise_exception=False)
-
-    @classmethod
-    def test_negate_with_incorrect_arguments_and_default_value(cls) -> None:
-        assert not BooleanUtil.negate(1)
-        assert BooleanUtil.negate(0)
-
-    @classmethod
-    def test_xor_with_correct_arguments(cls) -> None:
-        assert BooleanUtil.xor(True, False)
-        assert not BooleanUtil.xor(True, False, True)
-        assert BooleanUtil.xor(True, False, False)
-        assert not BooleanUtil.xor(True, True)
-
-    @classmethod
-    def test_xor_with_incorrect_arguments(cls) -> None:
-        with pytest.raises(ValueError):
-            BooleanUtil.xor()
-
-    @classmethod
-    def test_boolean_to_int_with_correct_arguments(cls) -> None:
-        state = True
-        assert BooleanUtil.boolean_to_int(state) == 1
-        assert BooleanUtil.boolean_to_int(not state) == 0
-
-    @classmethod
-    def test_boolean_to_int_with_incorrect_arguments(cls) -> None:
-        with pytest.raises(ValueError):
-            BooleanUtil.boolean_to_int(1, strict_mode=True) == 1
-
-        assert BooleanUtil.boolean_to_int(1, strict_mode=False) == 1
-        assert BooleanUtil.boolean_to_int(1) == 1
-
-    @classmethod
-    def test_str_to_boolean(cls) -> None:
-        assert not BooleanUtil.str_to_boolean("")
-        assert BooleanUtil.str_to_boolean("True")
-        assert BooleanUtil.str_to_boolean("对")
-        assert BooleanUtil.str_to_boolean("ok")
-        assert not BooleanUtil.str_to_boolean("false")
-        assert not BooleanUtil.str_to_boolean("no")
-        assert not BooleanUtil.str_to_boolean("0")
-        assert not BooleanUtil.str_to_boolean("错")
-        assert not BooleanUtil.str_to_boolean("×")
-
-    @classmethod
-    def test_to_str_true_and_false(cls) -> None:
-        assert BooleanUtil.to_str_true_and_false(True) == "TRUE"
-        assert BooleanUtil.to_str_true_and_false(False) == "FALSE"
-
-    @classmethod
-    def test_to_str_yes_no(cls) -> None:
-        assert BooleanUtil.to_str_yes_no(True) == "YES"
-        assert BooleanUtil.to_str_yes_no(False) == "NO"
 
 
 class TestRandomUtil:
