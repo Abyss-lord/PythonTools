@@ -16,7 +16,9 @@ Change Activity:
 # here put the import lib
 import time
 
-from .context_test import Singleton, StringUtil, TraceUsedTime, UnCkeckFucntion
+import allure
+
+from .context_test import Singleton, StringUtil, TraceUsedTime, UnCheckFunction
 
 
 @Singleton
@@ -25,20 +27,32 @@ class SingletonCls:
         self.name = name
 
 
+@allure.feature("自定义装饰器")
+@allure.description("自定义装饰器,可以计算运算时间, 单例模式等功能")
+@allure.tag("装饰器")
 class TestDecorator:
-    @classmethod
-    @TraceUsedTime("enter msg", "exit msg")
-    def test_trace_used_time(cls) -> None:
-        time.sleep(1)
+    @allure.story("测试TraceUsedTime装饰器")
+    @allure.description("测试TraceUsedTime装饰器,可以计算函数执行时间")
+    class TestUseTime:
+        @allure.title("测试TraceUsedTime装饰器")
+        @TraceUsedTime("enter msg", "exit msg")
+        def test_trace_used_time(self) -> None:
+            time.sleep(1)
 
-    @classmethod
-    @UnCkeckFucntion(True)
-    def test_unckeck_function(cls) -> None:
-        print("test_unckeck_function")
+    @allure.story("测试 UnCheckFunction 装饰器")
+    @allure.description("测试 UnCheckFunction 装饰器, 可以提示调用者函数是否会对参数进行检测")
+    class TestUnCheckedFunction:
+        @allure.title("测试 UnCheckFunction 装饰器")
+        @UnCheckFunction(True)
+        def test_uncheck_function(self) -> None:
+            print("test_uncheck_function")
 
-    @classmethod
-    def test_singleton(cls) -> None:
-        s1 = SingletonCls("s1")
-        s2 = SingletonCls("s2")
-        assert StringUtil.equals(s1.name, s2.name)
-        assert s1 is s2
+    @allure.story("测试单例模式")
+    @allure.description("测试单例模式, 可以保证一个类只有一个实例")
+    class TestSingleton:
+        @allure.title("测试单例模式")
+        def test_singleton(self) -> None:
+            s1 = SingletonCls("s1")
+            s2 = SingletonCls("s2")
+            assert StringUtil.equals(s1.name, s2.name)
+            assert s1 is s2

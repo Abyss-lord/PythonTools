@@ -14,7 +14,7 @@ Change Activity:
 """
 # here put the import lib
 
-from ..decorator import UnCkeckFucntion
+from ..decorator import UnCheckFunction
 from ..validators.string_validator import StringValidator
 from .basicutils import StringUtil
 
@@ -143,7 +143,7 @@ class PhoneUtils:
         return cls.is_mobile_hk(phone) or cls.is_mobile_tw(phone) or cls.is_mobile_mo(phone) or cls.is_mobile(phone)
 
     @classmethod
-    @UnCkeckFucntion(WARNING_ENABLED)
+    @UnCheckFunction(WARNING_ENABLED)
     def hide_before(cls, phone: str) -> str:
         """
         隐藏手机号前7位 替换字符为 "*" 栗子
@@ -161,7 +161,7 @@ class PhoneUtils:
         return StringUtil.hide(phone, 0, 7)
 
     @classmethod
-    @UnCkeckFucntion(WARNING_ENABLED)
+    @UnCheckFunction(WARNING_ENABLED)
     def hide_between(cls, phone: str) -> str:
         """
         隐藏手机号中间4位 替换字符为"*" 栗子
@@ -179,7 +179,7 @@ class PhoneUtils:
         return StringUtil.hide(phone, 3, 7)
 
     @classmethod
-    @UnCkeckFucntion(WARNING_ENABLED)
+    @UnCheckFunction(WARNING_ENABLED)
     def hide_after(cls, phone: str) -> str:
         """
         隐藏手机号最后4位 替换字符为"*" 栗子
@@ -197,7 +197,7 @@ class PhoneUtils:
         return StringUtil.hide(phone, 7, 11)
 
     @classmethod
-    @UnCkeckFucntion(WARNING_ENABLED)
+    @UnCheckFunction(WARNING_ENABLED)
     def get_phone_before(cls, phone: str) -> str:
         """
         获取手机号前3位
@@ -215,7 +215,7 @@ class PhoneUtils:
         return StringUtil.sub_sequence(phone, 0, 3)
 
     @classmethod
-    @UnCkeckFucntion(WARNING_ENABLED)
+    @UnCheckFunction(WARNING_ENABLED)
     def get_phone_between(cls, phone: str) -> str:
         """
         获取手机号中间4位
@@ -233,7 +233,7 @@ class PhoneUtils:
         return StringUtil.sub_sequence(phone, 3, 7)
 
     @classmethod
-    @UnCkeckFucntion(WARNING_ENABLED)
+    @UnCheckFunction(WARNING_ENABLED)
     def get_phone_after(cls, phone: str) -> str:
         """
         获取手机号后4位

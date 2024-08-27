@@ -35,7 +35,7 @@ from pythontools.core.constants.string_constant import (
     DesensitizedType,  # noqa: F401
 )
 from pythontools.core.convert.convertor import BasicConvertor  # noqa: F401
-from pythontools.core.decorator import Singleton, TraceUsedTime, UnCkeckFucntion  # noqa: F401
+from pythontools.core.decorator import Singleton, TraceUsedTime, UnCheckFunction  # noqa: F401
 from pythontools.core.errors import ConversionError, UnsupportedOperationError, ValidationError  # noqa: F401
 from pythontools.core.io.fileutils import (
     # noqa: F401

@@ -110,8 +110,8 @@ class TraceUsedTime:
         return wrapper
 
 
-class UnCkeckFucntion:
-    WARNING_MEDSAGE = "The function {} does not validate its arguments,\
+class UnCheckFunction:
+    WARNING_MESSAGE = "The function {} does not validate its arguments,\
     which requires the caller to guarantee that the arguments is valid"
 
     def __init__(self, warning_enabled: bool = True) -> None:
@@ -121,7 +121,7 @@ class UnCkeckFucntion:
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             if self.warning_enabled:
-                warnings.warn(self.WARNING_MEDSAGE.format(func.__name__))
+                warnings.warn(self.WARNING_MESSAGE.format(func.__name__))
             return func(*args, **kwargs)
 
         return wrapper

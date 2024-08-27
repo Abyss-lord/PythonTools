@@ -27,6 +27,8 @@ BASIC_TW_FAKE = Faker("zh_TW")
 BASIC_US_FAKE = Faker("en-US")
 
 
+@allure.feature("进制转换工具类")
+@allure.description("进制转换工具类,提供进制转换等功能")
 class TestRadixUtil:
     @allure.story("进制转换")
     @allure.description("支持任意进制之间的转换")
@@ -43,7 +45,7 @@ class TestRadixUtil:
                 assert RadixUtil.convert_base("252", 8, 2) == "10101010"
                 assert RadixUtil.convert_base("26216", 8, 10) == "11406"
                 assert RadixUtil.convert_base("154473", 8, 10) == "55611"
-                assert RadixUtil.convert_base("154473", 8, 16) == "d93b"
+                assert RadixUtil.convert_base("154473", 8, 16) == "D93B"
 
             with allure.step("步骤3:测试10进制转换为任意进制"):
                 assert RadixUtil.convert_base("11", 10, 2) == "1011"

@@ -229,13 +229,17 @@ class TestFinder:
             assert finder.start(3) == 4
 
 
+@allure.feature("测试密码强度工具类PasswdStrengthUtil")
 class TestPasswd:
-    @classmethod
-    def test_passwd(cls) -> None:
-        test_passwd_1 = "2hAj5#mne-ix.86H"
-        assert PasswdStrengthUtil.get_strength_score(test_passwd_1) == 13
-        test_passwd_2 = "123456"
-        assert PasswdStrengthUtil.get_strength_score(test_passwd_2) == 0
+    @allure.title("测试密码强度")
+    def test_passwd(self) -> None:
+        with allure.step("步骤1:测试强密码"):
+            test_passwd_1 = "2hAj5#mne-ix.86H"
+            assert PasswdStrengthUtil.get_strength_score(test_passwd_1) == 13
+
+        with allure.step("步骤2:测试弱密码"):
+            test_passwd_2 = "123456"
+            assert PasswdStrengthUtil.get_strength_score(test_passwd_2) == 0
 
 
 class TestHash:
@@ -255,7 +259,7 @@ class TestHash:
         ]
         print("32-bit Hash Results:")
         h = FnvHash()
-        for i, case in enumerate(test_cases):
+        for case in test_cases:
             hash_value_32 = h.hash_32(case)
             _ = h.hash_64(case)
             _ = h.hash_128(case)

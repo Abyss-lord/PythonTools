@@ -19,7 +19,7 @@ from collections.abc import Callable, Mapping
 from typing import Any
 
 from ..constants.type_constant import FunctionType
-from ..decorator import UnCkeckFucntion
+from ..decorator import UnCheckFunction
 from ..validators.type_validator import TypeValidator
 from .basicutils import StringUtil
 
@@ -128,7 +128,7 @@ class TypeUtil:
         return func_info_dict
 
     @classmethod
-    @UnCkeckFucntion(WARNING_ENABLED)
+    @UnCheckFunction(WARNING_ENABLED)
     def get_function_type_description(cls, func) -> str:
         """
         获取函数的类型描述。
@@ -159,7 +159,7 @@ class TypeUtil:
         return FunctionType.UNKNOWN_METHOD.value.description
 
     @classmethod
-    @UnCkeckFucntion(WARNING_ENABLED)
+    @UnCheckFunction(WARNING_ENABLED)
     def show_function_info(cls, func: Callable[[Any], Any], show_detail: bool = False) -> None:
         """
         显示一个函数的基本信息，包括函数名、类型、模块、文件路径、签名、参数信息（可选）。

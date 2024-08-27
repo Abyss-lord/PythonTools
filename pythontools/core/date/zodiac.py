@@ -16,7 +16,7 @@ Change Activity:
 # here put the import lib
 from datetime import date
 
-from ..decorator import UnCkeckFucntion
+from ..decorator import UnCheckFunction
 
 WARNING_ENABLED = True
 
@@ -54,7 +54,7 @@ class Zodiac:
     ]
 
     @classmethod
-    @UnCkeckFucntion(WARNING_ENABLED)
+    @UnCheckFunction(WARNING_ENABLED)
     def get_zodiac(cls, month: int, day: int) -> str:
         """
         根据指定月、日获取星座

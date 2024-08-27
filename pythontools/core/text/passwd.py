@@ -297,7 +297,7 @@ class PasswdStrengthUtil:
         if 0 <= score <= 3:
             return PasswdStrength.EASY
         elif 4 <= score <= 6:
-            return PasswdStrength.MIDIUM
+            return PasswdStrength.MEDIUM
         elif 7 <= score <= 9:
             return PasswdStrength.STRONG
         elif 10 <= score <= 12:

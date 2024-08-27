@@ -92,7 +92,7 @@ class DesensitizedType(Enum):
 
 class PasswdStrength(Enum):
     EASY = PasswdStrengthTuple("EASY", "简单", 0)
-    MIDIUM = PasswdStrengthTuple("MIDIUM", "中等", 4)
+    MEDIUM = PasswdStrengthTuple("MEDIUM", "中等", 4)
     STRONG = PasswdStrengthTuple("STRONG", "强", 7)
     VERY_STRONG = PasswdStrengthTuple("VERY_STRONG", "非常强", 10)
     EXTREMELY_STRONG = PasswdStrengthTuple("EXTREMELY_STRONG", "超强", 13)
