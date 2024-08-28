@@ -526,7 +526,7 @@ class StringValidator:
         return ReUtil.is_match(PatternPool.CHINESE_CAR_DRIVING_LICENCE, s, raise_exception=raise_exception)
 
     @classmethod
-    def is_tecent_code(cls, s: str, *, raise_exception: bool = False) -> bool:
+    def is_tencent_code(cls, s: str, *, raise_exception: bool = False) -> bool:
         """
         验证是否为腾讯QQ号
 
@@ -562,25 +562,6 @@ class StringValidator:
             是否为密码
         """
         return ReUtil.is_match(PatternPool.PASSWORD, s, raise_exception=raise_exception)
-
-    @classmethod
-    def is_strong_password(cls, s: str, *, raise_exception: bool = False) -> bool:
-        """
-        判断是否为强密码
-
-        Parameters
-        ----------
-        s : str
-            待检测字符串
-        raise_exception : bool, optional
-            如果匹配失败是否引发异常, by default False
-
-        Returns
-        -------
-        bool
-            给定字符串是否为强密码
-        """
-        return ReUtil.is_match(PatternPool.STRONG_PASSWORD, s, raise_exception=raise_exception)
 
     @classmethod
     def is_blank_line(cls, s: str, *, raise_exception: bool = False) -> bool:
@@ -806,7 +787,7 @@ class StringValidator:
         Returns
         -------
         bool
-            给定字符串是否不包含英文字母
+            给定字符串如果包含英文字母返回False，否则返回True
         """
         return ReUtil.is_match(PatternPool.HAS_NO_LETTER, s, raise_exception=raise_exception)
 
