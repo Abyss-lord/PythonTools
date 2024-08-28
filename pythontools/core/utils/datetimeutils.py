@@ -22,6 +22,7 @@ from datetime import date, datetime, timedelta, tzinfo
 import pytz
 
 from pythontools.core.constants.datetime_constant import Month, Quarter, TimeUnit, Week
+from pythontools.core.date.relativedelta import relativedelta
 from pythontools.core.utils.basicutils import StringUtil
 from pythontools.core.utils.randomutils import RandomUtil
 
@@ -70,14 +71,13 @@ class DatetimeUtil:
         return datetime.now().year
 
     @classmethod
-    def this_quarter(cls) -> int:
+    def this_quarter(cls) -> Quarter | None:
         """
 
         :return:
         """
         dt = datetime.now()
-        quarter = Quarter.get_quarter(dt)
-        return quarter.value.val
+        return Quarter.get_quarter(dt)
 
     @classmethod
     def this_month(cls) -> int:
@@ -209,7 +209,7 @@ class DatetimeUtil:
         return dt.replace(year=dt.year - 1)
 
     @classmethod
-    def next_year(cls, dt: datetime | None = None) -> int:
+    def next_year(cls, dt: datetime | None = None) -> datetime:
         """
         返回下一年的年份
 
@@ -228,7 +228,7 @@ class DatetimeUtil:
         return cls.offset_year(dt, 1)
 
     @classmethod
-    def last_year(cls, dt: datetime | None = None) -> int:
+    def last_year(cls, dt: datetime | None = None) -> datetime:
         """
         返回上一年的年份
 
@@ -247,7 +247,7 @@ class DatetimeUtil:
         return cls.offset_year(dt, -1)
 
     @classmethod
-    def next_quarter(cls, dt: datetime | None = None) -> Quarter:
+    def next_quarter(cls, dt: datetime | None = None) -> Quarter | None:
         """
         返回表示下一季度的枚举对象
 
@@ -267,13 +267,13 @@ class DatetimeUtil:
         return cls.offset_quarter(dt, 1)
 
     @classmethod
-    def last_quarter(cls, dt: datetime | None = None) -> Quarter:
+    def last_quarter(cls, dt: datetime | None = None) -> Quarter | None:
         if dt is None:
             dt = cls.local_now()
         return cls.offset_quarter(dt, -1)
 
     @classmethod
-    def next_month(cls, dt: datetime | None = None) -> Month:
+    def next_month(cls, dt: datetime | None = None) -> datetime:
         """
         返回表示下一个月的枚举对象
 
@@ -292,7 +292,7 @@ class DatetimeUtil:
         return cls.offset_month(dt, 1)
 
     @classmethod
-    def last_month(cls, dt: datetime | None = None) -> Month:
+    def last_month(cls, dt: datetime | None = None) -> datetime:
         """
         返回表示上一个月的枚举对象
 
@@ -312,7 +312,7 @@ class DatetimeUtil:
         return cls.offset_month(dt, -1)
 
     @classmethod
-    def offset_year(cls, dt: datetime, offset: int) -> int:
+    def offset_year(cls, dt: datetime, offset: int) -> datetime:
         """
         偏移年份
 
@@ -328,10 +328,10 @@ class DatetimeUtil:
         int
             偏移后的年份
         """
-        return dt.year + offset
+        return dt + relativedelta(years=offset)
 
     @classmethod
-    def offset_quarter(cls, dt: datetime, offset: int) -> Quarter:
+    def offset_quarter(cls, dt: datetime, offset: int) -> Quarter | None:
         """
         偏移季度
 
@@ -344,15 +344,14 @@ class DatetimeUtil:
 
         Returns
         -------
-        int
+        Quarter | None
             偏移后的季度枚举实例
         """
-        current_quarter = Quarter.get_quarter(dt)
-        offset_quarter_val = cls._cyclic_acquire(current_quarter.get_val(), 4, offset)
-        return Quarter.get_quarter(offset_quarter_val)
+        new_dt = dt + relativedelta(months=3 * offset)
+        return Quarter.get_quarter(new_dt)
 
     @classmethod
-    def offset_month(cls, dt: datetime, offset: int) -> Month:
+    def offset_month(cls, dt: datetime, offset: int) -> datetime:
         """
         偏移月份
 
@@ -368,8 +367,7 @@ class DatetimeUtil:
         int
             偏移后的月份
         """
-        offset_month = cls._cyclic_acquire(dt.month, 12, offset)
-        return Month.get_month(offset_month)
+        return dt + relativedelta(months=offset)
 
     @classmethod
     def offset_week(cls, dt: datetime, offset: int) -> datetime:
@@ -388,7 +386,7 @@ class DatetimeUtil:
         datetime
             偏移后的日期对象
         """
-        return cls.offset(dt, TimeUnit.DAYS, offset * 7)
+        return dt + relativedelta(weeks=offset)
 
     @classmethod
     def offset_day(cls, dt: datetime, offset: int) -> datetime:
@@ -407,7 +405,7 @@ class DatetimeUtil:
         datetime
             偏移后的日期对象
         """
-        return cls.offset(dt, TimeUnit.DAYS, offset)
+        return dt + relativedelta(days=offset)
 
     @classmethod
     def offset_hour(cls, dt: datetime, offset: int) -> datetime:
@@ -426,7 +424,7 @@ class DatetimeUtil:
         datetime
             偏移后的日期对象
         """
-        return cls.offset(dt, TimeUnit.HOURS, offset)
+        return dt + relativedelta(hours=offset)
 
     @classmethod
     def offset_minute(cls, dt: datetime, offset: int) -> datetime:
@@ -445,7 +443,7 @@ class DatetimeUtil:
         datetime
             偏移后的日期对象
         """
-        return cls.offset(dt, TimeUnit.MINUTES, offset)
+        return dt + relativedelta(minutes=offset)
 
     @classmethod
     def offset_second(cls, dt: datetime, offset: int) -> datetime:
@@ -464,7 +462,7 @@ class DatetimeUtil:
         datetime
             偏移后的日期对象
         """
-        return cls.offset(dt, TimeUnit.SECONDS, offset)
+        return dt + relativedelta(seconds=offset)
 
     @classmethod
     def offset_millisecond(cls, dt: datetime, offset: int) -> datetime:
@@ -483,7 +481,7 @@ class DatetimeUtil:
         datetime
             偏移后的日期对象
         """
-        return cls.offset(dt, TimeUnit.MILLISECONDS, offset)
+        return dt + relativedelta(microseconds=offset * 1000)
 
     @classmethod
     def offset_microsecond(cls, dt: datetime, offset: int) -> datetime:
@@ -502,48 +500,7 @@ class DatetimeUtil:
         datetime
             偏移后的日期对象
         """
-        return cls.offset(dt, TimeUnit.MICROSECONDS, offset)
-
-    @classmethod
-    def offset_nanosecond(cls, dt: datetime, offset: int) -> datetime:
-        """
-        偏移纳秒数
-
-        Parameters
-        ----------
-        dt : datetime
-            待偏移的日期
-        offset : int
-            偏移量
-
-        Returns
-        -------
-        datetime
-            偏移后的日期对象
-        """
-        return cls.offset(dt, TimeUnit.NANOSECONDS, offset)
-
-    @classmethod
-    def offset(cls, dt: datetime, time_unit: TimeUnit, offset: int) -> datetime:
-        """
-        获取指定日期偏移指定时间后的时间，生成的偏移日期不影响原日期
-
-        Parameters
-        ----------
-        dt : datetime
-            待偏移对象
-        time_unit : TimeUnit
-            偏移时间单位
-        offset : int
-            偏移量
-
-        Returns
-        -------
-        datetime
-            偏移后的日期对象
-        """
-        micro_time_value = cls.convert_time(offset, time_unit, TimeUnit.MICROSECONDS)
-        return dt + timedelta(microseconds=micro_time_value)
+        return dt + relativedelta(microseconds=offset)
 
     @classmethod
     def between(cls, dt: datetime, other: datetime, time_unit: TimeUnit) -> int | float:
@@ -1358,7 +1315,7 @@ class DatetimeUtil:
     @classmethod
     def _nth_day_of_month_obj(cls, year: int, month_obj: Month, weekday_obj: Week, n: int) -> date:
         month = month_obj.value.calendar_value
-        weekday = weekday_obj.value.iso8601_value
+        weekday = weekday_obj.value.iso8601_value - 1
 
         first_day, days_in_month = calendar.monthrange(year, month)
         # 获取当月第一个给定 weekday 是几号
