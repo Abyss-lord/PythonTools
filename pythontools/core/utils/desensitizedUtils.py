@@ -181,27 +181,6 @@ class DesensitizedUtil:
         return cls.retain_front_and_end(value, 0, 1)
 
     @classmethod
-    def desensitize_phone(cls, phone: str | bytes) -> str:
-        """
-        脱敏电话号码
-
-        Parameters
-        ----------
-        phone : str | bytes
-            待脱敏电话号码
-
-        Returns
-        -------
-        str
-            脱敏后的电话号码
-        """
-        return cls.retain_front_and_end(
-            phone,
-            3,
-            4,
-        )
-
-    @classmethod
     def desensitize_chinese_name(cls, name: str | bytes) -> str:
         """
         脱敏中文姓名
