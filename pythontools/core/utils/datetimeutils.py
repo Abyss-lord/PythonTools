@@ -1314,8 +1314,8 @@ class DatetimeUtil:
 
     @classmethod
     def _nth_day_of_month_obj(cls, year: int, month_obj: Month, weekday_obj: Week, n: int) -> date:
-        month = month_obj.value.calendar_value
-        weekday = weekday_obj.value.iso8601_value - 1
+        month = month_obj.get_value()
+        weekday = weekday_obj.get_value()
 
         first_day, days_in_month = calendar.monthrange(year, month)
         # 获取当月第一个给定 weekday 是几号
