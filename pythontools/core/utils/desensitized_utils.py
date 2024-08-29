@@ -29,7 +29,7 @@ Change Activity:
 # here put the import lib
 from ..constants.string_constant import CharPool, DesensitizedType
 from ..decorator import UnCheckFunction
-from .basic_utils import StringUtil
+from .basicutils import StringUtil
 
 DesensitizedType.mro
 
@@ -91,6 +91,7 @@ class DesensitizedUtil:
             raise ValueError(f"unsupported desensitized type: {desensitized_type}")
 
     @classmethod
+    @UnCheckFunction(WARNING_ENABLED)
     @UnCheckFunction(WARNING_ENABLED)
     def retain_front_and_end(cls, value: str | bytes, front: int, end: int) -> str:
         """
@@ -273,6 +274,7 @@ class DesensitizedUtil:
 
     @classmethod
     @UnCheckFunction(WARNING_ENABLED)
+    @UnCheckFunction(WARNING_ENABLED)
     def desensitize_email(cls, email: str | bytes) -> str:
         """
         脱敏电子邮箱
@@ -312,6 +314,7 @@ class DesensitizedUtil:
         return cls.mask_all(password)
 
     @classmethod
+    @UnCheckFunction(WARNING_ENABLED)
     @UnCheckFunction(WARNING_ENABLED)
     def desensitize_bank_card(cls, bank_card: str | bytes) -> str:
         """

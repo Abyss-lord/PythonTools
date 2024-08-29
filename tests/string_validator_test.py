@@ -332,11 +332,3 @@ class TestStringValidator:
         assert StringValidator.is_tencent_code("123456789")
         assert StringValidator.is_tencent_code("851979198")
         assert not StringValidator.is_tencent_code("0123")
-
-    @allure.title("测试是否是ISBN")
-    def test_is_isbn(self) -> None:
-        with allure.step("步骤1:测试判断ISBN-13"):
-            assert StringValidator.is_isbn("9783161484100")
-
-        with allure.step("步骤2:测试判断ISBN-10"):
-            assert StringValidator.is_isbn("8175257660")

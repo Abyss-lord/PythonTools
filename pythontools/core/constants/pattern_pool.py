@@ -122,18 +122,25 @@ class RegexPool:
     TECENT_CODE = r"[1-9][0-9]{4,}"
     # 密码， 以字母开头，长度在6~18之间，只能包含字母、数字和下划线
     PASSWORD = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,18}$"
+    PASSWORD = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,18}$"
     # 空行
     BLANK_LINE = r"\n\s*\r"
     # 微信号
     # FIX 2024-08-28: "/^[a-zA-Z][-_a-zA-Z0-9]{5,19}$/" -> "^[ a-zA-Z][-_a-zA-Z0-9]{5,19}"
     WECHAT = r"^[ a-zA-Z][-_a-zA-Z0-9]{5,19}$"
+    # FIX 2024-08-28: "/^[a-zA-Z][-_a-zA-Z0-9]{5,19}$/" -> "^[ a-zA-Z][-_a-zA-Z0-9]{5,19}"
+    WECHAT = r"^[ a-zA-Z][-_a-zA-Z0-9]{5,19}$"
     # 火车车次
+    TRAIN_NUMBER = r"^[GCDZTSPKXLY1-9]\d{1,4}$"
     TRAIN_NUMBER = r"^[GCDZTSPKXLY1-9]\d{1,4}$"
     # 24小时时间制
     TIME_IN_24_HOUR = r"^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$"
+    TIME_IN_24_HOUR = r"^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$"
     # 12小时时间制
     TIME_IN_12_HOUR = r"^(?:1[0-2]|0?[1-9]):[0-5]\d(:[0-5]\d)?\s*(?:AM|PM)?$"
+    TIME_IN_12_HOUR = r"^(?:1[0-2]|0?[1-9]):[0-5]\d(:[0-5]\d)?\s*(?:AM|PM)?$"
     # 中国省份
+    CHINESE_PROVINCE = "^浙江|上海|北京|天津|重庆|黑龙江|吉林|辽宁|内蒙古|河北|新疆|甘肃|青海|陕西|宁夏|河南|山东|山西|安徽|湖北|湖南|江苏|四川|贵州|云南|广西|西藏|江西|广东|福建|台湾|海南|香港|澳门$"  # noqa: E501
     CHINESE_PROVINCE = "^浙江|上海|北京|天津|重庆|黑龙江|吉林|辽宁|内蒙古|河北|新疆|甘肃|青海|陕西|宁夏|河南|山东|山西|安徽|湖北|湖南|江苏|四川|贵州|云南|广西|西藏|江西|广东|福建|台湾|海南|香港|澳门$"  # noqa: E501
     # LINUX 文件路径
     LINUX_FILE_PATH = r"/^\/(?:[^/]+\/)*[^/]+$/"
@@ -335,6 +342,7 @@ class PatternPool:
     NON_NEGATIVE_INTEGER = re.compile(RegexPool.NON_NEGATIVE_INTEGER)
     # 腾讯qq
     TECENT_CODE = re.compile(RegexPool.TECENT_CODE)
+
     # 密码
     PASSWORD = re.compile(RegexPool.PASSWORD)
     # 空行

@@ -14,9 +14,10 @@ Change Activity:
 """
 # here put the import lib
 
+import calendar
 from datetime import datetime
 
-import allure  # type: ignore
+import allure
 import pytest
 
 from .context_test import DesensitizedType, Gender, Month, Quarter, TimeUnit, Week
@@ -30,938 +31,463 @@ class TestConstant:
     @allure.description("季度枚举类, 用于获取季度的中文名称、名称、值")
     class TestQuarter:
         @allure.title("测试获取季度枚举类")
-        @pytest.mark.parametrize(
-            "quarter_name, expected",
-            [
-                (13, None),
-                ("q5", None),
-                ("第5季度", None),
-                ("5季度", None),
-                (1, Quarter.Q1),
-                (2, Quarter.Q1),
-                (3, Quarter.Q1),
-                (4, Quarter.Q2),
-                (5, Quarter.Q2),
-                (6, Quarter.Q2),
-                (7, Quarter.Q3),
-                (8, Quarter.Q3),
-                (9, Quarter.Q3),
-                (10, Quarter.Q4),
-                (11, Quarter.Q4),
-                (12, Quarter.Q4),
-                ("Q1", Quarter.Q1),
-                ("Q2", Quarter.Q2),
-                ("Q3", Quarter.Q3),
-                ("Q4", Quarter.Q4),
-                ("第一季度", Quarter.Q1),
-                ("第二季度", Quarter.Q2),
-                ("第三季度", Quarter.Q3),
-                ("第四季度", Quarter.Q4),
-                ("一季度", Quarter.Q1),
-                ("二季度", Quarter.Q2),
-                ("三季度", Quarter.Q3),
-                ("四季度", Quarter.Q4),
-                ("1季度", Quarter.Q1),
-                ("2季度", Quarter.Q2),
-                ("3季度", Quarter.Q3),
-                ("4季度", Quarter.Q4),
-                pytest.param([], None, marks=pytest.mark.xfail(raises=TypeError)),
-            ],
-        )
-        def test_get_quarter(self, quarter_name, expected) -> None:
-            assert Quarter.get_quarter(quarter_name) == expected
+        def test_get_quarter_with_incorrect_arguments(self) -> None:
+            with allure.step("步骤1:测试输入错误的类型"):
+                with pytest.raises(TypeError):
+                    Quarter.get_quarter([])
+
+            with allure.step("步骤2:测试返回None的边界值"):
+                assert Quarter.get_quarter(13) is None
+                assert Quarter.get_quarter("q5") is None
+                assert Quarter.get_quarter("第5季度") is None
+                assert Quarter.get_quarter("5季度") is None
+
+            with allure.step("步骤3:测试根据输入的数字值获取枚举类"):
+                assert Quarter.get_quarter(1) == Quarter.Q1
+                assert Quarter.get_quarter(4) == Quarter.Q2
+                assert Quarter.get_quarter(7) == Quarter.Q3
+                assert Quarter.get_quarter(10) == Quarter.Q4
+
+            with allure.step("步骤4:测试根据输入的带前缀英文名称获取枚举类"):
+                assert Quarter.get_quarter("Q1") == Quarter.Q1
+                assert Quarter.get_quarter("Q2") == Quarter.Q2
+                assert Quarter.get_quarter("Q3") == Quarter.Q3
+                assert Quarter.get_quarter("Q4") == Quarter.Q4
+
+                assert Quarter.get_quarter("q1") == Quarter.Q1
+                assert Quarter.get_quarter("q2") == Quarter.Q2
+                assert Quarter.get_quarter("q3") == Quarter.Q3
+                assert Quarter.get_quarter("q4") == Quarter.Q4
+
+            with allure.step("步骤5:测试根据输入的中文名称获取枚举类"):
+                assert Quarter.get_quarter("第一季度") == Quarter.Q1
+                assert Quarter.get_quarter("第二季度") == Quarter.Q2
+                assert Quarter.get_quarter("第三季度") == Quarter.Q3
+                assert Quarter.get_quarter("第四季度") == Quarter.Q4
+
+                assert Quarter.get_quarter("一季度") == Quarter.Q1
+                assert Quarter.get_quarter("二季度") == Quarter.Q2
+                assert Quarter.get_quarter("三季度") == Quarter.Q3
+                assert Quarter.get_quarter("四季度") == Quarter.Q4
+
+                assert Quarter.get_quarter("第1季度") == Quarter.Q1
+                assert Quarter.get_quarter("第2季度") == Quarter.Q2
+                assert Quarter.get_quarter("第3季度") == Quarter.Q3
+                assert Quarter.get_quarter("第4季度") == Quarter.Q4
+
+                assert Quarter.get_quarter("1季度") == Quarter.Q1
+                assert Quarter.get_quarter("2季度") == Quarter.Q2
+                assert Quarter.get_quarter("3季度") == Quarter.Q3
+                assert Quarter.get_quarter("4季度") == Quarter.Q4
 
         @allure.title("测试获取季度枚举类中文名称")
-        @pytest.mark.parametrize(
-            "quarter, expected",
-            [
-                (Quarter.Q1, "第一季度"),
-                (Quarter.Q2, "第二季度"),
-                (Quarter.Q3, "第三季度"),
-                (Quarter.Q4, "第四季度"),
-            ],
-        )
-        def test_get_chinese_format(
-            self,
-            quarter,
-            expected,
-        ) -> None:
-            assert quarter.get_chinese_format() == expected
+        def test_get_chinese_format(self) -> None:
+            assert Quarter.Q1.get_chinese_format() == "第一季度"
+            assert Quarter.Q2.get_chinese_format() == "第二季度"
+            assert Quarter.Q3.get_chinese_format() == "第三季度"
+            assert Quarter.Q4.get_chinese_format() == "第四季度"
 
         @allure.title("测试获取季度枚举类名称")
-        @pytest.mark.parametrize(
-            "quarter, expected",
-            [
-                (Quarter.Q1, "Q1"),
-                (Quarter.Q2, "Q2"),
-                (Quarter.Q3, "Q3"),
-                (Quarter.Q4, "Q4"),
-            ],
-        )
-        def test_get_name(self, quarter, expected) -> None:
-            assert quarter.get_name() == expected
+        def test_get_name(self) -> None:
+            assert Quarter.Q1.get_name() == "Q1"
+            assert Quarter.Q2.get_name() == "Q2"
+            assert Quarter.Q3.get_name() == "Q3"
+            assert Quarter.Q4.get_name() == "Q4"
 
         @allure.title("测试获取季度枚举类值")
-        @pytest.mark.parametrize(
-            "quarter, expected",
-            [
-                (Quarter.Q1, 1),
-                (Quarter.Q2, 2),
-                (Quarter.Q3, 3),
-                (Quarter.Q4, 4),
-            ],
-        )
-        def test_get_value(self, quarter, expected) -> None:
-            assert quarter.get_value() == expected
-
-        @allure.title("测试获取季度枚举类最大、最小值")
-        def test_get_max_and_min_value(self) -> None:
-            assert Quarter.get_max_value() == 4
-            assert Quarter.get_min_value() == 1
-
-        @allure.title("测试判断季度枚举类是否为第一个季度或者最后一个季度")
-        @pytest.mark.parametrize(
-            "quarter, expected",
-            [
-                (Quarter.Q1, True),
-                (Quarter.Q2, False),
-                (Quarter.Q3, False),
-                (Quarter.Q4, False),
-            ],
-        )
-        def test_is_first_quarter(self, quarter, expected) -> None:
-            assert quarter.is_first_quarter() == expected
-
-        @allure.title("测试判断季度枚举类是否为最后一个季度")
-        @pytest.mark.parametrize(
-            "quarter, expected",
-            [
-                (Quarter.Q1, False),
-                (Quarter.Q2, False),
-                (Quarter.Q3, False),
-                (Quarter.Q4, True),
-            ],
-        )
-        def test_is_last_quarter(self, quarter, expected) -> None:
-            assert quarter.is_last_quarter() == expected
-
-        @allure.title("测试判断给定季度值是否合法")
-        @pytest.mark.parametrize(
-            "quarter_value, expected",
-            [
-                (1, True),
-                (2, True),
-                (3, True),
-                (4, True),
-                (5, False),
-                (6, False),
-                (7, False),
-                (8, False),
-                (9, False),
-                (10, False),
-                (11, False),
-                (12, False),
-                (13, False),
-            ],
-        )
-        def test_is_valid_quarter(self, quarter_value, expected) -> None:
-            assert Quarter.is_valid_quarter(quarter_value) == expected
+        def test_get_val(self) -> None:
+            assert Quarter.Q1.get_val() == 1
+            assert Quarter.Q2.get_val() == 2
+            assert Quarter.Q3.get_val() == 3
+            assert Quarter.Q4.get_val() == 4
 
     @allure.story("月常量类")
     @allure.description("月常量枚举类, 用于获取月份的中文名称、名称、值")
     @allure.tag("constant")
     class TestMonth:
         @allure.title("测试获取月份枚举类")
-        @pytest.mark.parametrize(
-            "month_num, expected",
-            [
-                (1, Month.JANUARY),
-                (2, Month.FEBRUARY),
-                (3, Month.MARCH),
-                (4, Month.APRIL),
-                (5, Month.MAY),
-                (6, Month.JUNE),
-                (7, Month.JULY),
-                (8, Month.AUGUST),
-                (9, Month.SEPTEMBER),
-                (10, Month.OCTOBER),
-                (11, Month.NOVEMBER),
-                (12, Month.DECEMBER),
-                (13, None),
-            ],
-        )
-        def test_get_month_by_number(self, month_num, expected) -> None:
-            assert Month._get_month_by_number(month_num) == expected
+        def test_get_month_by_number(self) -> None:
+            with allure.step("步骤1:测试根据数字获取月份枚举类"):
+                assert Month.get_month(1) == Month.JANUARY
+                assert Month.get_month(2) == Month.FEBRUARY
+                assert Month.get_month(3) == Month.MARCH
+                assert Month.get_month(4) == Month.APRIL
+                assert Month.get_month(5) == Month.MAY
+                assert Month.get_month(6) == Month.JUNE
+                assert Month.get_month(7) == Month.JULY
+                assert Month.get_month(8) == Month.AUGUST
+                assert Month.get_month(9) == Month.SEPTEMBER
+                assert Month.get_month(10) == Month.OCTOBER
+                assert Month.get_month(11) == Month.NOVEMBER
+                assert Month.get_month(12) == Month.DECEMBER
 
-        @allure.title("测试根据英文名称获取月份枚举类")
-        @pytest.mark.parametrize(
-            "month_name, expected",
-            [
-                ("JANUARY", Month.JANUARY),
-                ("FEBRUARY", Month.FEBRUARY),
-                ("MARCH", Month.MARCH),
-                ("APRIL", Month.APRIL),
-                ("MAY", Month.MAY),
-                ("JUNE", Month.JUNE),
-                ("JULY", Month.JULY),
-                ("AUGUST", Month.AUGUST),
-                ("SEPTEMBER", Month.SEPTEMBER),
-                ("OCTOBER", Month.OCTOBER),
-                ("NOVEMBER", Month.NOVEMBER),
-                ("DECEMBER", Month.DECEMBER),
-                ("INVALID", None),
-            ],
-        )
-        def test_get_month_by_name(
-            self,
-            month_name,
-            expected,
-        ) -> None:
-            assert Month.get_month(month_name) == expected
+            with allure.step("步骤2:测试根据名称获取月份枚举类"):
+                assert Month.get_month("JANUARY") == Month.JANUARY
+                assert Month.get_month("FEBRUARY") == Month.FEBRUARY
+                assert Month.get_month("MARCH") == Month.MARCH
+                assert Month.get_month("APRIL") == Month.APRIL
+                assert Month.get_month("MAY") == Month.MAY
+                assert Month.get_month("JUNE") == Month.JUNE
+                assert Month.get_month("JULY") == Month.JULY
+                assert Month.get_month("AUGUST") == Month.AUGUST
+                assert Month.get_month("SEPTEMBER") == Month.SEPTEMBER
+                assert Month.get_month("OCTOBER") == Month.OCTOBER
+                assert Month.get_month("NOVEMBER") == Month.NOVEMBER
+                assert Month.get_month("DECEMBER") == Month.DECEMBER
 
-        @allure.title("测试根据中文名称获取月份枚举类")
-        @pytest.mark.parametrize(
-            "month_name, expected",
-            [
-                ("一月", Month.JANUARY),
-                ("二月", Month.FEBRUARY),
-                ("三月", Month.MARCH),
-                ("四月", Month.APRIL),
-                ("五月", Month.MAY),
-                ("六月", Month.JUNE),
-                ("七月", Month.JULY),
-                ("八月", Month.AUGUST),
-                ("九月", Month.SEPTEMBER),
-                ("十月", Month.OCTOBER),
-                ("十一月", Month.NOVEMBER),
-                ("十二月", Month.DECEMBER),
-                ("1月", Month.JANUARY),
-                ("2月", Month.FEBRUARY),
-                ("3月", Month.MARCH),
-                ("4月", Month.APRIL),
-                ("5月", Month.MAY),
-                ("6月", Month.JUNE),
-                ("7月", Month.JULY),
-                ("8月", Month.AUGUST),
-                ("9月", Month.SEPTEMBER),
-                ("10月", Month.OCTOBER),
-                ("11月", Month.NOVEMBER),
-                ("12月", Month.DECEMBER),
-                ("INVALID", None),
-                pytest.param([], None, marks=pytest.mark.xfail(raises=TypeError)),
-            ],
-        )
-        def test_get_month_by_chinese_name(
-            self,
-            month_name,
-            expected,
-        ) -> None:
-            assert Month.get_month(month_name) == expected
+            with allure.step("步骤3:测试根据中文名称获取月份枚举实例"):
+                assert Month.get_month("一月") == Month.JANUARY
+                assert Month.get_month("二月") == Month.FEBRUARY
+                assert Month.get_month("三月") == Month.MARCH
+                assert Month.get_month("四月") == Month.APRIL
+                assert Month.get_month("五月") == Month.MAY
+                assert Month.get_month("六月") == Month.JUNE
+                assert Month.get_month("七月") == Month.JULY
+                assert Month.get_month("八月") == Month.AUGUST
+                assert Month.get_month("九月") == Month.SEPTEMBER
+                assert Month.get_month("十月") == Month.OCTOBER
+                assert Month.get_month("十一月") == Month.NOVEMBER
+                assert Month.get_month("十二月") == Month.DECEMBER
 
-        @allure.title("测试根据月份简称获取月份枚举类")
-        @pytest.mark.parametrize(
-            "month_name, expected",
-            [
-                ("JAN", Month.JANUARY),
-                ("FEB", Month.FEBRUARY),
-                ("MAR", Month.MARCH),
-                ("APR", Month.APRIL),
-                ("MAY", Month.MAY),
-                ("JUN", Month.JUNE),
-                ("JUL", Month.JULY),
-                ("AUG", Month.AUGUST),
-                ("SEP", Month.SEPTEMBER),
-                ("OCT", Month.OCTOBER),
-                ("NOV", Month.NOVEMBER),
-                ("DEC", Month.DECEMBER),
-                ("INVALID", None),
-            ],
-        )
-        def test_get_month_by_alias(
-            self,
-            month_name,
-            expected,
-        ) -> None:
-            assert Month.get_month(month_name) == expected
+                assert Month.get_month("1月") == Month.JANUARY
+                assert Month.get_month("2月") == Month.FEBRUARY
+                assert Month.get_month("3月") == Month.MARCH
+                assert Month.get_month("4月") == Month.APRIL
+                assert Month.get_month("5月") == Month.MAY
+                assert Month.get_month("6月") == Month.JUNE
+                assert Month.get_month("7月") == Month.JULY
+                assert Month.get_month("8月") == Month.AUGUST
+                assert Month.get_month("9月") == Month.SEPTEMBER
+                assert Month.get_month("10月") == Month.OCTOBER
+                assert Month.get_month("11月") == Month.NOVEMBER
+                assert Month.get_month("12月") == Month.DECEMBER
 
-        @allure.title("测试根据dt对象获取月份枚举实例")
-        @pytest.mark.parametrize(
-            "dt, expected",
-            [
-                (datetime(2021, 1, 1), Month.JANUARY),
-                (datetime(2021, 2, 1), Month.FEBRUARY),
-                (datetime(2021, 3, 1), Month.MARCH),
-                (datetime(2021, 4, 1), Month.APRIL),
-                (datetime(2021, 5, 1), Month.MAY),
-                (datetime(2021, 6, 1), Month.JUNE),
-                (datetime(2021, 7, 1), Month.JULY),
-                (datetime(2021, 8, 1), Month.AUGUST),
-                (datetime(2021, 9, 1), Month.SEPTEMBER),
-                (datetime(2021, 10, 1), Month.OCTOBER),
-                (datetime(2021, 11, 1), Month.NOVEMBER),
-                (datetime(2021, 12, 1), Month.DECEMBER),
-            ],
-        )
-        def test_get_month_by_datetime(self, dt, expected) -> None:
-            assert Month.get_month(dt) == expected
+            with allure.step("步骤4:测试根据月份简写名称获取月份枚举实例"):
+                assert Month.get_month("JAN") == Month.JANUARY
+                assert Month.get_month("FEB") == Month.FEBRUARY
+                assert Month.get_month("MAR") == Month.MARCH
+                assert Month.get_month("APR") == Month.APRIL
+                assert Month.get_month("MAY") == Month.MAY
+                assert Month.get_month("JUN") == Month.JUNE
+                assert Month.get_month("JUL") == Month.JULY
+                assert Month.get_month("AUG") == Month.AUGUST
+                assert Month.get_month("SEP") == Month.SEPTEMBER
+                assert Month.get_month("OCT") == Month.OCTOBER
+                assert Month.get_month("NOV") == Month.NOVEMBER
+                assert Month.get_month("DEC") == Month.DECEMBER
+
+            with allure.step("步骤5:测试根据输入的 datetime 对象获取月份枚举实例"):
+                assert Month.get_month(datetime(2021, 1, 1)) == Month.JANUARY
+                assert Month.get_month(datetime(2021, 2, 1)) == Month.FEBRUARY
+                assert Month.get_month(datetime(2021, 3, 1)) == Month.MARCH
+                assert Month.get_month(datetime(2021, 4, 1)) == Month.APRIL
+                assert Month.get_month(datetime(2021, 5, 1)) == Month.MAY
+                assert Month.get_month(datetime(2021, 6, 1)) == Month.JUNE
+                assert Month.get_month(datetime(2021, 7, 1)) == Month.JULY
+                assert Month.get_month(datetime(2021, 8, 1)) == Month.AUGUST
+                assert Month.get_month(datetime(2021, 9, 1)) == Month.SEPTEMBER
+                assert Month.get_month(datetime(2021, 10, 1)) == Month.OCTOBER
+                assert Month.get_month(datetime(2021, 11, 1)) == Month.NOVEMBER
+                assert Month.get_month(datetime(2021, 12, 1)) == Month.DECEMBER
+
+            with allure.step("步骤6:测试输入错误的数值"):
+                assert Month.get_month("INVALID") is None
+                assert Month.get_month(13) is None
+                assert Month.get_month("13月") is None
+
+            with allure.step("步骤7:测试输入错误的类型"):
+                with pytest.raises(TypeError):
+                    Month.get_month([])
 
         @allure.title("测试获取月份枚举实例的天数")
-        @pytest.mark.parametrize(
-            "month, year, expected",
-            [
-                (Month.JANUARY, 2021, 31),
-                (Month.FEBRUARY, 2021, 28),
-                (Month.FEBRUARY, 2020, 29),
-                (Month.MARCH, 2021, 31),
-                (Month.APRIL, 2021, 30),
-                (Month.MAY, 2021, 31),
-                (Month.JUNE, 2021, 30),
-                (Month.JULY, 2021, 31),
-                (Month.AUGUST, 2021, 31),
-                (Month.SEPTEMBER, 2021, 30),
-                (Month.OCTOBER, 2021, 31),
-                (Month.NOVEMBER, 2021, 30),
-                (Month.DECEMBER, 2021, 31),
-            ],
-        )
-        def test_month_get_last_day(
-            self,
-            month,
-            year,
-            expected,
-        ) -> None:
-            assert month.get_last_day(year) == expected
+        def test_month_get_last_day(self) -> None:
+            assert Month.JANUARY.get_last_day(2021) == 31
+            assert Month.FEBRUARY.get_last_day(2021) == 28
+            assert Month.FEBRUARY.get_last_day(2020) == 29
+            assert Month.MARCH.get_last_day(2021) == 31
+            assert Month.APRIL.get_last_day(2021) == 30
+            assert Month.MAY.get_last_day(2021) == 31
+            assert Month.JUNE.get_last_day(2021) == 30
+            assert Month.JULY.get_last_day(2021) == 31
+            assert Month.AUGUST.get_last_day(2021) == 31
+            assert Month.SEPTEMBER.get_last_day(2021) == 30
+            assert Month.OCTOBER.get_last_day(2021) == 31
+            assert Month.NOVEMBER.get_last_day(2021) == 30
+            assert Month.DECEMBER.get_last_day(2021) == 31
 
         @allure.title("测试获取月份枚举实例的名称")
-        @pytest.mark.parametrize(
-            "month, expected",
-            [
-                (Month.JANUARY, "JANUARY"),
-                (Month.FEBRUARY, "FEBRUARY"),
-                (Month.MARCH, "MARCH"),
-                (Month.APRIL, "APRIL"),
-                (Month.MAY, "MAY"),
-                (Month.JUNE, "JUNE"),
-                (Month.JULY, "JULY"),
-                (Month.AUGUST, "AUGUST"),
-                (Month.SEPTEMBER, "SEPTEMBER"),
-                (Month.OCTOBER, "OCTOBER"),
-                (Month.NOVEMBER, "NOVEMBER"),
-                (Month.DECEMBER, "DECEMBER"),
-            ],
-        )
-        def test_get_name(self, month, expected) -> None:
-            assert month.get_name() == expected
+        def test_get_name(self) -> None:
+            assert Month.JANUARY.get_name() == "JANUARY"
+            assert Month.FEBRUARY.get_name() == "FEBRUARY"
+            assert Month.MARCH.get_name() == "MARCH"
+            assert Month.APRIL.get_name() == "APRIL"
+            assert Month.MAY.get_name() == "MAY"
+            assert Month.JUNE.get_name() == "JUNE"
+            assert Month.JULY.get_name() == "JULY"
+            assert Month.AUGUST.get_name() == "AUGUST"
+            assert Month.SEPTEMBER.get_name() == "SEPTEMBER"
+            assert Month.OCTOBER.get_name() == "OCTOBER"
+            assert Month.NOVEMBER.get_name() == "NOVEMBER"
+            assert Month.DECEMBER.get_name() == "DECEMBER"
 
         @allure.title("测试获取月份枚举实例的中文名称")
-        @pytest.mark.parametrize(
-            "month, expected",
-            [
-                (Month.JANUARY, "一月"),
-                (Month.FEBRUARY, "二月"),
-                (Month.MARCH, "三月"),
-                (Month.APRIL, "四月"),
-                (Month.MAY, "五月"),
-                (Month.JUNE, "六月"),
-                (Month.JULY, "七月"),
-                (Month.AUGUST, "八月"),
-                (Month.SEPTEMBER, "九月"),
-                (Month.OCTOBER, "十月"),
-                (Month.NOVEMBER, "十一月"),
-                (Month.DECEMBER, "十二月"),
-            ],
-        )
-        def test_get_chinese_format(self, month, expected) -> None:
-            assert month.get_chinese_format() == expected
+        def test_get_natest_get_chinese_format(self) -> None:
+            assert Month.JANUARY.get_chinese_format() == "一月"
+            assert Month.FEBRUARY.get_chinese_format() == "二月"
+            assert Month.MARCH.get_chinese_format() == "三月"
+            assert Month.APRIL.get_chinese_format() == "四月"
+            assert Month.MAY.get_chinese_format() == "五月"
+            assert Month.JUNE.get_chinese_format() == "六月"
+            assert Month.JULY.get_chinese_format() == "七月"
+            assert Month.AUGUST.get_chinese_format() == "八月"
+            assert Month.SEPTEMBER.get_chinese_format() == "九月"
+            assert Month.OCTOBER.get_chinese_format() == "十月"
+            assert Month.NOVEMBER.get_chinese_format() == "十一月"
+            assert Month.DECEMBER.get_chinese_format() == "十二月"
 
         @allure.title("测试获取月份枚举实例的简称")
-        @pytest.mark.parametrize(
-            "month, expected",
-            [
-                (Month.JANUARY, "JAN"),
-                (Month.FEBRUARY, "FEB"),
-                (Month.MARCH, "MAR"),
-                (Month.APRIL, "APR"),
-                (Month.MAY, "MAY"),
-                (Month.JUNE, "JUN"),
-                (Month.JULY, "JUL"),
-                (Month.AUGUST, "AUG"),
-                (Month.SEPTEMBER, "SEP"),
-                (Month.OCTOBER, "OCT"),
-                (Month.NOVEMBER, "NOV"),
-                (Month.DECEMBER, "DEC"),
-            ],
-        )
-        def test_get_alias(self, month, expected) -> None:
-            month.get_alias() == expected.lower()
+        def test_get_alias(self) -> None:
+            assert Month.JANUARY.get_alias() == "JAN".lower()
+            assert Month.FEBRUARY.get_alias() == "FEB".lower()
+            assert Month.MARCH.get_alias() == "MAR".lower()
+            assert Month.APRIL.get_alias() == "APR".lower()
+            assert Month.MAY.get_alias() == "MAY".lower()
+            assert Month.JUNE.get_alias() == "JUN".lower()
+            assert Month.JULY.get_alias() == "JUL".lower()
+            assert Month.AUGUST.get_alias() == "AUG".lower()
+            assert Month.SEPTEMBER.get_alias() == "SEP".lower()
+            assert Month.OCTOBER.get_alias() == "OCT".lower()
+            assert Month.NOVEMBER.get_alias() == "NOV".lower()
+            assert Month.DECEMBER.get_alias() == "DEC".lower()
 
         @allure.title("测试获取月份枚举实例数字表示")
-        @pytest.mark.parametrize(
-            "month, expected",
-            [
-                (Month.JANUARY, 1),
-                (Month.FEBRUARY, 2),
-                (Month.MARCH, 3),
-                (Month.APRIL, 4),
-                (Month.MAY, 5),
-                (Month.JUNE, 6),
-                (Month.JULY, 7),
-                (Month.AUGUST, 8),
-                (Month.SEPTEMBER, 9),
-                (Month.OCTOBER, 10),
-                (Month.NOVEMBER, 11),
-                (Month.DECEMBER, 12),
-            ],
-        )
-        def test_get_value(self, month, expected) -> None:
-            assert month.get_value() == expected
-
-        @allure.title("测试获取月份枚举类最大、最小值")
-        def test_get_max_and_min_value(self) -> None:
-            assert Month.get_max_value() == 12
-            assert Month.get_min_value() == 1
-
-        @allure.title("测试判断月份枚举类是否为第一个月或者最后一个月")
-        @pytest.mark.parametrize(
-            "month, expected",
-            [
-                (Month.JANUARY, True),
-                (Month.FEBRUARY, False),
-                (Month.MARCH, False),
-                (Month.APRIL, False),
-                (Month.MAY, False),
-                (Month.JUNE, False),
-                (Month.JULY, False),
-                (Month.AUGUST, False),
-                (Month.SEPTEMBER, False),
-                (Month.OCTOBER, False),
-                (Month.NOVEMBER, False),
-                (Month.DECEMBER, False),
-            ],
-        )
-        def test_is_first_month(self, month, expected) -> None:
-            assert month.is_first_month() == expected
-
-        @allure.title("测试判断月份枚举类是否为最后一个月")
-        @pytest.mark.parametrize(
-            "month, expected",
-            [
-                (Month.JANUARY, False),
-                (Month.FEBRUARY, False),
-                (Month.MARCH, False),
-                (Month.APRIL, False),
-                (Month.MAY, False),
-                (Month.JUNE, False),
-                (Month.JULY, False),
-                (Month.AUGUST, False),
-                (Month.SEPTEMBER, False),
-                (Month.OCTOBER, False),
-                (Month.NOVEMBER, False),
-                (Month.DECEMBER, True),
-            ],
-        )
-        def test_is_last_month(self, month, expected) -> None:
-            assert month.is_last_month() == expected
-
-        @allure.title("测试判断给定月份值是否合法")
-        @pytest.mark.parametrize(
-            "month_value, expected",
-            [
-                (1, True),
-                (2, True),
-                (3, True),
-                (4, True),
-                (5, True),
-                (6, True),
-                (7, True),
-                (8, True),
-                (9, True),
-                (10, True),
-                (11, True),
-                (12, True),
-                (13, False),
-                (0, False),
-            ],
-        )
-        def test_is_valid_month(
-            self,
-            month_value,
-            expected,
-        ) -> None:
-            assert Month.is_valid_month(month_value) == expected
+        def test_get_value(self) -> None:
+            assert Month.JANUARY.get_value() == 1
+            assert Month.FEBRUARY.get_value() == 2
+            assert Month.MARCH.get_value() == 3
+            assert Month.APRIL.get_value() == 4
+            assert Month.MAY.get_value() == 5
+            assert Month.JUNE.get_value() == 6
+            assert Month.JULY.get_value() == 7
+            assert Month.AUGUST.get_value() == 8
+            assert Month.SEPTEMBER.get_value() == 9
+            assert Month.OCTOBER.get_value() == 10
+            assert Month.NOVEMBER.get_value() == 11
+            assert Month.DECEMBER.get_value() == 12
 
     @allure.story("周单位枚举")
     @allure.description("周单位枚举, 表示周一到周日的枚举")
     class TestWeek:
-        @allure.title("测试根据整数获取周枚举实例")
-        @pytest.mark.parametrize(
-            "week_num, expected",
-            [
-                (1, Week.MONDAY),
-                (2, Week.TUESDAY),
-                (3, Week.WEDNESDAY),
-                (4, Week.THURSDAY),
-                (5, Week.FRIDAY),
-                (6, Week.SATURDAY),
-                (7, Week.SUNDAY),
-                (8, None),
-            ],
-        )
-        def test_get_week_by_int(self, week_num, expected) -> None:
-            assert Week.get_week(week_num) == expected
+        @allure.title("测试获取周枚举实例")
+        def test_get_week_by_int(self) -> None:
+            with allure.step("步骤1:测试根据数字获取周枚举实例"):
+                assert Week.get_week(1) == Week.MONDAY
+                assert Week.get_week(2) == Week.TUESDAY
+                assert Week.get_week(3) == Week.WEDNESDAY
+                assert Week.get_week(4) == Week.THURSDAY
+                assert Week.get_week(5) == Week.FRIDAY
+                assert Week.get_week(6) == Week.SATURDAY
+                assert Week.get_week(7) == Week.SUNDAY
 
-        @allure.title("测试根据中文名称获取周枚举实例")
-        @pytest.mark.parametrize(
-            "week_name, expected",
-            [
-                ("星期一", Week.MONDAY),
-                ("星期二", Week.TUESDAY),
-                ("星期三", Week.WEDNESDAY),
-                ("星期四", Week.THURSDAY),
-                ("星期五", Week.FRIDAY),
-                ("星期六", Week.SATURDAY),
-                ("星期日", Week.SUNDAY),
-                ("星期1", Week.MONDAY),
-                ("星期2", Week.TUESDAY),
-                ("星期3", Week.WEDNESDAY),
-                ("星期4", Week.THURSDAY),
-                ("星期5", Week.FRIDAY),
-                ("星期6", Week.SATURDAY),
-                ("星期7", Week.SUNDAY),
-                ("周一", Week.MONDAY),
-                ("周二", Week.TUESDAY),
-                ("周三", Week.WEDNESDAY),
-                ("周四", Week.THURSDAY),
-                ("周五", Week.FRIDAY),
-                ("周六", Week.SATURDAY),
-                ("周日", Week.SUNDAY),
-                ("周1", Week.MONDAY),
-                ("周2", Week.TUESDAY),
-                ("周3", Week.WEDNESDAY),
-                ("周4", Week.THURSDAY),
-                ("周5", Week.FRIDAY),
-                ("周6", Week.SATURDAY),
-                ("周7", Week.SUNDAY),
-                ("星期八", None),
-                ("星期9", None),
-                ("INVALID", None),
-                pytest.param([], None, marks=pytest.mark.xfail(raises=TypeError)),
-            ],
-        )
-        def test_get_week_by_chinese_name(self, week_name, expected) -> None:
-            assert Week.get_week(week_name) == expected
+            with allure.step("步骤2:测试根据中文获取周枚举实例"):
+                assert Week.get_week("星期一") == Week.MONDAY
+                assert Week.get_week("星期二") == Week.TUESDAY
+                assert Week.get_week("星期三") == Week.WEDNESDAY
+                assert Week.get_week("星期四") == Week.THURSDAY
+                assert Week.get_week("星期五") == Week.FRIDAY
+                assert Week.get_week("星期六") == Week.SATURDAY
+                assert Week.get_week("星期日") == Week.SUNDAY
 
-        @allure.title("测试根据英文获取周枚举实例")
-        @pytest.mark.parametrize(
-            "week_name, expected",
-            [
-                ("MONDAY", Week.MONDAY),
-                ("TUESDAY", Week.TUESDAY),
-                ("WEDNESDAY", Week.WEDNESDAY),
-                ("THURSDAY", Week.THURSDAY),
-                ("FRIDAY", Week.FRIDAY),
-                ("SATURDAY", Week.SATURDAY),
-                ("SUNDAY", Week.SUNDAY),
-            ],
-        )
-        def test_get_week_by_english_name(self, week_name, expected) -> None:
-            assert Week.get_week(week_name) == expected
+                assert Week.get_week("星期1") == Week.MONDAY
+                assert Week.get_week("星期2") == Week.TUESDAY
+                assert Week.get_week("星期3") == Week.WEDNESDAY
+                assert Week.get_week("星期4") == Week.THURSDAY
+                assert Week.get_week("星期5") == Week.FRIDAY
+                assert Week.get_week("星期6") == Week.SATURDAY
+                assert Week.get_week("星期7") == Week.SUNDAY
 
-        @allure.title("测试根据dt对象获取周枚举实例")
-        @pytest.mark.parametrize(
-            "dt, expected",
-            [
-                (datetime(2024, 8, 26), Week.MONDAY),
-                (datetime(2024, 8, 27), Week.TUESDAY),
-                (datetime(2024, 8, 28), Week.WEDNESDAY),
-                (datetime(2024, 8, 29), Week.THURSDAY),
-                (datetime(2024, 8, 30), Week.FRIDAY),
-                (datetime(2024, 8, 31), Week.SATURDAY),
-                (datetime(2024, 9, 1), Week.SUNDAY),
-            ],
-        )
-        def test_get_week_by_datetime(
-            self,
-            dt,
-            expected,
-        ) -> None:
-            assert Week.get_week(dt) == expected
+                assert Week.get_week("周一") == Week.MONDAY
+                assert Week.get_week("周二") == Week.TUESDAY
+                assert Week.get_week("周三") == Week.WEDNESDAY
+                assert Week.get_week("周四") == Week.THURSDAY
+                assert Week.get_week("周五") == Week.FRIDAY
+                assert Week.get_week("周六") == Week.SATURDAY
+                assert Week.get_week("周日") == Week.SUNDAY
 
-        @allure.title("测试根据英文简称获取周枚举实例")
-        @pytest.mark.parametrize(
-            "week_name, expected",
-            [
-                ("MON", Week.MONDAY),
-                ("TUE", Week.TUESDAY),
-                ("WED", Week.WEDNESDAY),
-                ("THU", Week.THURSDAY),
-                ("FRI", Week.FRIDAY),
-                ("SAT", Week.SATURDAY),
-                ("SUN", Week.SUNDAY),
-            ],
-        )
-        def test_get_week_by_alias(
-            self,
-            week_name,
-            expected,
-        ) -> None:
-            assert Week.get_week(week_name) == expected
+                assert Week.get_week("周1") == Week.MONDAY
+                assert Week.get_week("周2") == Week.TUESDAY
+                assert Week.get_week("周3") == Week.WEDNESDAY
+                assert Week.get_week("周4") == Week.THURSDAY
+                assert Week.get_week("周5") == Week.FRIDAY
+                assert Week.get_week("周6") == Week.SATURDAY
+                assert Week.get_week("周7") == Week.SUNDAY
+
+            with allure.step("步骤3:测试根据名称获取周枚举实例"):
+                assert Week.get_week("MONDAY") == Week.MONDAY
+                assert Week.get_week("TUESDAY") == Week.TUESDAY
+                assert Week.get_week("WEDNESDAY") == Week.WEDNESDAY
+                assert Week.get_week("THURSDAY") == Week.THURSDAY
+                assert Week.get_week("FRIDAY") == Week.FRIDAY
+                assert Week.get_week("SATURDAY") == Week.SATURDAY
+                assert Week.get_week("SUNDAY") == Week.SUNDAY
+
+            with allure.step("步骤4:测试根据简称获取周枚举实例"):
+                assert Week.get_week("MON") == Week.MONDAY
+                assert Week.get_week("TUE") == Week.TUESDAY
+                assert Week.get_week("WED") == Week.WEDNESDAY
+                assert Week.get_week("THU") == Week.THURSDAY
+                assert Week.get_week("FRI") == Week.FRIDAY
+                assert Week.get_week("SAT") == Week.SATURDAY
+                assert Week.get_week("SUN") == Week.SUNDAY
+
+            with allure.step("步骤5:测试根据detetime对象获取周枚举实例"):
+                assert Week.get_week(datetime(2024, 8, 26)) == Week.MONDAY
+                assert Week.get_week(datetime(2024, 8, 27)) == Week.TUESDAY
+                assert Week.get_week(datetime(2024, 8, 28)) == Week.WEDNESDAY
+                assert Week.get_week(datetime(2024, 8, 29)) == Week.THURSDAY
+                assert Week.get_week(datetime(2024, 8, 30)) == Week.FRIDAY
+                assert Week.get_week(datetime(2024, 8, 31)) == Week.SATURDAY
+                assert Week.get_week(datetime(2024, 9, 1)) == Week.SUNDAY
+            with allure.step("步骤6:测试输入错误的数值"):
+                assert Week.get_week(8) is None
+                assert Week.get_week("星期八") is None
+                assert Week.get_week("星期9") is None
+
+            with allure.step("步骤7:测试输入错误的类型"):
+                with pytest.raises(TypeError):
+                    Week.get_week(None)
 
         @allure.title("测试获取周枚举实例的名称")
-        @pytest.mark.parametrize(
-            "week, expected",
-            [
-                (Week.MONDAY, "MONDAY"),
-                (Week.TUESDAY, "TUESDAY"),
-                (Week.WEDNESDAY, "WEDNESDAY"),
-                (Week.THURSDAY, "THURSDAY"),
-                (Week.FRIDAY, "FRIDAY"),
-                (Week.SATURDAY, "SATURDAY"),
-                (Week.SUNDAY, "SUNDAY"),
-            ],
-        )
-        def test_get_name(
-            self,
-            week,
-            expected,
-        ) -> None:
-            assert week.get_name() == expected
+        def test_get_name(self) -> None:
+            assert Week.MONDAY.get_name() == "MONDAY"
+            assert Week.TUESDAY.get_name() == "TUESDAY"
+            assert Week.WEDNESDAY.get_name() == "WEDNESDAY"
+            assert Week.THURSDAY.get_name() == "THURSDAY"
+            assert Week.FRIDAY.get_name() == "FRIDAY"
+            assert Week.SATURDAY.get_name() == "SATURDAY"
+            assert Week.SUNDAY.get_name() == "SUNDAY"
 
         @allure.title("测试获取周枚举实例的中文名称")
-        @pytest.mark.parametrize(
-            "week, expected",
-            [
-                (Week.MONDAY, "星期一"),
-                (Week.TUESDAY, "星期二"),
-                (Week.WEDNESDAY, "星期三"),
-                (Week.THURSDAY, "星期四"),
-                (Week.FRIDAY, "星期五"),
-                (Week.SATURDAY, "星期六"),
-                (Week.SUNDAY, "星期日"),
-            ],
-        )
-        def test_get_chinese_format_with_default_prefix(
-            self,
-            week,
-            expected,
-        ) -> None:
-            assert week.get_chinese_format() == expected
+        def test_get_chinese_format(self) -> None:
+            with allure.step("步骤1:测试获取中文名称, 使用默认前缀"):
+                assert Week.MONDAY.get_chinese_format() == "星期一"
+                assert Week.TUESDAY.get_chinese_format() == "星期二"
+                assert Week.WEDNESDAY.get_chinese_format() == "星期三"
+                assert Week.THURSDAY.get_chinese_format() == "星期四"
+                assert Week.FRIDAY.get_chinese_format() == "星期五"
+                assert Week.SATURDAY.get_chinese_format() == "星期六"
+                assert Week.SUNDAY.get_chinese_format() == "星期日"
 
-        @allure.title("测试获取周枚举实例的中文名称, 使用自定义前缀")
-        @pytest.mark.parametrize(
-            "week, prefix, expected",
-            [
-                (Week.MONDAY, "周", "周一"),
-                (Week.TUESDAY, "周", "周二"),
-                (Week.WEDNESDAY, "周", "周三"),
-                (Week.THURSDAY, "周", "周四"),
-                (Week.FRIDAY, "周", "周五"),
-                (Week.SATURDAY, "周", "周六"),
-                (Week.SUNDAY, "周", "周日"),
-            ],
-        )
-        def test_get_chinese_format_with_custom_prefix(
-            self,
-            week,
-            prefix,
-            expected,
-        ) -> None:
-            assert week.get_chinese_format(prefix=prefix) == expected
+            with allure.step("步骤2:测试获取中文名称, 使用自定义前缀"):
+                assert Week.MONDAY.get_chinese_format("周") == "周一"
+                assert Week.TUESDAY.get_chinese_format("周") == "周二"
+                assert Week.WEDNESDAY.get_chinese_format("周") == "周三"
+                assert Week.THURSDAY.get_chinese_format("周") == "周四"
+                assert Week.FRIDAY.get_chinese_format("周") == "周五"
+                assert Week.SATURDAY.get_chinese_format("周") == "周六"
+                assert Week.SUNDAY.get_chinese_format("周") == "周日"
 
         @allure.title("测试获取周枚举实例的简称")
-        @pytest.mark.parametrize(
-            "week, expected",
-            [
-                (Week.MONDAY, "MON"),
-                (Week.TUESDAY, "TUE"),
-                (Week.WEDNESDAY, "WED"),
-                (Week.THURSDAY, "THU"),
-                (Week.FRIDAY, "FRI"),
-                (Week.SATURDAY, "SAT"),
-                (Week.SUNDAY, "SUN"),
-            ],
-        )
-        def test_get_alias(
-            self,
-            week,
-            expected,
-        ) -> None:
-            assert week.get_alias() == expected.lower()
+        def test_get_alias(self) -> None:
+            assert Week.MONDAY.get_alias() == "MON".lower()
+            assert Week.TUESDAY.get_alias() == "TUE".lower()
+            assert Week.WEDNESDAY.get_alias() == "WED".lower()
+            assert Week.THURSDAY.get_alias() == "THU".lower()
+            assert Week.FRIDAY.get_alias() == "FRI".lower()
+            assert Week.SATURDAY.get_alias() == "SAT".lower()
+            assert Week.SUNDAY.get_alias() == "SUN".lower()
 
         @allure.title("测试获取周枚举实例对应的calendar值")
-        @pytest.mark.parametrize(
-            "week, expected",
-            [
-                (Week.MONDAY, 0),
-                (Week.TUESDAY, 1),
-                (Week.WEDNESDAY, 2),
-                (Week.THURSDAY, 3),
-                (Week.FRIDAY, 4),
-                (Week.SATURDAY, 5),
-                (Week.SUNDAY, 6),
-            ],
-        )
-        def test_get_value(
-            self,
-            week,
-            expected,
-        ) -> None:
-            assert week.get_value() == expected
+        def test_get_value(self) -> None:
+            assert Week.MONDAY.get_value() == calendar.MONDAY
+            assert Week.TUESDAY.get_value() == calendar.TUESDAY
+            assert Week.WEDNESDAY.get_value() == calendar.WEDNESDAY
+            assert Week.THURSDAY.get_value() == calendar.THURSDAY
+            assert Week.FRIDAY.get_value() == calendar.FRIDAY
+            assert Week.SATURDAY.get_value() == calendar.SATURDAY
+            assert Week.SUNDAY.get_value() == calendar.SUNDAY
 
         @allure.title("测试获取周枚举实例的ISO8601值")
-        @pytest.mark.parametrize(
-            "week, expected",
-            [
-                (Week.MONDAY, 1),
-                (Week.TUESDAY, 2),
-                (Week.WEDNESDAY, 3),
-                (Week.THURSDAY, 4),
-                (Week.FRIDAY, 5),
-                (Week.SATURDAY, 6),
-                (Week.SUNDAY, 7),
-            ],
-        )
-        def test_get_iso8601_value(
-            self,
-            week,
-            expected,
-        ) -> None:
-            assert week.get_iso8601_value() == expected
-
-        @allure.title("测试周最大值和最小值")
-        def test_get_max_and_min_value(self) -> None:
-            assert Week.get_max_value() == 7
-            assert Week.get_min_value() == 1
-
-        @allure.title("测试判断周枚举实例是否为一周的开始")
-        @pytest.mark.parametrize(
-            "week, expected",
-            [
-                (Week.MONDAY, True),
-                (Week.TUESDAY, False),
-                (Week.WEDNESDAY, False),
-                (Week.THURSDAY, False),
-                (Week.FRIDAY, False),
-                (Week.SATURDAY, False),
-                (Week.SUNDAY, False),
-            ],
-        )
-        def test_is_first_day_of_week(self, week, expected) -> None:
-            assert week.is_first_day_of_week() == expected
-
-        @allure.title("测试判断周枚举实例是否为一周的结尾")
-        @pytest.mark.parametrize(
-            "week, expected",
-            [
-                (Week.MONDAY, False),
-                (Week.TUESDAY, False),
-                (Week.WEDNESDAY, False),
-                (Week.THURSDAY, False),
-                (Week.FRIDAY, False),
-                (Week.SATURDAY, False),
-                (Week.SUNDAY, True),
-            ],
-        )
-        def test_is_last_day_of_week(self, week, expected) -> None:
-            assert week.is_last_day_of_week() == expected
-
-        @allure.title("测试判断给定周值是否合法")
-        @pytest.mark.parametrize(
-            "week_value, expected",
-            [
-                (1, True),
-                (2, True),
-                (3, True),
-                (4, True),
-                (5, True),
-                (6, True),
-                (7, True),
-                (8, False),
-                (0, False),
-            ],
-        )
-        def test_is_valid_week(self, week_value, expected) -> None:
-            assert Week.is_valid_weekday(week_value) == expected
+        def test_get_iso8601_value(self) -> None:
+            assert Week.MONDAY.get_iso8601_value() == 1
+            assert Week.TUESDAY.get_iso8601_value() == 2
+            assert Week.WEDNESDAY.get_iso8601_value() == 3
+            assert Week.THURSDAY.get_iso8601_value() == 4
+            assert Week.FRIDAY.get_iso8601_value() == 5
+            assert Week.SATURDAY.get_iso8601_value() == 6
+            assert Week.SUNDAY.get_iso8601_value() == 7
 
     @allure.story("时间单位枚举")
     @allure.description("时间单位枚举, 表示时间单位的枚举, 纳秒,微秒,毫秒,秒,分钟,小时,天")
     class TestTimeUnit:
-        @allure.title("测试纳秒的时间转换")
-        @pytest.mark.parametrize(
-            "time_unit, val, expected",
-            [
-                (TimeUnit.NANOSECONDS, 1, 1),
-                (TimeUnit.MICROSECONDS, 1, 1000),
-                (TimeUnit.MILLISECONDS, 1, 1000000),
-                (TimeUnit.SECONDS, 1, 1000000000),
-                (TimeUnit.MINUTES, 1, 60000000000),
-                (TimeUnit.HOURS, 1, 3600000000000),
-                (TimeUnit.DAYS, 1, 86400000000000),
-                (TimeUnit.WEEK, 1, 604800000000000),
-            ],
-        )
-        def test_to_nanos(
-            self,
-            time_unit,
-            val,
-            expected,
-        ) -> None:
-            assert time_unit.to_nanos(val) == expected
+        @allure.title("测试时间单位之间的转换")
+        def test_convert(self) -> None:
+            with allure.step("步骤1:纳秒的转换"):
+                assert TimeUnit.NANOSECONDS.to_nanos(1) == 1
 
-        @allure.title("测试微秒的时间转换")
-        @pytest.mark.parametrize(
-            "time_unit, val, expected",
-            [
-                (TimeUnit.MICROSECONDS, 1, 1),
-                (TimeUnit.MILLISECONDS, 1, 1000),
-                (TimeUnit.SECONDS, 1, 1000000),
-                (TimeUnit.MINUTES, 1, 60000000),
-                (TimeUnit.HOURS, 1, 3600000000),
-                (TimeUnit.DAYS, 1, 86400000000),
-                (TimeUnit.WEEK, 1, 604800000000),
-            ],
-        )
-        def test_to_micros(self, time_unit, val, expected) -> None:
-            assert time_unit.to_micros(val) == expected
+            with allure.step("步骤2:微秒的转换"):
+                assert TimeUnit.MICROSECONDS.to_micros(1) == 1
+                assert TimeUnit.MICROSECONDS.to_nanos(1) == 1000
 
-        @allure.title("测试毫秒的时间转换")
-        @pytest.mark.parametrize(
-            "time_unit, val, expected",
-            [
-                (TimeUnit.MILLISECONDS, 1, 1),
-                (TimeUnit.SECONDS, 1, 1000),
-                (TimeUnit.MINUTES, 1, 60000),
-                (TimeUnit.HOURS, 1, 3600000),
-                (TimeUnit.DAYS, 1, 86400000),
-                (TimeUnit.WEEK, 1, 604800000),
-            ],
-        )
-        def test_to_millis(
-            self,
-            time_unit,
-            val,
-            expected,
-        ) -> None:
-            assert time_unit.to_millis(val) == expected
+            with allure.step("步骤3:毫秒的转换"):
+                assert TimeUnit.MILLISECONDS.to_millis(1) == 1
+                assert TimeUnit.MILLISECONDS.to_micros(1) == 1000
+                assert TimeUnit.MILLISECONDS.to_nanos(1) == 1000000
 
-        @allure.title("测试秒的时间转换")
-        @pytest.mark.parametrize(
-            "time_unit, val, expected",
-            [
-                (TimeUnit.SECONDS, 1, 1),
-                (TimeUnit.MINUTES, 1, 60),
-                (TimeUnit.HOURS, 1, 3600),
-                (TimeUnit.DAYS, 1, 86400),
-                (TimeUnit.WEEK, 1, 604800),
-            ],
-        )
-        def test_to_seconds(
-            self,
-            time_unit,
-            val,
-            expected,
-        ) -> None:
-            assert time_unit.to_seconds(val) == expected
+            with allure.step("步骤4:秒的转换"):
+                assert TimeUnit.SECONDS.to_seconds(1) == 1
+                assert TimeUnit.SECONDS.to_millis(1) == 1000
+                assert TimeUnit.SECONDS.to_micros(1) == 1000000
+                assert TimeUnit.SECONDS.to_nanos(1) == 1000000000
 
-        @allure.title("测试分钟的时间转换")
-        @pytest.mark.parametrize(
-            "time_unit, val, expected",
-            [
-                (TimeUnit.MINUTES, 1, 1),
-                (TimeUnit.HOURS, 1, 60),
-                (TimeUnit.DAYS, 1, 1440),
-                (TimeUnit.WEEK, 1, 10080),
-            ],
-        )
-        def test_to_minutes(
-            self,
-            time_unit,
-            val,
-            expected,
-        ) -> None:
-            assert time_unit.to_minutes(val) == expected
+            with allure.step("步骤5:分钟的转换"):
+                assert TimeUnit.MINUTES.to_minutes(1) == 1
+                assert TimeUnit.MINUTES.to_seconds(1) == 60
+                assert TimeUnit.MINUTES.to_millis(1) == 60000
+                assert TimeUnit.MINUTES.to_micros(1) == 60000000
+                assert TimeUnit.MINUTES.to_nanos(1) == 60000000000
 
-        @allure.title("测试小时的的时间转换")
-        @pytest.mark.parametrize(
-            "time_unit, val, expected",
-            [
-                (TimeUnit.HOURS, 1, 1),
-                (TimeUnit.DAYS, 1, 24),
-                (TimeUnit.WEEK, 1, 168),
-            ],
-        )
-        def test_to_hours(
-            self,
-            time_unit,
-            val,
-            expected,
-        ) -> None:
-            assert time_unit.to_hours(val) == expected
+            with allure.step("步骤6:小时的转换"):
+                assert TimeUnit.HOURS.to_hours(1) == 1
+                assert TimeUnit.HOURS.to_minutes(1) == 60
+                assert TimeUnit.HOURS.to_seconds(1) == 3600
+                assert TimeUnit.HOURS.to_millis(1) == 3600000
+                assert TimeUnit.HOURS.to_micros(1) == 3600000000
+                assert TimeUnit.HOURS.to_nanos(1) == 3600000000000
 
-        @allure.title("测试天的时间转换")
-        @pytest.mark.parametrize(
-            "time_unit, val, expected",
-            [
-                (TimeUnit.DAYS, 1, 1),
-                (TimeUnit.WEEK, 1, 7),
-            ],
-        )
-        def test_to_days(
-            self,
-            time_unit,
-            val,
-            expected,
-        ) -> None:
-            assert time_unit.to_days(val) == expected
-
-        @allure.title("测试周的时间转换")
-        @pytest.mark.parametrize(
-            "time_unit, val, expected",
-            [
-                (TimeUnit.WEEK, 1, 1),
-            ],
-        )
-        def test_to_weeks(
-            self,
-            time_unit,
-            val,
-            expected,
-        ) -> None:
-            assert time_unit.to_weeks(val) == expected
+            with allure.step("步骤7:天的转换"):
+                assert TimeUnit.DAYS.to_days(1) == 1
+                assert TimeUnit.DAYS.to_hours(1) == 24
+                assert TimeUnit.DAYS.to_minutes(1) == 1440
+                assert TimeUnit.DAYS.to_seconds(1) == 86400
+                assert TimeUnit.DAYS.to_millis(1) == 86400000
+                assert TimeUnit.DAYS.to_micros(1) == 86400000000
+                assert TimeUnit.DAYS.to_nanos(1) == 86400000000000
 
     @allure.story("性别枚举")
     @allure.description("性别枚举, 表示性别的枚举, 男,女")
     class TestGender:
         @allure.title("测试获取性别枚举实例")
-        @pytest.mark.parametrize(
-            "gender_name, expected_gender",
-            [
-                ("MALE", Gender.MALE),
-                ("男", Gender.MALE),
-                ("男的", Gender.MALE),
-                ("男性", Gender.MALE),
-                ("FEMALE", Gender.FEMALE),
-                ("女性", Gender.FEMALE),
-                ("女的", Gender.FEMALE),
-                ("女", Gender.FEMALE),
-                pytest.param("unknown", None, marks=pytest.mark.xfail),
-            ],
-        )
-        def test_get_gender_by_name(self, gender_name, expected_gender) -> None:
-            assert Gender.get_gender_by_name(gender_name) == expected_gender
+        def test_get_obj(self) -> None:
+            with allure.step("步骤1:测试获取男性"):
+                assert Gender.get_gender_by_name("MALE") == Gender.MALE
+                assert Gender.get_gender_by_name("男") == Gender.MALE
+                assert Gender.get_gender_by_name("男的") == Gender.MALE
+                assert Gender.get_gender_by_name("男性") == Gender.MALE
 
-        @allure.title("测试根据性别代码获取性别枚举实例")
-        @pytest.mark.parametrize(
-            "gender_code, expected_gender",
-            [
-                (0, Gender.FEMALE),
-                (1, Gender.MALE),
-                (2, Gender.FEMALE),
-                (3, Gender.MALE),
-            ],
-        )
-        def test_get_gender_by_code(self, gender_code, expected_gender) -> None:
-            assert Gender.get_gender_by_code(gender_code) == expected_gender
+            with allure.step("步骤2:测试获取女性"):
+                assert Gender.get_gender_by_name("FEMALE") == Gender.FEMALE
+                assert Gender.get_gender_by_name("女性") == Gender.FEMALE
+                assert Gender.get_gender_by_name("女的") == Gender.FEMALE
+                assert Gender.get_gender_by_name("女") == Gender.FEMALE
+
+            with allure.step("步骤3:测试根据数字获取性别枚举实例"):
+                assert Gender.MALE == Gender.get_gender_by_code(1)
+                assert Gender.FEMALE == Gender.get_gender_by_code(2)
+
+            with allure.step("步骤4:测试获取未知性别"):
+                with pytest.raises(ValueError):
+                    Gender.get_gender_by_name("unknown")
 
     @allure.story("脱敏类型枚举")
     @allure.description(
@@ -970,24 +496,14 @@ class TestConstant:
     )
     class TestDesensitizedType:
         @allure.title("测试获取枚举值描述信息")
-        @pytest.mark.parametrize(
-            "desensitized_type, expected_description",
-            [
-                (DesensitizedType.USER_ID, "用户id"),
-                (DesensitizedType.ADDRESS, "地址"),
-                (DesensitizedType.ID_CARD, "身份证号"),
-                (DesensitizedType.BANK_CARD, "银行卡"),
-                (DesensitizedType.MOBILE_PHONE, "手机号"),
-                (DesensitizedType.EMAIL, "电子邮件"),
-                (DesensitizedType.IPV4, "IPv4地址"),
-                (DesensitizedType.IPV6, "IPv6地址"),
-                (DesensitizedType.ALL_MASK, "全部不显示"),
-                (DesensitizedType.CAR_LICENSE, "车牌号"),
-            ],
-        )
-        def test_get_DesensitizedType_description(
-            self,
-            desensitized_type,
-            expected_description,
-        ) -> None:
-            assert desensitized_type.get_description() == expected_description
+        def test_get_DesensitizedType_description(self) -> None:
+            assert DesensitizedType.USER_ID.get_description() == "用户id"
+            assert DesensitizedType.ADDRESS.get_description() == "地址"
+            assert DesensitizedType.ID_CARD.get_description() == "身份证号"
+            assert DesensitizedType.BANK_CARD.get_description() == "银行卡"
+            assert DesensitizedType.MOBILE_PHONE.get_description() == "手机号"
+            assert DesensitizedType.EMAIL.get_description() == "电子邮件"
+            assert DesensitizedType.IPV4.get_description() == "IPv4地址"
+            assert DesensitizedType.IPV6.get_description() == "IPv6地址"
+            assert DesensitizedType.ALL_MASK.get_description() == "全部不显示"
+            assert DesensitizedType.CAR_LICENSE.get_description() == "车牌号"

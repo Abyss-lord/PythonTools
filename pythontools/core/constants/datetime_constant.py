@@ -17,6 +17,7 @@ Change Activity:
 import calendar
 from collections import namedtuple
 from datetime import date, datetime
+from datetime import date, datetime
 from enum import Enum
 from typing import Literal, Optional
 
@@ -38,14 +39,6 @@ class Quarter(Enum):
     Q2 = QuarterTuple("Q2", "第二季度", 2)
     Q3 = QuarterTuple("Q3", "第三季度", 3)
     Q4 = QuarterTuple("Q4", "第四季度", 4)
-
-    @staticmethod
-    def get_max_value() -> int:
-        return Quarter.Q4.get_value()
-
-    @staticmethod
-    def get_min_value() -> int:
-        return Quarter.Q1.get_value()
 
     @classmethod
     def get_quarter(cls, dt: datetime | int | str) -> Optional["Quarter"]:
@@ -87,31 +80,26 @@ class Quarter(Enum):
         else:
             raise TypeError("dt must be datetime or int or str")
 
-    @classmethod
-    def is_valid_quarter(cls, quarter: int) -> bool:
+    def get_chinese_format(self) -> str:
         """
-        检查给定的季度是否有效
+        获取季度中文名称
 
         Example:
         -------
-        >>> Quarter.is_valid_quarter(1)
-        True
-        >>> Quarter.is_valid_quarter(5)
-        False
-
-        Parameters
-        ----------
-        quarter : int
-            季度数字
+        >>> Quarter.Q1.get_chinese_format()
+        '第一季度'
+        >>> Quarter.Q2.get_chinese_format()
+        '第二季度'
+        >>> Quarter.Q3.get_chinese_format()
+        '第三季度'
+        >>> Quarter.Q4.get_chinese_format()
+        '第四季度'
 
         Returns
         -------
-        bool
-            True: 有效, False: 无效
+        str
+            季度的中文名称
         """
-        return Quarter.get_min_value() <= quarter <= Quarter.get_max_value()
-
-    def get_chinese_format(self) -> str:
         """
         获取季度中文名称
 
@@ -155,19 +143,19 @@ class Quarter(Enum):
         """
         return self.value.name
 
-    def get_value(self) -> int:
+    def get_val(self) -> int:
         """
         获取季度值
 
         Example:
         -------
-        >>> Quarter.Q1.get_value()
+        >>> Quarter.Q1.get_val()
         1
-        >>> Quarter.Q2.get_value()
+        >>> Quarter.Q2.get_val()
         2
-        >>> Quarter.Q3.get_value()
+        >>> Quarter.Q3.get_val()
         3
-        >>> Quarter.Q4.get_value()
+        >>> Quarter.Q4.get_val()
         4
 
         Returns
@@ -176,50 +164,6 @@ class Quarter(Enum):
             季度值
         """
         return self.value.val
-
-    def is_first_quarter(self) -> bool:
-        """
-        判断当前季度是否为第一季度
-
-        Example:
-        -------
-        >>> Quarter.Q1.is_first_quarter()
-        True
-        >>> Quarter.Q2.is_first_quarter()
-        False
-        >>> Quarter.Q3.is_first_quarter()
-        False
-        >>> Quarter.Q4.is_first_quarter()
-        False
-
-        Returns
-        -------
-        bool
-            True: 当前季度为第一季度, False: 当前季度不是第一季度
-        """
-        return self == Quarter.Q1
-
-    def is_last_quarter(self) -> bool:
-        """
-        判断当前季度是否为最后一季度
-
-        Example:
-        -------
-        >>> Quarter.Q1.is_last_quarter()
-        False
-        >>> Quarter.Q2.is_last_quarter()
-        False
-        >>> Quarter.Q3.is_last_quarter()
-        False
-        >>> Quarter.Q4.is_last_quarter()
-        True
-
-        Returns
-        -------
-        bool
-            True: 当前季度为最后一季度, False: 当前季度不是最后一季度
-        """
-        return self == Quarter.Q4
 
     @classmethod
     def _get_quarter_by_name(cls, name: str) -> Optional["Quarter"]:
@@ -293,14 +237,6 @@ class Month(Enum):
     NOVEMBER = MonthTuple("NOVEMBER", "十一月", "nov", 11)
     DECEMBER = MonthTuple("DECEMBER", "十二月", "dec", 12)
 
-    @staticmethod
-    def get_max_value() -> int:
-        return Month.DECEMBER.get_value()
-
-    @staticmethod
-    def get_min_value() -> int:
-        return Month.JANUARY.get_value()
-
     @classmethod
     def get_month(cls, name: int | str | datetime) -> Optional["Month"]:
         """
@@ -342,30 +278,6 @@ class Month(Enum):
             return cls._get_month_by_date(name)
         else:
             raise TypeError("name must be int or str")
-
-    @classmethod
-    def is_valid_month(cls, month: int) -> bool:
-        """
-        检查给定的月份是否有效
-
-        Example:
-        -------
-        >>> Month.is_valid_month(1)
-        True
-        >>> Month.is_valid_month(13)
-        False
-
-        Parameters
-        ----------
-        month : int
-            月份数字
-
-        Returns
-        -------
-        bool
-            True: 有效, False: 无效
-        """
-        return Month.get_min_value() <= month <= Month.get_max_value()
 
     def get_name(self) -> str:
         """
@@ -430,28 +342,6 @@ class Month(Enum):
             year = year.year
 
         return self._get_last_day_of_month_by_number(year)
-
-    def is_first_month(self) -> bool:
-        """
-        判断当前月份是否为第一月
-
-        Returns
-        -------
-        bool
-            True: 当前月份为第一月, False: 当前月份不是第一月
-        """
-        return self == Month.JANUARY
-
-    def is_last_month(self) -> bool:
-        """
-        判断当前月份是否为最后一月
-
-        Returns
-        -------
-        bool
-            True: 当前月份为最后一月, False: 当前月份不是最后一月
-        """
-        return self == Month.DECEMBER
 
     def _get_last_day_of_month_by_number(self, year: int) -> int:
         month = self.get_value()
@@ -525,14 +415,6 @@ class Week(Enum):
     SATURDAY = WeekTuple("SATURDAY", "六", "sat", calendar.SATURDAY, 6)
     SUNDAY = WeekTuple("SUNDAY", "日", "sun", calendar.SUNDAY, 7)
 
-    @staticmethod
-    def get_max_value() -> int:
-        return Week.SUNDAY.get_iso8601_value()
-
-    @staticmethod
-    def get_min_value() -> int:
-        return Week.MONDAY.get_iso8601_value()
-
     @classmethod
     def get_week(cls, name: int | str | datetime) -> Optional["Week"]:
         """
@@ -572,30 +454,6 @@ class Week(Enum):
             return cls._get_week_by_date(name)
         else:
             raise TypeError("name must be int or str")
-
-    @classmethod
-    def is_valid_weekday(cls, weekday: int) -> bool:
-        """
-        检查给定的星期是否有效
-
-        Example:
-        -------
-        >>> Week.is_valid_weekday(1)
-        True
-        >>> Week.is_valid_weekday(8)
-        False
-
-        Parameters
-        ----------
-        weekday : int
-            星期数字
-
-        Returns
-        -------
-        bool
-            True: 有效, False: 无效
-        """
-        return Week.get_min_value() <= weekday <= Week.get_max_value()
 
     def get_name(self) -> str:
         """
@@ -666,28 +524,6 @@ class Week(Enum):
         """
         return self.value.alias
 
-    def is_first_day_of_week(self) -> bool:
-        """
-        判断当前星期是否为星期一
-
-        Returns
-        -------
-        bool
-            True: 当前星期为星期一, False: 当前星期不是星期一
-        """
-        return self == Week.MONDAY
-
-    def is_last_day_of_week(self) -> bool:
-        """
-        判断当前星期是否为星期日
-
-        Returns
-        -------
-        bool
-            True: 当前星期为星期日, False: 当前星期不是星期日
-        """
-        return self == Week.SUNDAY
-
     @classmethod
     def _get_week_by_date(cls, dt: datetime) -> Optional["Week"]:
         return cls._get_week_by_number(dt.weekday() + 1)
@@ -739,7 +575,6 @@ class TimeUnit(Enum):
     MINUTES = TimeUnitTuple("分钟(min)", 60 * SECONDS.unit_val_in_ns)
     HOURS = TimeUnitTuple("小时(h)", 60 * MINUTES.unit_val_in_ns)
     DAYS = TimeUnitTuple("天(d)", 24 * HOURS.unit_val_in_ns)
-    WEEK = TimeUnitTuple("周(w)", 7 * DAYS.unit_val_in_ns)
 
     def to_nanos(self, duration: int) -> int:
         return duration * self.value.unit_val_in_ns
@@ -761,21 +596,3 @@ class TimeUnit(Enum):
 
     def to_days(self, duration: int) -> int:
         return duration * self.value.unit_val_in_ns // TimeUnit.DAYS.value.unit_val_in_ns
-
-    def to_weeks(self, duration: int) -> int:
-        return duration * self.value.unit_val_in_ns // TimeUnit.WEEK.value.unit_val_in_ns
-
-
-class DayType(str, Enum):
-    WORKING_DAY = "WT"
-    CALENDAR_DAY = "KT"
-    REST_DAY = "RD"
-    HOLIDAY = "HD"
-
-
-class EndDateType(Enum):
-    INCLUSIVE = 1
-    EXCLUSIVE = 2
-
-
-_DayTyp = DayType | Literal["WT", "KT"]  # noqa: F821

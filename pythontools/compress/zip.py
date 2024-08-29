@@ -22,8 +22,8 @@ from os import PathLike
 from pathlib import Path
 from zipfile import ZipInfo
 
-from pythontools.core.utils.basic_utils import StringUtil
-from pythontools.io.fileutils import FileUtil
+from pythontools.core.io.fileutils import FileUtil
+from pythontools.core.utils.basicutils import StringUtil
 
 
 class ZipUtil:
@@ -111,9 +111,11 @@ class ZipUtil:
         """
         zip_path_obj = Path(zip_name)
         if not FileUtil.is_dir(zip_path_obj):
+        if not FileUtil.is_dir(zip_path_obj):
             raise ValueError("Must give a valid directory")
 
         with zipfile.ZipFile(zip_path_obj, "w", compression=zipfile.ZIP_DEFLATED, allowZip64=True) as z:
+            path_obj_lst = FileUtil.list_files(dir_path)
             path_obj_lst = FileUtil.list_files(dir_path)
             for p in path_obj_lst:
                 z.write(p, p.relative_to(dir_path))

@@ -23,7 +23,8 @@ from pythontools.core.constants.typehint import T
 
 from ..constants.type_constant import FunctionType
 from ..decorator import UnCheckFunction
-from .basic_utils import StringUtil
+from ..validators.type_validator import TypeValidator
+from .basicutils import StringUtil
 
 WARNING_ENABLED = True
 
@@ -268,6 +269,7 @@ class TypeUtil:
 
     @classmethod
     @UnCheckFunction(WARNING_ENABLED)
+    @UnCheckFunction(WARNING_ENABLED)
     def get_function_type_description(cls, func) -> str:
         """
         获取函数的类型描述。
@@ -299,7 +301,7 @@ class TypeUtil:
 
     @classmethod
     @UnCheckFunction(WARNING_ENABLED)
-    def show_function_info(cls, func: Callable[[t.Any], t.Any], show_detail: bool = False) -> None:
+    def show_function_info(cls, func: Callable[[Any], Any], show_detail: bool = False) -> None:
         """
         显示一个函数的基本信息，包括函数名、类型、模块、文件路径、签名、参数信息（可选）。
 

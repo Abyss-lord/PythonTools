@@ -14,12 +14,10 @@ Change Activity:
 """
 
 # here put the import lib
-import functools
 import os
 import re
 import tempfile
 import time
-import typing as t
 import unicodedata
 import uuid
 from datetime import datetime
@@ -33,6 +31,7 @@ from ..core.utils.basic_utils import SequenceUtil, StringUtil
 from ..core.utils.datetime_utils import DatetimeUtil
 
 
+class FileUtil:
 class FileUtil:
     """
     文件、系统工具类
@@ -104,6 +103,15 @@ class FileUtil:
 
     WINDOWS_LINE_ENDING = "\r\n"
     LINUX_LINE_ENDING = "\n"
+    FILENAME_ASCII_STRIP_RE = re.compile(r"[^A-Za-z0-9_.-]")
+    WINDOWS_DEVICE_FILES = {
+        "CON",
+        "PRN",
+        "AUX",
+        "NUL",
+        *(f"COM{i}" for i in range(10)),
+        *(f"LPT{i}" for i in range(10)),
+    }
     FILENAME_ASCII_STRIP_RE = re.compile(r"[^A-Za-z0-9_.-]")
     WINDOWS_DEVICE_FILES = {
         "CON",
@@ -609,11 +617,8 @@ class FileUtil:
             cls.is_exist(p, raise_exception=True)
 
         t = cls.get_create_time_in_nanoseconds(p, check_exist=True)
-        return DatetimeUtil.convert_time(
-            t,
-            TimeUnit.NANOSECONDS,
-            TimeUnit.MILLISECONDS,
-        )
+        create_time_in_milliseconds = DatetimeUtil.convert_time(t, TimeUnit.NANOSECONDS, TimeUnit.MILLISECONDS)
+        return create_time_in_milliseconds
 
     @classmethod
     def get_create_time_in_seconds(
@@ -641,11 +646,9 @@ class FileUtil:
             cls.is_exist(p, raise_exception=True)
 
         t = cls.get_create_time_in_nanoseconds(p, check_exist=True)
-        return DatetimeUtil.convert_time(
-            t,
-            TimeUnit.NANOSECONDS,
-            TimeUnit.SECONDS,
-        )
+        create_time_in_seconds = DatetimeUtil.convert_time(t, TimeUnit.NANOSECONDS, TimeUnit.SECONDS)
+
+        return create_time_in_seconds
 
     @classmethod
     def get_create_time_in_string_format(
@@ -721,10 +724,8 @@ class FileUtil:
             文件最后修改时间(毫秒)
         """
         last_modify_time_in_nanoseconds = cls.get_last_modify_time_in_nanoseconds(p, check_exist=check_exist)
-        return DatetimeUtil.convert_time(
-            last_modify_time_in_nanoseconds,
-            TimeUnit.NANOSECONDS,
-            TimeUnit.MILLISECONDS,
+        last_modify_time_in_mill = DatetimeUtil.convert_time(
+            last_modify_time_in_nanoseconds, TimeUnit.NANOSECONDS, TimeUnit.MILLISECONDS
         )
 
     @classmethod
@@ -745,7 +746,11 @@ class FileUtil:
             文件最后修改时间(秒)
         """
         last_modify_time_in_nanoseconds = cls.get_last_modify_time_in_nanoseconds(p, check_exist=check_exist)
-        return DatetimeUtil.convert_time(last_modify_time_in_nanoseconds, TimeUnit.NANOSECONDS, TimeUnit.SECONDS)
+        last_modify_time_in_second = DatetimeUtil.convert_time(
+            last_modify_time_in_nanoseconds, TimeUnit.NANOSECONDS, TimeUnit.SECONDS
+        )
+
+        return last_modify_time_in_second
 
     @classmethod
     def get_last_modify_time_in_string_format(
@@ -1064,7 +1069,7 @@ class FileUtil:
             随机文件名
         """
         dt = datetime.now()
-        return f'{dt.strftime("%Y%m%d_%H%M%S%f")}_{uuid.uuid4().hex[:6]}_{cls.secure_filename(seed_name)}'
+        return "{}_{}_{}".format(dt.strftime("%Y%m%d_%H%M%S%f"), uuid.uuid4().hex[0:6], cls.secure_filename(seed_name))
 
     @classmethod
     def secure_filename(cls, filename: str) -> str:

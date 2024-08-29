@@ -21,8 +21,8 @@ from typing import Any, NamedTuple, Self
 
 from pythontools.core.constants.string_constant import CharPool, CharsetUtil
 from pythontools.core.errors import UnsupportedOperationError
-from pythontools.core.utils.basic_utils import SequenceUtil
-from pythontools.io.fileutils import FileUtil
+from pythontools.core.io.fileutils import FileUtil
+from pythontools.core.utils.basicutils import SequenceUtil
 
 
 class CsvConfig:
@@ -421,6 +421,7 @@ class CsvReader:
         """
         self._check_path()
         path_obj = FileUtil.get_path_object(self.file_path)
+        path_obj = FileUtil.get_path_object(self.file_path)
         with open(path_obj, encoding=self.encoding) as csv_file:
             reader = csv.reader(
                 csv_file,
@@ -442,7 +443,9 @@ class CsvReader:
 
     def _check_path(self) -> None:
         if not FileUtil.is_exist(self.file_path):
+        if not FileUtil.is_exist(self.file_path):
             raise FileNotFoundError(f"file {self.file_path} not found")
 
+        if not FileUtil.is_match_extension(self.file_path, "csv"):
         if not FileUtil.is_match_extension(self.file_path, "csv"):
             raise ValueError(f"file {self.file_path} is not a csv file")

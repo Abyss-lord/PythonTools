@@ -21,7 +21,7 @@ from os import PathLike
 from typing import Any
 
 from pythontools.core.constants.string_constant import CharsetUtil
-from pythontools.io.fileutils import FileUtil
+from pythontools.core.io.fileutils import FileUtil
 
 
 class CsvUtil:
@@ -44,6 +44,8 @@ class CsvUtil:
         """
         path_obj = FileUtil.get_path_object(f_name)
         return FileUtil.is_match_extension(path_obj, cls.CSV_EXTENSION)
+        path_obj = FileUtil.get_path_object(f_name)
+        return FileUtil.is_match_extension(path_obj, cls.CSV_EXTENSION)
 
     @classmethod
     def get_dicts_from_csv(
@@ -54,8 +56,10 @@ class CsvUtil:
         delimiter: str = ",",
     ) -> Generator[dict[str | Any, str | Any], Any, None]:
         path_obj = FileUtil.get_path_object(f_name)
+        path_obj = FileUtil.get_path_object(f_name)
         with open(path_obj, encoding=encoding, newline=newline) as f_in:
-            yield from csv.DictReader(f_in, delimiter=delimiter)
+            csv_reader = csv.DictReader(f_in, delimiter=delimiter)
+            yield from csv_reader
             FileUtil
 
     @classmethod
@@ -68,6 +72,7 @@ class CsvUtil:
         newline: str = "",
         delimiter: str = ",",
     ):
+        path_obj = FileUtil.get_path_object(f_name)
         path_obj = FileUtil.get_path_object(f_name)
         path_obj.parent.mkdir(parents=True, exist_ok=True)
 

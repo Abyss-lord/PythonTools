@@ -1,16 +1,4 @@
-# Copyright 2024 The pythontools Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#!/usr/bin/env python
 """
 -------------------------------------------------
 @File       :   basic_utils.py
@@ -26,39 +14,305 @@ Change Activity:
 """
 # here put the import lib
 
-import binascii
-import collections
-import functools
 import itertools as it
-import os
-import random
-import re
 import string
 import sys
-import typing as t
-import unicodedata
-from collections.abc import Generator, Mapping, Sequence, Set
+import typing
+from collections.abc import Mapping, Sequence, Set
+from typing import Any
 
-from ..__typing import K, T
-from ..constants.pattern_pool import PatternPool, RegexPool
-from ..constants.string_constant import CharPool, CharsetUtil, Strategy
+from ..constants.string_constant import CharPool, CharsetUtil
 from ..decorator import UnCheckFunction
-from ..errors import RegexValidationError
-from .boolean_utils import BooleanUtil
-from .random_utils import RandomUtil
+from .randomutils import RandomUtil
 
-_Tin = t.TypeVar("_Tin")
-_Tout = t.TypeVar("_Tout")
-_K = t.TypeVar("_K")
+
+class BooleanUtil:
+    TRUE_SET: frozenset[str] = frozenset(
+        [
+            "true",
+            "yes",
+            "y",
+            "t",
+            "ok",
+            "1",
+            "on",
+            "是",
+            "对",
+            "真",
+            "對",
+            "√",
+        ]
+    )
+    FALSE_SET: frozenset[str] = frozenset(
+        [
+            "false",
+            "no",
+            "n",
+            "f",
+            "0",
+            "off",
+            "否",
+            "错",
+            "假",
+            "錯",
+            "×",
+        ]
+    )
+    DEFAULT_TRUE_STRING: typing.Final[str] = "TRUE"
+    DEFAULT_FALSE_STRING: typing.Final[str] = "FALSE"
+
+    @classmethod
+    def value_of(cls, val: Any) -> bool:
+        """
+        包装方法, 用于将值转换成布尔类型
+        NOTE 底层依赖于 BasicConvertor.to_bool
+        :param val: 待转换的值
+        :return: 转换后的布尔值
+        """
+        return bool(val)
+
+    @classmethod
+    def negate(cls, state: bool, *, raise_exception: bool = False) -> bool:
+        """
+        安全取相反值
+        :param state: Boolean值
+        :param raise_exception: 相反的Boolean值
+        :return:
+        """
+        if not isinstance(state, bool):
+            if raise_exception:
+                raise TypeError(f"{state} is not a boolean type")
+            state = bool(state)
+        return not state
+
+    @classmethod
+    def str_to_boolean(cls, value_str: str, *, strict_mode: bool = False) -> bool:
+        """
+        转换字符串为boolean值
+        :param value_str: 待转换字符串
+        :param strict_mode: 是否启动严格模式, 如果开启严格模式, 则不会使用BOOL进行布尔运算, 否则会进行布尔运算
+        :return: boolean值
+        """
+        if StringUtil.is_blank(value_str):
+            return False
+
+        value_str = value_str.strip().lower()
+        true_flg = value_str in cls.TRUE_SET
+        false_flg = value_str in cls.FALSE_SET
+
+        if not true_flg and not false_flg:
+            if strict_mode:
+                raise ValueError(f"{value_str} is not a boolean value")
+            return bool(value_str)
+
+        return False if false_flg else True
+
+    @classmethod
+    def boolean_to_int(cls, value: bool, *, strict_mode: bool = False) -> int:
+        """
+        boolean值转为int
+        :param value: 待测试的值
+        :param strict_mode: 是否启动严格模式, 如果开启严格模式, 则不会使用BOOL进行布尔运算, 否则会进行布尔运算
+        :return: int 值
+        """
+        if not isinstance(value, bool):
+            if strict_mode:
+                raise ValueError(f"{value} is not a boolean value")
+            return 1 if bool(value) else 0
+
+        return 1 if value else 0
+
+    @classmethod
+    def to_str_true_and_false(cls, value: bool, *, strict_mode: bool = True) -> str:
+        """
+        将boolean转换为字符串 'true' 或者 'false'.
+        :param value: Boolean值
+        :param strict_mode: 是否启动严格模式, 如果开启严格模式, 则不会使用BOOL进行布尔运算, 否则会进行布尔运算
+        :return: 'true', 'false'
+        """
+        return cls.to_string(
+            value,
+            cls.DEFAULT_TRUE_STRING,
+            cls.DEFAULT_FALSE_STRING,
+            strict_mode=strict_mode,
+        )
+
+    @classmethod
+    def to_str_on_and_off(cls, value: bool, *, strict_mode: bool = True) -> str:
+        """
+        将boolean转换为字符串 'on' 或者 'off'.
+        :param value: Boolean值
+        :param strict_mode: 是否启动严格模式, 如果开启严格模式, 则不会使用BOOL进行布尔运算, 否则会进行布尔运算
+        :return: 'on', 'off'
+        """
+        return cls.to_string(value, "ON", "OFF", strict_mode=strict_mode)
+
+    @classmethod
+    def to_str_yes_no(cls, value: bool, *, strict_mode: bool = True) -> str:
+        """
+        将boolean转换为字符串 'yes' 或者 'no'.
+        :param value: Boolean值
+        :param strict_mode: 是否启动严格模式, 如果开启严格模式, 则不会使用BOOL进行布尔运算, 否则会进行布尔运算
+        :return: 'yes', 'no'
+        """
+        return cls.to_string(value, "YES", "NO", strict_mode=strict_mode)
+
+    @classmethod
+    def to_chinese_str(cls, value: bool, *, strict_mode: bool = True) -> str:
+        """
+        将给定布尔值转换为“是”或者“否”
+
+        Parameters
+        ----------
+        value : bool
+            待转换布尔值
+        strict_mode : bool, optional
+            是否启动严格模式, 如果开启严格模式, 则不会使用BOOL进行布尔运算,否则会进行布尔运算, by default True
+
+        Returns
+        -------
+        str
+            转换后的字符串
+        """
+        return cls.to_string(value, "是", "否", strict_mode=strict_mode)
+
+    @classmethod
+    def to_string(cls, value: bool, true_str: str, false_str: str, *, strict_mode: bool = False) -> str:
+        """
+        将boolean转换为字符串
+        :param value: Boolean值
+        :param true_str:
+        :param false_str:
+        :param strict_mode: 是否启动严格模式, 如果开启严格模式, 则不会使用BOOL进行布尔运算, 否则会进行布尔运算
+        :return: 转换后的字符串
+        """
+        value = cls._check_boolean_value(value, strict_mode=strict_mode)
+
+        if StringUtil.is_blank(true_str):
+            true_str = cls.DEFAULT_TRUE_STRING
+        if StringUtil.is_blank(false_str):
+            false_str = cls.DEFAULT_FALSE_STRING
+
+        return true_str if value else false_str
+
+    @classmethod
+    def and_all(cls, *values) -> bool:
+        """
+        对Boolean数组取与
+
+        Parameters
+        ----------
+        values : typing.List[bool]
+            待检测Boolean数组
+
+
+        Returns
+        -------
+        bool
+
+
+        Raises
+        ------
+        ValueError
+            _description_
+        """
+
+        for flg in values:
+            if not flg:
+                return False
+
+        return True
+
+    @classmethod
+    def or_all(cls, *values) -> bool:
+        """
+        对Boolean数组取或
+
+        Example:
+        ----------
+        >>> BooleanUtil.or_all([True, False])
+        True
+        >>> BooleanUtil.or_all([True, True])
+        True
+        >>> BooleanUtil.or_all([True, False, True])
+        True
+        >>> BooleanUtil.or_all([False, False, False])
+        False
+
+        Parameters
+        ----------
+        values : typing.List[bool]
+            待检测Boolean数组
+
+        Returns
+        -------
+        bool
+            取值为真返回
+
+        Raises
+        ------
+        ValueError
+            如果数组为空则抛出异常
+        """
+        if SequenceUtil.is_empty(values):
+            raise ValueError("Empty sequence")
+
+        for flg in values:
+            if flg:
+                return True
+
+        return False
+
+    @classmethod
+    def xor(cls, *values, strict: bool = True) -> bool:
+        """
+        对Boolean数组取异或
+
+        Example:
+        ----------
+        >>> BooleanUtil.xor(True, False) # True
+        >>> BooleanUtil.xor(True, True) # False
+        >>> BooleanUtil.xor(True, False, True) # False
+
+        Parameters
+        ----------
+        values : typing.List[bool]
+            待检测Boolean数组
+        strict : bool, optional
+            是否启动严格模式, 如果开启严格模式, 则不会使用BOOL进行布尔运算,否则会进行布尔运算, by default True
+
+        Returns
+        -------
+        bool
+            如果数组检测结果为真则返回
+
+        Raises
+        ------
+            ValueError: 如果数组为空则抛出异常
+        """
+        if SequenceUtil.is_empty(values):
+            raise ValueError("Empty sequence")
+        result = False
+        for flg in values:
+            flg = cls._check_boolean_value(flg, strict_mode=strict)
+            result = result ^ flg
+        return result
+
+    @classmethod
+    def _check_boolean_value(cls, value: bool, *, strict_mode: bool = False) -> bool:
+        if not isinstance(value, bool) and strict_mode:
+            raise ValueError(f"{value} is not a boolean value")
+        StringUtil.EMPTY
+        return bool(value)
 
 
 class SequenceUtil:
-    EMPTY: t.Final[str] = CharPool.EMPTY
-    SPACE: t.Final[str] = CharPool.SPACE
-    INDEX_NOT_FOUND: t.Final[int] = -1
+    EMPTY: typing.Final[str] = CharPool.EMPTY
+    SPACE: typing.Final[str] = CharPool.SPACE
+    INDEX_NOT_FOUND: typing.Final[int] = -1
 
     @classmethod
-    def is_empty(cls, seq: t.Sized) -> bool:
+    def is_empty(cls, sequence: typing.Sequence[Any]) -> bool:
         """
         返回序列是否为空。
 
@@ -69,7 +323,7 @@ class SequenceUtil:
 
         Parameters
         ----------
-        sequence : t.Sized[Any]
+        sequence : typing.Sequence[Any]
             待检测序列
 
         Returns
@@ -77,33 +331,22 @@ class SequenceUtil:
         bool
             如果序列为空返回True, 否则返回False
         """
-        return seq is None or len(seq) == 0
+        return sequence is None or len(sequence) == 0
 
     @classmethod
-    def is_not_empty(cls, seq: t.Sized) -> bool:
+    def is_not_empty(cls, sequence: typing.Sequence[Any]) -> bool:
         """
-        返回序列是否为非空
+        返回序列是否为非空。\n
+        NOTE 依赖于 is_empty 实现。
 
-        Parameters
-        ----------
-        sequence : t.Sized[Any]
-            待检测序列
-
-        Returns
-        -------
-        bool
-            如果序列为非空返回True, 否则返回False
+        :param sequence:
+        :return:
         """
-        return not cls.is_empty(seq)
+        return not cls.is_empty(sequence)
 
     @classmethod
     def is_sub_equal(
-        cls,
-        main_seq: Sequence[T],
-        start_idx: int,
-        sub_seq: Sequence[T],
-        sub_start_idx: int,
-        split_length: int,
+        cls, main_seq: Sequence[Any], start_idx: int, sub_seq: Sequence[Any], sub_start_idx: int, split_length: int
     ) -> bool:
         """
         截取两个字符串的不同部分（长度一致），判断截取的子串是否相同 任意一个字符串为null返回false
@@ -140,195 +383,35 @@ class SequenceUtil:
         main_split_seq = main_seq[start_idx : start_idx + split_length]
         sub_split_seq = sub_seq[sub_start_idx : sub_start_idx + split_length]
 
-        return all(i == j for i, j in zip(main_split_seq, sub_split_seq))
+        for i, j in zip(main_split_seq, sub_split_seq):
+            if i != j:
+                return False
+
+        return True
 
     @classmethod
-    def contains_any(
-        cls,
-        it: t.Iterable[T],
-        *args,
-    ) -> bool:
+    def reverse_sequence(cls, sequence: typing.Sequence[Any]) -> typing.Sequence:
         """
-        检查序列是否包含任意给定元素
-
-        Example:
-        ----------
-        >>> SequenceUtil.contains_any([1, 2, 3], 2, 4) # True
-        >>> SequenceUtil.contains_any([1, 2, 3], 4, 5) # False
-
-        Parameters
-        ----------
-        sequence : t.Sequence[Any]
-            待检测序列
-        args : Any
-            任意数量的元素, 用于检测是否包含其中之一
-
-        Returns
-        -------
-        bool
-            如果包含args中的任意元素返回True, 否则返回False
+        翻转序列
+        :param sequence: 待翻转序列
+        :return: 翻转后的序列
         """
-        return any(i in it for i in args)
+        return sequence[::-1]
 
     @classmethod
-    def contains_all(
-        cls,
-        it: t.Iterable[T],
-        *args,
-    ) -> bool:
+    def has_none(cls, sequence: typing.Sequence[Any]) -> bool:
         """
-        检查序列是否包含所有给定元素
-
-        Example:
-        ----------
-        >>> SequenceUtil.contains_all([1, 2, 3], 2, 3) # True
-        >>> SequenceUtil.contains_all([1, 2, 3], 2, 4) # False
-
-        Parameters
-        ----------
-        sequence : t.Sequence[Any]
-            待检测序列
-        args : Any
-            任意数量的元素, 用于检测是否包含其中之一
-
-        Returns
-        -------
-        bool
-            如果包含args中的所有元素返回True, 否则返回False
+        返回序列是否含有None元素
+        :param sequence: 待检测序列
+        :return: 如果包含None则返回True, 否则返回False
         """
-        return all(i in it for i in args)
+        for item in sequence:
+            if item is None:
+                return True
+        return False
 
     @classmethod
-    def is_sorted(
-        cls,
-        sequence: t.Sequence[T],
-        key_selector: t.Callable[
-            [T],
-            K,
-        ] = None,
-    ) -> bool:
-        """
-        判断序列是否有序
-
-        Parameters
-        ----------
-        sequence : t.Sequence[T]
-            待检测序列
-        key_selector : t.Callable[[T], K], optional
-            排序的key, by default None
-
-        Returns
-        -------
-        bool
-            如果序列有序返回True, 否则返回False
-        """
-        if key_selector is None:
-            key_selector = lambda x: x
-
-        return all(key_selector(sequence[i]) <= key_selector(sequence[i + 1]) for i in range(len(sequence) - 1))
-
-    @classmethod
-    def is_only(cls, it: t.Iterable[T]) -> bool:
-        """
-        判断一个可迭代对象是否只包含一个元素
-
-        Parameters
-        ----------
-        it : t.Iterable[T]
-            待判断的可迭代对象
-
-        Returns
-        -------
-        bool
-            如果可迭代对象只包含一个元素返回 True, 否则返回 False
-        """
-        if isinstance(it, t.Sized):
-            return len(it) == 1
-
-        lst = tuple(it.islice(it, 2))
-        return bool(lst and len(lst) == 1)
-
-    @classmethod
-    def has_none(cls, sequence: t.Sequence[T]) -> bool:
-        """
-        返回序列是否含有 None 元素
-
-        Parameters
-        ----------
-        sequence : t.Sequence[T]
-            待检测序列
-
-        Returns
-        -------
-        bool
-            如果序列含有 None 元素返回 True, 否则返回 False
-        """
-        return any(item is None for item in sequence)
-
-    @classmethod
-    def is_all_element_equal(cls, iterable: t.Iterable[T]) -> bool:
-        """
-        判断序列中是否所有元素相等
-
-        Example:
-        ----------
-        >>> SequenceUtil.is_all_ele_equal([1, 1, 1, 1]) # True
-        >>> SequenceUtil.is_all_ele_equal([1, 2, 1, 1]) # False
-
-        Parameters
-        ----------
-        iterable : t.Iterable[Any]
-            待检测序列
-
-        Returns
-        -------
-        bool
-            如果所有元素相等返回True, 否则返回False
-        """
-        g = it.groupby(iterable)
-        return next(g, True) and not next(g, False)  # type: ignore
-
-    @classmethod
-    def get_element(cls, it: t.Iterable[T], idx: int) -> T:
-        """
-        从序列中获取指定索引的元素, 如果索引越界则返回None
-
-        Parameters
-        ----------
-        seq : t.Sequence[T]
-            待获取的序列
-        idx : int
-            索引
-
-        Returns
-        -------
-        T
-            序列中指定索引的元素, 如果索引越界则返回None
-        """
-        if isinstance(it, t.Sequence):
-            return it[idx] if idx < len(it) else None
-        else:
-            return next(iter.islice(it, idx, None), None)
-
-    @classmethod
-    def reverse_sequence(cls, seq: t.Sequence[T]) -> t.Sequence:
-        """
-        翻转序列，不会影响原序列
-
-        Parameters
-        ----------
-        sequence : t.Sequence[T]
-            待翻转序列
-
-        Returns
-        -------
-        t.Sequence
-            翻转后的序列
-        """
-        return seq[::-1]
-
-    @classmethod
-    def get_length(cls, sequence: t.Sequence[T]) -> int:
+    def get_length(cls, sequence: typing.Sequence[Any]) -> int:
         """
         返回序列长度
 
@@ -343,7 +426,7 @@ class SequenceUtil:
 
         Parameters
         ----------
-        sequence : t.Sequence[Any]
+        sequence : typing.Sequence[Any]
             待检测序列
 
         Returns
@@ -356,40 +439,27 @@ class SequenceUtil:
         ValueError
             如果序列为None则抛出异常
         """
-        if sequence is None or not isinstance(sequence, t.Sequence):
-            raise ValueError(f"Invalid sequence, {sequence}")
+        if sequence is None or not isinstance(sequence, typing.Sequence):
+            raise ValueError("Invalid sequence")
         return len(sequence)
 
     @classmethod
-    def first_idx_of_none(cls, seq: t.Sequence[T]) -> int:
+    def first_idx_of_none(cls, sequence: typing.Sequence[Any]) -> int:
         """
-        返回序列中第一个None元素的索引
-
-        Parameters
-        ----------
-        sequence : t.Sequence[T]
-            待检测序列
-
-        Returns
-        -------
-        int
-            如果序列中不存在None元素, 则返回-1，否则返回第一个None元素的索引
+        返回第一个None元素的索引
+        :param sequence: 待检测序列
+        :return: 返回None的索引, 如果不存在返回-1
         """
-
-        return cls.first_index_of(
-            seq,
-            0,
-            None,
-        )
+        return cls.first_index_of(sequence, 0, None)
 
     @classmethod
-    def last_idx_of_none(cls, seq: t.Sequence[T]) -> int:
+    def last_idx_of_none(cls, sequence: typing.Sequence[Any]) -> int:
         """
         返回序列中最后一个None元素的索引
 
         Parameters
         ----------
-        sequence : t.Sequence[Any]
+        sequence : typing.Sequence[Any]
             待检测序列
 
         Returns
@@ -397,41 +467,21 @@ class SequenceUtil:
         int
             最后一个None元素的索引位置
         """
-        return cls.last_index_of(
-            seq,
-            len(seq) - 1,
-            None,
-        )
-
-    @t.overload
-    def first_index_of(
-        cls,
-        seq: t.Sequence[T],
-        from_idx: int,
-        predicate: t.Callable[[T], bool],
-    ) -> int: ...
-
-    @t.overload
-    def first_index_of(
-        cls,
-        seq: t.Sequence[T],
-        from_idx: int,
-        predicate: T,
-    ) -> int: ...
+        return cls.last_index_of(sequence, -1, None)
 
     @classmethod
     def first_index_of(
         cls,
-        seq: t.Sequence[T],
+        sequence: typing.Sequence[Any],
         from_idx: int,
-        predicate,
+        value: Any,
     ) -> int:
         """
         寻找序列中第一个指定元素的索引
 
         Parameters
         ----------
-        sequence : t.Sequence[Any]
+        sequence : typing.Sequence[Any]
             待检测序列
         value : Any
             待查找元素
@@ -443,50 +493,27 @@ class SequenceUtil:
         int
             如果
         """
-
-        if cls.is_empty(seq):
+        if cls.is_empty(sequence):
             return cls.INDEX_NOT_FOUND
-        if not isinstance(predicate, t.Callable):
-            target_val = predicate
-
-            def predicate(x):
-                return x == target_val
-
-        from_idx = max(from_idx, 0)
-
-        return next(
-            (index for index in range(from_idx, len(seq)) if predicate(seq[index])),
-            cls.INDEX_NOT_FOUND,
-        )
-
-    @t.overload
-    def last_index_of(
-        cls,
-        seq: t.Sequence[T],
-        from_idx: int,
-        predicate: t.Callable[[T], bool],
-    ) -> int: ...
-
-    @t.overload
-    def last_index_of(
-        cls,
-        from_idx: int,
-        predicate: T,
-    ) -> int: ...
+        try:
+            idx = sequence.index(value, from_idx)
+        except ValueError:
+            return cls.INDEX_NOT_FOUND
+        return idx
 
     @classmethod
     def last_index_of(
         cls,
-        seq: Sequence[T],
+        sequence: typing.Sequence[Any],
         from_idx: int,
-        predicate,
+        value: Any,
     ) -> int:
         """
         寻找序列中最后一个指定元素的索引
 
         Parameters
         ----------
-        sequence : t.Sequence[Any]
+        sequence : typing.Sequence[Any]
             待检测序列
         value : Any
             待查找元素
@@ -496,29 +523,51 @@ class SequenceUtil:
         int
             如果存在则返回索引, 否则返回-1
         """
-
-        if cls.is_empty(seq):
+        if cls.is_empty(sequence):
             return cls.INDEX_NOT_FOUND
 
-        if not isinstance(predicate, t.Callable):
-            target_val = predicate
+        length = len(sequence)
+        # 计算倒序后的起始索引
+        if from_idx == 0:
+            from_idx = length - 1
+        else:
+            from_idx = length - abs(from_idx) if from_idx < 0 else from_idx
 
-            def predicate(x):
-                return x == target_val
-
-        from_idx = min(from_idx, len(seq) - 1)
-
-        return next(
-            (index for index in range(from_idx, -1, -1) if predicate(seq[index])),
-            cls.INDEX_NOT_FOUND,
-        )
+        for i in range(from_idx, -1, -1):
+            if sequence[i] == value:
+                return i
+        return cls.INDEX_NOT_FOUND
 
     @classmethod
-    def new_list(
-        cls,
-        capacity: int,
-        fill_val: T = None,
-    ) -> list[T]:
+    def contains_any(cls, sequence: typing.Sequence[Any], *args) -> bool:
+        """
+        检查序列是否包含任意给定元素
+
+        Example:
+        ----------
+        >>> SequenceUtil.contains_any([1, 2, 3], 2, 4) # True
+        >>> SequenceUtil.contains_any([1, 2, 3], 4, 5) # False
+
+        Parameters
+        ----------
+        sequence : typing.Sequence[Any]
+            待检测序列
+        args : Any
+            任意数量的元素, 用于检测是否包含其中之一
+
+        Returns
+        -------
+        bool
+            如果包含args中的任意元素返回True, 否则返回False
+        """
+        # PERF 可能有更好的方案
+        for i in args:
+            if i in sequence:
+                return True
+        return False
+
+    @classmethod
+    def new_list(cls, capacity: int, fill_val: Any = None) -> list[Any]:
         """
         根据给定容量创建列表
 
@@ -536,18 +585,13 @@ class SequenceUtil:
 
         Returns
         -------
-        t.List[Any]
+        typing.List[Any]
             创建的列表
         """
         return [fill_val for _ in range(capacity)]
 
     @classmethod
-    def set_or_append(
-        cls,
-        lst: t.Sequence[T],
-        idx: int,
-        value: T,
-    ) -> Sequence[T]:
+    def set_or_append(cls, lst: typing.Sequence[Any], idx: int, value: Any) -> Sequence[Any]:
         """
         插入或者尾部追加元素
 
@@ -562,7 +606,7 @@ class SequenceUtil:
 
         Parameters
         ----------
-        lst : t.Sequence[Any]
+        lst : typing.Sequence[Any]
             待添加元素的序列
         idx : int
             添加元素的位置
@@ -574,26 +618,17 @@ class SequenceUtil:
         int
             返回序列操作前后的长度差
         """
-        tmp = list(lst)
-        if 0 <= idx < len(lst):
-            tmp[idx] = value
-            return tmp
+        old_length = len(lst)
+        if 0 <= idx < old_length:
+            res = [i for i in lst[:idx]]
+            res += [value] + [i for i in lst[idx:]]
 
-        if idx < 0:
-            tmp = [value] + tmp
+            return res
         else:
-            tmp.append(value)
-
-        return tmp
+            return [i for i in lst] + [value]
 
     @classmethod
-    def resize(
-        cls,
-        seq: t.Sequence[T],
-        new_length: int,
-        *,
-        fill_val: T = None,
-    ) -> t.Sequence[T]:
+    def resize(cls, lst: typing.Sequence[Any], new_length: int, *, fill_val: Any = None) -> typing.Sequence[Any]:
         """
         调整序列的长度, 如果新长度小于原长度, 则截断, 如果新长度大于原长度, 则填充默认值。
 
@@ -606,7 +641,7 @@ class SequenceUtil:
 
         Parameters
         ----------
-        lst : t.Sequence[Any]
+        lst : typing.Sequence[Any]
             待调整的序列
         new_length : int
             新的长度
@@ -615,49 +650,49 @@ class SequenceUtil:
 
         Returns
         -------
-        t.Sequence[Any]
+        typing.Sequence[Any]
             调整后新生成的序列, 长度为new_length,
         """
 
-        if new_length < 0:
-            return list(seq)
+        if 0 > new_length:
+            return [i for i in lst]
 
-        if new_length <= len(seq):
-            return [seq[i] for i in range(new_length)]
+        if new_length <= len(lst):
+            return [lst[i] for i in range(new_length)]
 
-        diff_length = new_length - len(seq)
-        return list(seq) + cls.new_list(diff_length, fill_val)
+        diff_length = new_length - len(lst)
+        return [i for i in lst] + cls.new_list(diff_length, fill_val)
 
     @classmethod
-    def remove_none(cls, it: t.Iterable[T]) -> list[T]:
+    def remove_none_item(cls, lst: typing.Sequence[Any]) -> typing.Sequence[Any]:
         """
         移除序列中所有的None元素
 
         Parameters
         ----------
-        seq : t.Sequence[Any]
+        lst : typing.Sequence[Any]
             待处理序列
 
         Returns
         -------
-        t.Sequence[Any]
+        typing.Sequence[Any]
             处理完成后新产生的序列
         """
-        return cls.remove_item(it, None)
+        return [i for i in lst if i is not None]
 
     @classmethod
-    def remove_false(cls, it: t.Iterable[T]) -> list[T]:
+    def remove_false_item(cls, lst: typing.Sequence[Any]) -> typing.Sequence[Any]:
         """
         移除序列中所有的False元素
 
         Parameters
         ----------
-        lst : t.Sequence[Any]
+        lst : typing.Sequence[Any]
             待处理序列
 
         Returns
         -------
-        t.Sequence[Any]
+        typing.Sequence[Any]
             处理完成后新产生的序列
 
         Notes
@@ -666,66 +701,23 @@ class SequenceUtil:
 
         依赖于 `BooleanUtil#value_of()` 方法。
         """
-        return cls.remove_item(it, BooleanUtil.is_false)
-
-    @t.overload
-    def remove_item(
-        cls,
-        it: t.Iterable[T],
-        predicate: t.Callable[[T], bool],
-    ) -> list[T]: ...
-
-    @t.overload
-    def remove_item(
-        cls,
-        it: t.Iterable[T],
-        predicate: T,
-    ) -> list[T]: ...
-
-    @classmethod
-    def remove_item(
-        cls,
-        it: t.Iterable[T],
-        predicate,
-    ) -> list[T]:
-        """
-        从可迭代对象中移除指定元素
-
-        Parameters
-        ----------
-        it : t.Iterable[T]
-            待处理可迭代对象
-        predicate : T | t.Callable[[T], bool]
-            待移除元素的条件
-
-        Returns
-        -------
-        list[T]
-            移除指定元素后的新列表
-        """
-        if not isinstance(predicate, t.Callable):
-            target_val = predicate
-
-            def predicate(x) -> bool:
-                return x == target_val
-
-        return [i for i in it if not predicate(i)]
+        return [i for i in lst if BooleanUtil.value_of(i)]
 
     @classmethod
     def sub_sequence(
         cls,
-        lst: t.Sequence[T],
+        lst: typing.Sequence[Any],
         start: int,
         end: int | None = None,
         *,
         include_last: bool = False,
-    ) -> t.Sequence[T]:
+    ) -> typing.Sequence[Any]:
         """
         从序列中获取子序列
 
         Parameters
         ----------
-        lst : t.Sequence[Any]
+        lst : typing.Sequence[Any]
             待切分序列
         start : int
             开始切分位置
@@ -735,8 +727,8 @@ class SequenceUtil:
             是否包含结束位置的元素, by default False
 
         Returns
-        --------
-        t.Sequence[Any]
+        -------
+        typing.Sequence[Any]
             切分后的子序列
 
         Raises
@@ -749,17 +741,62 @@ class SequenceUtil:
         if start < 0 or start > end or start >= len(lst):
             raise ValueError(f"Start index {start} is out of range")
 
-        if start == end:
-            return [lst[start]] if include_last else []
-
         return lst[start : end + 1] if include_last else lst[start:end]
 
     @classmethod
-    def get_first_items(
+    def get_item_by_idx(
         cls,
-        iterable: t.Iterable[T],
-        n: int,
-    ) -> t.Iterable[T]:
+        lst: typing.Sequence[Any],
+        idx: int,
+        default: Any = None,
+        *,
+        raise_exception: bool = False,
+    ) -> Any:
+        """
+        根据给定的索引返回元素
+
+        Example:
+        ----------
+        >>> lst = [1, 2, 3]
+        ... SequenceUtil.get_item_by_idx(lst, 1) # 2
+        ... SequenceUtil.get_item_by_idx(lst, 4) # None
+        ... SequenceUtil.get_item_by_idx(lst, 4, default=0) # 0
+
+        Parameters
+        ----------
+        lst : typing.Sequence[Any]
+            待提取序列
+        idx : int
+            给定的索引位置
+        default : Any, optional
+            提取默认值, by default None
+        raise_exception : bool, optional
+            当给定索引大于等于序列长度时是否抛出异常, by default False
+
+        Returns
+        -------
+        Any
+            提取的值
+
+        Raises
+        ------
+        ValueError
+            当索引小于0时抛出异常
+        IndexError
+            当给定索引大于等于序列长度时, 并且 raise_exception 为 True, 则抛出异常
+        """
+        seq_length = len(lst)
+        if idx < 0:
+            raise ValueError(f"Index {idx} is out of range")
+        if idx >= seq_length:
+            if raise_exception:
+                raise IndexError(f"Index {idx} is out of range")
+            else:
+                return default
+        return lst[idx]
+
+    @classmethod
+    def get_first_n_item_from_iter(cls, iterable: typing.Iterable[Any], n: int) -> typing.Iterable[Any]:
         """
         从序列中获取前n个元素
 
@@ -773,14 +810,14 @@ class SequenceUtil:
 
         Parameters
         ----------
-        iterable : t.Sequence[Any]
+        iterable : typing.Sequence[Any]
             待提取序列
         n : int
             前n个元素
 
         Returns
         -------
-        t.Iterable[Any]
+        typing.Iterable[Any]
             前n个元素组成的序列
 
         Raises
@@ -794,20 +831,19 @@ class SequenceUtil:
         return list(it.islice(iterable, n))
 
     @classmethod
-    def get_first_match(
-        cls,
-        it: t.Iterable[T],
-        predicate: t.Callable[[T], bool],
-        default_val: T = None,
-    ) -> T | None:
+    def get_first_match_item(
+        iterable: typing.Iterable[Any],
+        func: typing.Callable[[Any], bool],
+        default_val: Any = None,
+    ) -> Any:
         """
         从可迭代对象中返回第一个符合条件的元素
 
         Parameters
         ----------
-        it : t.Iterable[Any]
+        iterable : typing.Iterable[Any]
             待提取可迭代对象
-        func : t.Callable[[Any], bool]
+        func : typing.Callable[[Any], bool]
             检测函数
         default_val : Any, optional
             返回默认值, by default None
@@ -815,113 +851,48 @@ class SequenceUtil:
         Returns
         -------
         Any
-            如果存在则返回第一个符合条件的对象, 否则返回默认值
+            第一个符合条件的对象
         """
-        gen = cls.filtered_elements(it, predicate)
-        return next(gen, default_val)
+        return next((i for i in iterable if func(i)), default_val)
 
     @classmethod
-    def get_last_match(
-        cls,
-        it: t.Iterable[T],
-        predicate: t.Callable[[T], bool],
-        default_val: T = None,
-    ) -> T | None:
+    def is_all_element_equal(cls, iterable: typing.Iterable[Any]) -> bool:
         """
-        从可迭代对象中返回最后一个符合条件的元素
+        判断序列中是否所有元素相等
+
+        Example:
+        ----------
+        >>> SequenceUtil.is_all_ele_equal([1, 1, 1, 1]) # True
+        >>> SequenceUtil.is_all_ele_equal([1, 2, 1, 1]) # False
 
         Parameters
         ----------
-        it : t.Iterable[T]
-            待提取可迭代对象
-        predicate : t.Callable[[T], bool]
-            检测函数
-        default_val : T, optional
-            默认值, by default None
+        iterable : typing.Iterable[Any]
+            待检测序列
 
         Returns
         -------
-        T | None
-            如果存在则返回最后一个符合条件的对象, 否则返回默认值
+        bool
+            如果所有元素相等返回True, 否则返回False
         """
-        gen: Generator[T, None, None] = cls.filtered_elements(it, predicate)
-        tmp = None
-        for i in gen:
-            tmp = i
-        return tmp if tmp is not None else default_val
+        g = it.groupby(iterable)
+        return next(g, True) and not next(g, False)  # type: ignore
 
     @classmethod
-    def filtered_elements(
-        cls,
-        it: t.Iterable[T],
-        predicate: t.Callable[[T], bool],
-    ) -> t.Generator[T, None, None]:
-        """
-        获取可迭代对象中所有符合条件的元素
-
-        Parameters
-        ----------
-        it : t.Iterable[T]
-            待提取可迭代对象
-        predicate : t.Callable[[T], bool]
-            检测函数
-
-        Returns
-        -------
-        list[T]
-            符合条件的元素组成的列表
-        """
-        yield from (i for i in it if predicate(i))
-
-    @classmethod
-    def split_by(
-        cls,
-        it: t.Iterable[T],
-        predicate: t.Callable[[T], bool],
-    ) -> tuple[t.Sequence[T], t.Sequence[T]]:
-        """
-        将可迭代对象根据predicate函数的返回值进行分割
-
-        Parameters
-        ----------
-        it : t.Iterable[T]
-            待分割可迭代对象
-        predicate : t.Callable[[T], bool]
-            分割函数, 返回True则分割为左半部分, 否则分割为右半部分
-
-        Returns
-        -------
-        tuple[t.Sequence[T], t.Sequence[T]]
-            分割后的两个部分，第一部分为满足predicate函数的元素，第二部分为不满足predicate函数的元素
-        """
-        false_list = []
-        true_list = []
-        for v in it:
-            if predicate(v):
-                true_list.append(v)
-            else:
-                false_list.append(v)
-        return false_list, true_list
-
-    @classmethod
-    def cycle_shift(
-        cls,
-        seq: t.Sequence[T],
-        move_length: int,
-    ) -> t.Sequence[T]:
+    def rotate(cls, seq: typing.Sequence[Any], move_length: int) -> typing.Sequence[Any]:
         """
         将列表滚动移动 n 位
 
         Parameters
         ----------
-        seq : t.Sequence[Any]
+        seq : typing.Sequence[Any]
             待滚动序列
         move_length : int
             滚动位数, 正数向后移动, 负数向前移动
 
         Returns
         -------
-        t.Sequence[Any]
+        typing.Sequence[Any]
             滚动后的新列表
         """
         if cls.is_empty(seq):
@@ -931,34 +902,38 @@ class SequenceUtil:
         if abs(move_length) > seq_length:
             move_length %= seq_length
 
-        res = list(seq[-move_length:])
-        res.extend(iter(seq[:-move_length]))
+        res = []
+        for i in seq[-move_length:]:
+            res.append(i)
+        for i in seq[:-move_length]:
+            res.append(i)
+
         return res
 
     @classmethod
     def get_chunks(
         cls,
-        seq: t.Sequence[T],
+        seq: typing.Sequence[Any],
         chunk_size: int,
-    ) -> t.Generator[t.Sequence[T], None, None]:
+    ) -> typing.Generator[typing.Sequence[Any], None, None]:
         """
         根据给定的大小, 将序列切分为多个块
 
         Parameters
         ----------
-        seq : t.Sequence[Any]
+        seq : typing.Sequence[Any]
             待切分序列
         chunk_size : int
             给定的块大小
 
         Returns
         -------
-        t.Generator[t.Sequence[Any], None, None]
+        typing.Generator[typing.Sequence[Any], None, None]
             块序列的生成器
 
         Yields
         ------
-        Iterator[t.Generator[t.Sequence[Any], None, None]]
+        Iterator[typing.Generator[typing.Sequence[Any], None, None]]
             块序列的生成器
 
         NOTES:
@@ -970,119 +945,10 @@ class SequenceUtil:
             yield seq[i : i + chunk_size]
 
     @classmethod
-    def split_half(cls, seq: t.Sequence[T]) -> Sequence[Sequence[T]]:
-        """
-        将序列切分成前后两半
-
-        Parameters
-        ----------
-        seq : t.Sequence[Any]
-            待切分序列
-
-        Returns
-        -------
-        t.Tuple[t.Sequence[Any], t.Sequence[Any]]
-            切分后的前后两半序列
-        """
-        return cls.split_seq(seq, 2)
-
-    @classmethod
-    def split_seq(
-        cls,
-        seq: t.Sequence[T],
-        cnt_of_group: int,
-    ) -> Sequence[Sequence[T]]:
-        """
-        将序列切分成指定数量的组
-
-        Parameters
-        ----------
-        seq : t.Sequence[Any]
-            待切分序列
-        num_of_group : int
-            给定的组数量
-
-        Returns
-        -------
-        Sequence[Sequence[Any]]
-            切分后的多个序列组成的列表
-
-        Raises
-        ------
-        ValueError
-            如果num_of_group小于等于0则抛出异常
-        """
-        if cnt_of_group <= 0:
-            raise ValueError("num_of_group should be greater than 0")
-
-        length = cls.get_length(seq)
-        if cnt_of_group == 1:
-            return [seq]
-
-        if length <= cnt_of_group:
-            return [[i] for i in seq]
-
-        cnt_of_group = int(length / cnt_of_group)
-        out = []
-        split_cnt_lst = []
-        tmp = 0
-        while tmp + cnt_of_group <= length:
-            split_cnt_lst.append(cnt_of_group)
-            tmp += cnt_of_group
-
-        split_cnt_lst[-1] += length - tmp
-
-        last = 0
-        for i in split_cnt_lst:
-            out.append(seq[last : last + i])
-            last += i
-
-        return out
-
-    @classmethod
-    def groupby(
-        cls,
-        it: t.Iterable[T],
-        *,
-        key_func: t.Callable[[T], _K],
-        val_func: t.Callable[[T], _Tout] = None,
-    ) -> dict[_K, list[_Tout]]:
-        """
-        根据给定的key_func和val_func, 将可迭代对象分组
-
-        Parameters
-        ----------
-        it : t.Iterable[Any]
-            待分组可迭代对象
-        key_func : t.Callable[[Any], Any]
-            键函数, 用于提取键值
-        val_func : t.Callable[[Any], Any], optional
-            值函数, 用于提取值, by default None
-
-        Returns
-        -------
-        dict[Any, list[Any]]
-            分组结果字典
-
-        NOTES:
-        ------
-        参考:https://docs.python.org/zh-cn/3/library/itertools.html#itertools.groupby
-        """
-        if val_func is None:
-
-            def val_func(x):
-                return x
-
-        groups = collections.defaultdict(list)
-        for val in it:
-            groups[key_func(val)].append(val_func(val))
-        return dict(groups)
-
-    @classmethod
     def flatten_sequence(
         cls,
-        seq: t.Sequence[T],
-    ) -> t.Generator[T, None, None]:
+        seq: typing.Sequence[Any],
+    ) -> typing.Generator[Any, None, None]:
         """
         将嵌套序列展开
 
@@ -1094,7 +960,7 @@ class SequenceUtil:
 
         Parameters
         ----------
-        seq : t.Sequence[Any]
+        seq : typing.Sequence[Any]
             待展开序列
 
         Returns
@@ -1113,44 +979,63 @@ class SequenceUtil:
                 yield i
 
     @classmethod
-    def merge_ranges(cls, *ranges) -> list:
+    def split_sequence(cls, seq: typing.Sequence[Any], num_of_group: int) -> Sequence[Sequence[Any]]:
         """
-        合并多个范围, 并返回合并后的范围列表
-
-        Example:
-        ----------
-        >>> merge_ranges([(1, 3), (2, 4), (5, 6)])
-        [(1, 4), (5, 6)]
+        将序列切分成指定数量的组
 
         Parameters
         ----------
-        ranges : t.Tuple[t.Tuple[int, int], ...]
-            待合并的范围列表
+        seq : typing.Sequence[Any]
+            待切分序列
+        num_of_group : int
+            给定的组数量
 
         Returns
         -------
-        t.List[t.Tuple[int, int]]
-            合并后的范围列表
+        Sequence[Sequence[Any]]
+            切分后的多个序列组成的列表
+
+        Raises
+        ------
+        ValueError
+            如果num_of_group小于等于0则抛出异常
         """
+        if num_of_group <= 0:
+            raise ValueError("num_of_group should be greater than 0")
 
-        def has_intersection(r1, r2, key_func=lambda x: x):
-            c, d = key_func(r2)
-            a, b = key_func(r1)
-            return b >= c and d >= a
+        if num_of_group == 1:
+            return [seq]
 
-        if not ranges:
-            return []
-        # (1, 3), (2, 4), (7, 8)]
-        ranges = sorted(ranges, key=lambda s: s[0])
+        length = cls.get_length(seq)
+        if length < num_of_group:
+            return [[i] for i in seq]
 
-        merged = [ranges[0]]
-        for r in ranges[1:]:
-            if has_intersection(merged[-1], r):
-                merged[-1] = (min(merged[-1][0], r[0]), max(merged[-1][1], r[1]))
-            else:
-                merged.append(r)
+        single_cnt_of_group = length / num_of_group
+        out = []
+        last = 0.0
 
-        return merged
+        while last < length:
+            out.append(seq[int(last) : int(last + single_cnt_of_group)])
+            last += single_cnt_of_group
+
+        return out
+
+    @classmethod
+    def split_half(cls, seq: typing.Sequence[Any]) -> Sequence[Sequence[Any]]:
+        """
+        将序列切分成前后两半
+
+        Parameters
+        ----------
+        seq : typing.Sequence[Any]
+            待切分序列
+
+        Returns
+        -------
+        typing.Tuple[typing.Sequence[Any], typing.Sequence[Any]]
+            切分后的前后两半序列
+        """
+        return cls.split_sequence(seq, 2)
 
 
 class StringUtil(SequenceUtil):
@@ -1200,22 +1085,24 @@ class StringUtil(SequenceUtil):
     __SYB = ["M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"]
 
     @classmethod
-    def is_string(cls, obj: T) -> bool:
+    def is_string(cls, obj: typing.Any, *, raise_type_exception: bool = False) -> bool:
         """
         检查对象是否是字符串
 
-        Parameters
-        ----------
-        obj : T
-            待检测对象
+        *Example:*
 
+        >>> assert is_string('foo') # returns true
+        >>> assert not is_string(b'foo') # returns false
 
-        Returns
-        -------
-        bool
-            如果对象是字符串则返回 True, 否则返回 False
+        :param obj: 待检测对象
+        :param raise_type_exception: 类型错误的时候是否引发异常
+        :return: 如果是字符串返回True, 否则返回False
         """
-        return isinstance(obj, str)
+        if isinstance(obj, str):
+            return True
+        if raise_type_exception:
+            raise TypeError(f"{obj} is not a string")
+        return False
 
     @classmethod
     def is_all_whitespace(cls, s: str) -> bool:
@@ -1240,7 +1127,15 @@ class StringUtil(SequenceUtil):
         bool
             字符串是否全为空白字符
         """
-        return all(c.isspace() for c in s) if s is not None else False
+        if s is None:
+            return False
+        if cls.get_length(s) == 0:
+            return True
+        for c in s:
+            if not c.isspace():
+                return False
+
+        return True
 
     @classmethod
     def is_ascii_control(cls, s: str) -> bool:
@@ -1257,7 +1152,10 @@ class StringUtil(SequenceUtil):
         bool
             如果字符串中的每个字符都是ASCII控制字符, 则返回True, 否则返回False
         """
-        return all((ord(c) < 32 or ord(c) == 127) for c in s)
+        for c in s:
+            if not (ord(c) < 32 or ord(c) == 127):
+                return False
+        return True
 
     @classmethod
     def is_unicode_str(cls, s: str) -> bool:
@@ -1298,19 +1196,13 @@ class StringUtil(SequenceUtil):
         return cls.equals_any(s, CharPool.SLASH, CharPool.BACKSLASH)
 
     @classmethod
-    def is_blank(
-        cls,
-        s: str | None,
-    ) -> bool:
+    def is_blank(cls, s: str | None, *, raise_type_exception: bool = False) -> bool:
         """
-        判断给定的字符串是否为空, 字符串为空定义为: \n
-        1. 字符串为None \n
-        2. 空字符串: "" \n
-        3. 空格、全角空格、制表符、换行符, 等不可见字符, \n
+        判断给定的字符串是否为空, 空字符串包括null、空字符串: ""、空格、全角空格、制表符、换行符, 等不可见字符, \\n
 
         Parameters
         ----------
-        s : t.Optional[str]
+        s : typing.Optional[str]
             待检测的字符串
         raise_type_exception : bool, optional
             如果类型错误, 是否要抛出异常, by default False
@@ -1327,67 +1219,67 @@ class StringUtil(SequenceUtil):
         """
         if s is None:
             return True
+        if not cls.is_string(s, raise_type_exception=raise_type_exception):
+            return False
 
-        if not isinstance(s, str):
-            raise TypeError(f"{s} is not a string")
-
-        for c in s:
+        val = str(s) if not isinstance(s, str) else s
+        for c in val:
             if c in (string.ascii_letters + string.digits + string.punctuation):
                 return False
 
-        return len(s.strip()) == 0
+        return len(val.strip()) == 0
 
     @classmethod
-    def is_not_blank(cls, s: str) -> bool:
+    def is_not_blank(cls, s: str, *, raise_type_exception: bool = False) -> bool:
         """
-        判断给定的字符串是否不为空, 空字符串包括null、空字符串: ""、空格、全角空格、制表符、换行符, 等不可见字符, \\n
+        判断给定的字符串是否为非空。\n
+        NOTE 依赖于is_blank实现。
 
-        Parameters
-        ----------
-        s : str
-            待检测的字符串
-
-        Returns
-        -------
-        bool
-            如果字符串不为空返回True, 否则返回False
+        :param s: 被检测的字符串
+        :param raise_type_exception: 如果类型错误, 是否要抛出异常
+        :return: 如果字符串为非空返回True, 否则返回False
         """
-        return not cls.is_blank(s)
+        return not cls.is_blank(s, raise_type_exception=raise_type_exception)
 
     @classmethod
     def has_blank(cls, *args) -> bool:
         """
         判断多个字符串中是否有空白字符串
-
-        Returns
-        -------
-        bool
-            如果有空白字符串返回 True, 否则返回 False
+        :param args: 待判断字符串
+        :return: 如果有空白字符串返回True, 否则返回False
         """
-        return True if cls.is_empty(args) else any(cls.is_blank(arg) for arg in args)
+        if cls.is_empty(args):
+            return True
+        for arg in args:
+            if cls.is_blank(arg):
+                return True
+
+        return False
 
     @classmethod
     def is_all_blank(cls, *args) -> bool:
         """
-        判断给定的多个字符串是否全为空白字符串
-
-        Returns
-        -------
-        bool
-            如果所有字符串全为空则返回 True, 否则返回 False
+        给定的多个字符串是否全为空
+        :param args: 待检测的多个字符串
+        :return: 如果都为空则返回True, 否则返回False
         """
         if cls.is_empty(args):
             return True
 
-        return not any(cls.is_not_blank(arg) for arg in args)
+        for arg in args:
+            if cls.is_not_blank(arg):
+                return False
+
+        return True
 
     @classmethod
-    def starts_with(
+    def is_starts_with(
         cls,
         s: str,
         prefix: str,
         *,
         case_insensitive: bool = True,
+        strict_mode: bool = False,
     ) -> bool:
         """
         检查字符串 s 是否以指定的前缀 prefix 开头。
@@ -1409,13 +1301,19 @@ class StringUtil(SequenceUtil):
             字符串 s 是否以指定的前缀 prefix 开头。
         """
 
+        if strict_mode:
+            return s.startswith(prefix)
+
+        s = s.strip()
+        prefix = prefix.strip()
+
         if case_insensitive:
             return s.lower().startswith(prefix.lower())
 
         return s.startswith(prefix)
 
     @classmethod
-    def starts_with_any(cls, s: str, *prefixes: str, case_insensitive: bool = False) -> bool:
+    def is_starts_with_any(cls, s: str, *prefixes: str, case_insensitive: bool = False) -> bool:
         """
         判断给定字符串是否以任何一个字符串开始.
         如果 prefixes 为空或者s为空, 则返回False.
@@ -1432,14 +1330,16 @@ class StringUtil(SequenceUtil):
         bool
             如果字符串以任何一个字符串开始返回True, 否则返回False
         """
-        return (
-            False
-            if cls.is_empty(prefixes) or cls.is_blank(s)
-            else any(cls.starts_with(s, prefix, case_insensitive=case_insensitive) for prefix in prefixes)
-        )
+        if cls.is_empty(prefixes) or cls.is_blank(s):
+            return False
+        for prefix in prefixes:
+            if cls.is_starts_with(s, prefix, case_insensitive=case_insensitive):
+                return True
+
+        return False
 
     @classmethod
-    def ends_with(
+    def is_ends_with(
         cls,
         s: str,
         suffix: str,
@@ -1477,12 +1377,32 @@ class StringUtil(SequenceUtil):
         return s.endswith(suffix)
 
     @classmethod
-    def ends_with_any(
-        cls,
-        s: str,
-        *suffixes: str,
-        case_insensitive: bool = False,
-    ) -> bool:
+    def is_surround(cls, s: str, prefix: str, suffix: str, case_insensitive: bool = True) -> bool:
+        """
+        判断字符串是否由指定前后缀包围
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        prefix : str
+            指定前缀
+        suffix : str
+            指定后缀
+
+        Returns
+        -------
+        bool
+            是否由指定前后缀包围
+        """
+        if case_insensitive:
+            s = s.lower()
+            prefix = prefix.lower()
+            suffix = suffix.lower()
+        return s.startswith(prefix) and s.endswith(suffix)
+
+    @classmethod
+    def is_ends_with_any(cls, s: str, *suffixes: str, case_insensitive: bool = False) -> bool:
         """
         判断一个字符串 s 是否以任何一个给定字符串结尾
         如果 suffixes 为空或者s为空, 则返回False.
@@ -1501,119 +1421,11 @@ class StringUtil(SequenceUtil):
         """
         if cls.is_empty(suffixes) or cls.is_blank(s):
             return False
-        return any(cls.ends_with(s, suffix, case_insensitive=case_insensitive) for suffix in suffixes)
+        for suffix in suffixes:
+            if cls.is_ends_with(s, suffix, case_insensitive=case_insensitive):
+                return True
 
-    @classmethod
-    def is_surround(
-        cls,
-        s: str,
-        prefix: str,
-        suffix: str,
-        case_insensitive: bool = True,
-    ) -> bool:
-        """
-        判断字符串是否由指定前后缀包围
-
-        Parameters
-        ----------
-        s : str
-            待检测字符串
-        prefix : str
-            指定前缀
-        suffix : str
-            指定后缀
-
-        Returns
-        -------
-        bool
-            是否由指定前后缀包围
-        """
-
-        return cls.starts_with(s, prefix, case_insensitive=case_insensitive) and cls.ends_with(
-            s, suffix, case_insensitive=case_insensitive
-        )
-
-    @classmethod
-    def is_mixed_case(cls, s: str) -> bool:
-        """
-        判断给定的字符串是否包含大写字母和小写字母
-
-        Parameters
-        ----------
-        s : str
-            待检测字符串
-
-        Returns
-        -------
-        bool
-            如果字符串包含大写字母和小写字母则返回True, 否则返回False
-        """
-        if cls.is_empty(s) or cls.get_length(s) == 1:
-            return False
-        contain_lower_case = False
-        contain_upper_case = False
-        for c in s:
-            if c.islower():
-                contain_lower_case = True
-            elif c.isupper():
-                contain_upper_case = True
-
-        return contain_lower_case and contain_upper_case
-
-    @classmethod
-    def is_alphabet(cls, uchar) -> bool:
-        """
-        判断一个 unicode 是否是英文字母
-
-        Parameters
-        ----------
-        uchar : str
-            待检测的unicode字符
-
-        Returns
-        -------
-        bool
-            如果是英文字母则返回True, 否则返回False
-        """
-        if not isinstance(uchar, str):
-            raise TypeError(f"Expected a string, but found {type(uchar)}")
-        if len(uchar) != 1:
-            return False
-        return ("\u0041" <= uchar <= "\u005a") or ("\u0061" <= uchar <= "\u007a")
-
-    @classmethod
-    def is_half_of_alphabet(cls, text: str) -> bool:
-        """
-        判断给定的字符串是否都是字母表中前半部分的字母
-
-        Parameters
-        ----------
-        text : str
-            待检测字符串
-
-        Returns
-        -------
-        bool
-            如果字符串都是字母表中前半部分的字母则返回True, 否则返回False
-        """
-        return all(c.lower() <= "m" for c in text)
-
-    @classmethod
-    def is_last_half_of_alphabet(cls, text: str) -> bool:
-        """
-        判断给定的字符串中的字符是否都是字母表中最后半部分的字母
-
-        Parameters
-        ----------
-        text : str
-            待检测字符串
-
-        Returns
-        -------
-        bool
-            如果字符串中的字符都是字母表中最后半部分的字母则返回True, 否则返回False
-        """
-        return all(c.lower() >= "m" for c in text)
+        return False
 
     @classmethod
     def contain_digit(cls, s: str) -> bool:
@@ -1633,7 +1445,7 @@ class StringUtil(SequenceUtil):
         return any(char.isdigit() for char in s)
 
     @classmethod
-    def contain_lowercase(cls, s: str) -> bool:
+    def has_lowercase(cls, s: str) -> bool:
         """
         判断字符串是否包含小写字母
 
@@ -1650,7 +1462,7 @@ class StringUtil(SequenceUtil):
         return any(char.islower() for char in s)
 
     @classmethod
-    def contain_uppercase(cls, s: str) -> bool:
+    def has_uppercase(cls, s: str) -> bool:
         """
         判断字符串是否包含大写字母
 
@@ -1670,39 +1482,18 @@ class StringUtil(SequenceUtil):
     def none_to_empty(cls, s: str) -> str:
         """
         当给定字符串为null时, 转换为Empty
-
-        Parameters
-        ----------
-        s : str
-            待检测字符串
-
-        Returns
-        -------
-        str
-            转换后的字符串
+        :param s: 待检测字符串
+        :return: 转换后的字符串
         """
         return cls.none_to_default(s, cls.EMPTY)
 
     @classmethod
-    def none_to_default(
-        cls,
-        s: str,
-        default_str: str,
-    ) -> str:
+    def none_to_default(cls, s: str, default_str: str) -> str:
         """
         如果字符串是 null, 则返回指定默认字符串, 否则返回字符串本身。
-
-        Parameters
-        ----------
-        s : str
-            待检测字符串
-        default_str : str
-            默认字符串
-
-        Returns
-        -------
-        str
-            如果字符串是 null, 则返回指定默认字符串, 否则返回字符串本身。
+        :param s: 要转换的字符串
+        :param default_str: 默认字符串
+        :return: 如果字符串是 null, 则返回指定默认字符串, 否则返回字符串本身。
         """
         return default_str if s is None else s
 
@@ -1710,148 +1501,67 @@ class StringUtil(SequenceUtil):
     def empty_to_default(cls, s: str, default_str: str) -> str:
         """
         如果字符串是null或者"", 则返回指定默认字符串, 否则返回字符串本身。
-
-        Parameters
-        ----------
-        s : str
-            待检测字符串
-        default_str : str
-            默认字符串
-
-        Returns
-        -------
-        str
-            转换后的字符串
+        :param s: 要转换的字符串
+        :param default_str: 默认字符串
+        :return: 转换后的字符串
         """
-        return default_str if cls.is_blank(s) else s
+        if s is None or cls.EMPTY == s:
+            return default_str
+        else:
+            return s
 
     @classmethod
     def empty_to_none(cls, s: str) -> str | None:
         """
         当给定字符串为空字符串时, 转换为null
-
-        Parameters
-        ----------
-        s : str
-            待检测字符串
-
-        Returns
-        -------
-        str | None
-            转换后的值
+        :param s: 被转换的字符串
+        :return: 转换后的字符串
         """
-        return None if cls.is_blank(s) else s
+        return None if cls.is_empty(s) else s
 
     @classmethod
-    def to_bytes(
-        cls,
-        byte_or_str: bytes | str,
-        encoding: str = CharsetUtil.UTF_8,
-    ) -> bytes:
+    def blank_to_default(cls, s: str, default_str: str) -> str:
+        """
+        如果字符串是null或者""或者空白, 则返回指定默认字符串, 否则返回字符串本身。
+        :param s: 要转换的字符串
+        :param default_str: 默认字符串
+        :return: 转换后的字符串
+        """
+        if cls.is_blank(s):
+            return default_str
+        else:
+            return s
+
+    @classmethod
+    def to_bytes(cls, byte_or_str: bytes | str, encoding=CharsetUtil.UTF_8) -> bytes:
         """
         将字节序列或者字符串转换成字节序列
-
-        Parameters
-        ----------
-        byte_or_str : bytes | str
-            待转换对象
-        encoding : str, optional
-            编码方式, by default CharsetUtil.UTF_8
-
-        Returns
-        -------
-        bytes
-            如果是bytes序列则返回自身, 否则编码后返回
-
-        Raises
-        ------
-        TypeError
-            如果 byte_or_str 不是 bytes 或 str 则抛出异常
+        :param byte_or_str: 待转换对象
+        :param encoding: 编码方式
+        :return: 如果是bytes序列则返回自身, 否则编码后返回
         """
-        if not isinstance(byte_or_str, (str | bytes)):
-            raise TypeError(f"Expected bytes or str, but found {type(byte_or_str)}")
-
-        return byte_or_str if isinstance(byte_or_str, bytes) else byte_or_str.encode(encoding)
+        assert isinstance(byte_or_str, bytes) or isinstance(byte_or_str, str)
+        if isinstance(byte_or_str, bytes):
+            return byte_or_str
+        else:
+            return byte_or_str.encode(encoding)
 
     @classmethod
-    def to_str(
-        cls,
-        byte_or_str: bytes | str,
-        encoding: str = CharsetUtil.UTF_8,
-    ) -> str:
+    def to_str(cls, byte_or_str: bytes | str, encoding=CharsetUtil.UTF_8) -> str:
         """
         将字节序列或者字符串转换成字符串
-
-        Parameters
-        ----------
-        byte_or_str : bytes | str
-            待转换对象
-        encoding : str, optional
-            解码方式, by default CharsetUtil.UTF_8
-
-        Returns
-        -------
-        str
-            如果是字符串则返回自身, 否则解码后返回
-
-        Raises
-        ------
-        TypeError
-            如果 byte_or_str 不是 bytes 或 str 则抛出异常
+        :param byte_or_str: 待转换对象
+        :param encoding: 解码方式
+        :return: 如果是字符串则返回自身, 否则解码后返回
         """
-        if not isinstance(byte_or_str, (str | bytes)):
-            raise TypeError(f"Expected bytes or str, but found {type(byte_or_str)}")
-        return byte_or_str if isinstance(byte_or_str, str) else byte_or_str.decode(encoding)
-
-    @classmethod
-    def b2q(cls, uchar: str) -> str:
-        """
-        半角转全角
-
-        Parameters
-        ----------
-        uchar : str
-            待转换的半角字符
-
-        Returns
-        -------
-        str
-            如果不是半角字符则返回原字符，否则返回对应的全角字符
-        """
-        inside_code = ord(uchar)
-        if inside_code < 0x0020 or inside_code > 0x7E:  # 不是半角字符就返回原来的字符
-            return uchar
-        if inside_code == 0x0020:  # 除了空格其他的全角半角的公式为:半角=全角-0xfee0
-            inside_code = 0x3000
+        assert isinstance(byte_or_str, bytes) or isinstance(byte_or_str, str)
+        if isinstance(byte_or_str, str):
+            return byte_or_str
         else:
-            inside_code += 0xFEE0
-        return chr(inside_code)
+            return byte_or_str.decode(encoding)
 
     @classmethod
-    def q2b(cls, uchar: str) -> str:
-        """
-        全角转半角
-
-        Parameters
-        ----------
-        uchar : str
-            待转换的全角字符
-
-        Returns
-        -------
-        str
-            如果不是全角字符则返回原字符，否则返回对应的半角字符
-        """
-        inside_code = ord(uchar)
-        if inside_code == 0x3000:  # 全角空格直接转换
-            inside_code = 0x0020
-        else:
-            inside_code -= 0xFEE0
-
-        return uchar if inside_code < 0x0020 or inside_code > 0x7E else chr(inside_code)
-
-    @classmethod
-    def as_set(cls, *args, froze: bool = False) -> Set[T]:
+    def as_set(cls, *args, froze: bool = False) -> Set[Any]:
         """
         将多个字符串输入转换成集合
 
@@ -1865,32 +1575,7 @@ class StringUtil(SequenceUtil):
         Set[Any]
             返回的集合
         """
-        return frozenset(args) if froze else set(args)
-
-    @classmethod
-    def as_list(cls, *args) -> list[str]:
-        """
-        将多个字符串输入转换成列表
-
-        Returns
-        -------
-        list[str]
-            返回的列表
-        """
-        return list(args)
-
-    @classmethod
-    def show_unicode_info(cls, s: str) -> None:
-        """
-        显示字符串的unicode信息
-
-        Parameters
-        ----------
-        s : str
-            待显示的字符串
-        """
-        for code_point in s:
-            print(f"U+{ord(code_point):04X}, code point: {code_point}, name: {unicodedata.name(code_point)}")
+        return set(args) if not froze else frozenset(args)
 
     @classmethod
     def convert_to_circled(cls, char: str) -> str:
@@ -1928,76 +1613,6 @@ class StringUtil(SequenceUtil):
             return char
 
     @classmethod
-    def camel_case_to_snake(
-        cls,
-        input_string: str,
-        separator="_",
-    ) -> str:
-        """
-        camelCase 格式的字符串转为 snake_case 格式的字符串
-
-        Parameters
-        ----------
-        input_string : str
-            待转换字符串
-        separator : str, optional
-            分隔符, by default "_"
-
-        Returns
-        -------
-        str
-            转换后的字符串
-
-        Raises
-        ------
-        TypeError
-            如果 input_string 不是字符串则抛出异常
-        """
-        if not cls.is_string(input_string):
-            raise TypeError("input_string must be a string")
-
-        return PatternPool.CAMEL_CASE_REPLACE.sub(lambda m: m.group(1) + separator, input_string).lower()
-
-    @classmethod
-    def snake_case_to_camel(
-        cls,
-        input_string: str,
-        upper_case_first: bool = False,
-        separator: str = "_",
-    ) -> str:
-        """
-        将 snake_case 格式的字符串转为 camelCase 格式的字符串
-
-        Parameters
-        ----------
-        input_string : str
-            待转换字符串
-        upper_case_first : bool, optional
-            是否首单词首字母大写, by default False
-        separator : str, optional
-            分隔符, by default "_"
-
-        Returns
-        -------
-        str
-            转换后的字符串
-
-        Raises
-        ------
-        TypeError
-            如果 input_string 不是字符串则抛出异常
-        """
-        if not cls.is_string(input_string):
-            raise TypeError("input_string must be a string")
-
-        tokens: list[str] = [s.title() for s in input_string.split(separator)]
-
-        if not upper_case_first:
-            tokens[0] = tokens[0].lower()
-
-        return "".join(tokens)
-
-    @classmethod
     def get_circled_number(cls, number: int) -> str:
         """
         将[1-20]数字转换为带圈的字符：
@@ -2024,52 +1639,28 @@ class StringUtil(SequenceUtil):
     @classmethod
     def fill_before(cls, s: str, fill_char: str, length: int) -> str:
         """
-        将已有字符串填充为规定长度, 左侧填充字符 fill_char
+        将已有字符串填充为规定长度, 如果已有字符串超过这个长度则返回这个字符串。
 
-        Parameters
-        ----------
-        s : str
-            待填充的字符串
-        fill_char : str
-            填充的字符
-        length : int
-            填充后的长度
-
-        Returns
-        -------
-        str
-            如果·s·长度超过·length·则返回·s·本身, 否则返回填充后的字符串
+        :param s: 被填充的字符串
+        :param fill_char: 填充的字符
+        :param length: 填充长度
+        :return: 填充后的字符串
         """
         return s.rjust(length, fill_char)
 
     @classmethod
     def fill_after(cls, s: str, fill_char: str, length: int) -> str:
         """
-        将已有字符串填充为规定长度, 右侧填充字符 fill_char
 
-        Parameters
-        ----------
-        s : str
-            待填充的字符串
-        fill_char : str
-            填充的字符
-        length : int
-            填充后的长度
-
-        Returns
-        -------
-        str
-            如果·s·长度超过·length·则返回·s·本身, 否则返回填充后的字符串
+        :param s: 被填充的字符串
+        :param fill_char: 填充的字符
+        :param length:
+        :return: 填充后的字符串
         """
         return s.ljust(length, fill_char)
 
     @classmethod
-    def sub_before(
-        cls,
-        s: str,
-        separator: str,
-        use_last_separator: bool = False,
-    ) -> str:
+    def sub_before(cls, s: str, separator: str, use_last_separator: bool = False) -> str:
         """
         截取分隔字符串之前的字符串，不包括分隔字符串本身。
 
@@ -2094,7 +1685,7 @@ class StringUtil(SequenceUtil):
             return s
 
         try:
-            separator_idx = s.rindex(separator) if use_last_separator else s.index(separator)
+            separator_idx = s.index(separator) if not use_last_separator else s.rindex(separator)
         except ValueError:
             return s
         else:
@@ -2126,40 +1717,26 @@ class StringUtil(SequenceUtil):
             return s
 
         try:
-            separator_idx = s.rindex(separator) if use_last_separator else s.index(separator)
+            separator_idx = s.index(separator) if not use_last_separator else s.rindex(separator)
         except ValueError:
             return s
         else:
             return s[separator_idx + 1 :]
 
     @classmethod
-    def get_center_msg(
-        cls,
-        s: str,
-        fill_char: str,
-        length: int,
-    ) -> str:
+    def get_center_msg(cls, s: str, fill_char: str, length: int) -> str:
         """
-        获取打印信息, 信息左右两侧由指定字符填充, 信息居中
+        获取打印信息, 信息左右两侧由指定字符填充
 
         *Example:*
 
         >>> StringUtil.get_center_msg("hello world", "=", 40) # ==== hello world ====
         >>> StringUtil.get_center_msg("hello world", "=", 1) # hello world
 
-        Parameters
-        ----------
-        s : str
-            待填充的字符串
-        fill_char : str
-            填充的字符
-        length : int
-            填充后的长度
-
-        Returns
-        -------
-        str
-            填充后的字符串
+        :param s: 被填充的字符串
+        :param fill_char: 填充的字符
+        :param length:
+        :return: 填充后的字符串
         """
         single_side_width = length // 2
         return f" {s} ".center(single_side_width, fill_char)
@@ -2171,6 +1748,7 @@ class StringUtil(SequenceUtil):
         s2: str,
         *,
         case_insensitive: bool = True,
+        strict_mode: bool = False,
     ) -> bool:
         """
         判断两个字符串是否相等
@@ -2183,6 +1761,8 @@ class StringUtil(SequenceUtil):
             待检测字符串 s2
         case_insensitive : bool, optional
             是否忽略大小写, by default True
+        strict_mode : bool, optional
+            是否启用严格模式,即是否调用strip()函数, by default False
 
         Returns
         -------
@@ -2192,17 +1772,22 @@ class StringUtil(SequenceUtil):
         if s1 is None or s2 is None:
             return False
 
-        s1_length = SequenceUtil.get_length(s1)
-        s2_length = SequenceUtil.get_length(s2)
-        if s1_length != s2_length:
+        if strict_mode:
+            return s1 == s2
+
+        s1 = s1.strip()
+        s2 = s2.strip()
+
+        if len(s1) != len(s2):
             return False
 
         for i, j in zip(s1, s2):
             if case_insensitive:
                 if i.lower() != j.lower() and i.upper() != j.upper():
                     return False
-            elif i != j:
-                return False
+            else:
+                if i != j:
+                    return False
 
         return True
 
@@ -2213,33 +1798,12 @@ class StringUtil(SequenceUtil):
         s2: str,
         *,
         case_insensitive: bool = True,
+        strict_mode: bool = False,
     ) -> bool:
-        """
-        判断两个字符串是否不相等
-
-        Parameters
-        ----------
-        s1 : str
-            待检测字符串1
-        s2 : str
-            待检测字符串2
-        case_insensitive : bool, optional
-            是否忽略大小写, by default True
-
-
-        Returns
-        -------
-        bool
-            _description_
-        """
-        return not cls.equals(s1, s2, case_insensitive=case_insensitive)
+        return not cls.equals(s1, s2, case_insensitive=case_insensitive, strict_mode=strict_mode)
 
     @classmethod
-    def equals_any(
-        cls,
-        s: str,
-        *args,
-    ) -> bool:
+    def equals_any(cls, s: str, *args: str, case_insensitive: bool = True) -> bool:
         """
         判断字符串 s 等于任何一个给定的字符串 args 中的字符串, 则返回 True, 否则返回 False.
 
@@ -2259,42 +1823,14 @@ class StringUtil(SequenceUtil):
         """
         if cls.is_empty(args):
             return False
-        return any(cls.equals(s, arg, case_insensitive=False) for arg in args)
+        for arg in args:
+            if cls.equals(s, arg, case_insensitive=case_insensitive):
+                return True
+
+        return False
 
     @classmethod
-    def equals_any_ignore_case(
-        cls,
-        s: str,
-        *args,
-    ) -> bool:
-        """
-        判断字符串 s 等于任何一个给定的字符串 args 中的字符串, 忽略大小写, 则返回 True, 否则返回 False.
-
-        Parameters
-        ----------
-        s : str
-            待检测字符串 s
-        args : str
-            待比较的字符串列表
-
-        Returns
-        -------
-        bool
-            如果字符串 s 等于任何一个给定的字符串 args 中的字符串, 则返回 True, 否则返回 False.
-        """
-        if cls.is_empty(args):
-            return False
-        return any(cls.equals(s, arg, case_insensitive=True) for arg in args)
-
-    @classmethod
-    def hide(
-        cls,
-        s: str,
-        start: int,
-        end: int,
-        *,
-        replace_char: str = "*",
-    ) -> str:
+    def hide(cls, s: str, start: int, end: int, *, replace_char: str = "*") -> str:
         """
         隐藏字符串 s 中从 start 到 end 位置的字符, 用指定的替换字符 replace_char 替换。
 
@@ -2320,15 +1856,22 @@ class StringUtil(SequenceUtil):
         if start > len(s):
             return s
 
-        end = min(end, len(s))
+        if end >= len(s):
+            end = len(s)
 
-        hide_part = cls.sub_sequence(s, start, end, include_last=False)
-        return s[:start] + replace_char * len(hide_part) + s[end:]
+        new_str_lst = []
+        for i, v in enumerate(s):
+            if start <= i < end:
+                new_str_lst.append(replace_char)
+            else:
+                new_str_lst.append(v)
+
+        return "".join(new_str_lst)
 
     @classmethod
     def sub_sequence(
         cls,
-        lst: Sequence[T],
+        lst: Sequence[Any],
         start: int,
         end: int | None = None,
         *,
@@ -2359,97 +1902,7 @@ class StringUtil(SequenceUtil):
         return "".join(sub_seq)
 
     @classmethod
-    def reverse_fstring(
-        cls,
-        pattern: str,
-        string: str,
-    ) -> dict[str, str] | None:
-        """
-        反向解析字符串中的格式化字符串
-
-        Parameters
-        ----------
-        pattern : str
-            待解析的字符串模板
-        string : str
-            待解析的字符串
-
-        Returns
-        -------
-        dict[str, str] | None
-            解析结果字典, 如果解析失败则返回 None
-        """
-        pattern = cls._pattern_cache(pattern)
-        return m.groupdict() if (m := pattern.fullmatch(string)) else None
-
-    @classmethod
-    def get_name_sequence(cls, prefix: str) -> Generator[str, T, None]:
-        """
-        返回一个名字序列生成器
-
-        Parameters
-        ----------
-        prefix : str
-            名字前缀
-
-        Returns
-        -------
-        t.Callable[[], str]
-            名字序列生成器
-        """
-        sequence = it.count()
-        while True:
-            yield f"{prefix}{next(sequence)}"
-
-    @classmethod
-    def get_new_name(
-        cls,
-        taken: t.Collection[str],
-        base: str,
-        transform: t.Callable[[str], str] = None,
-    ) -> str:
-        """
-        获取一个新的名字, 保证名字不重复
-
-        Parameters
-        ----------
-        taken : t.Collection[str]
-            已有名字集合
-        base : str
-            基础名字
-        transform : t.Callable[[str], str], optional
-            名字转换函数, by default None
-
-        Returns
-        -------
-        str
-            一个重复的名字
-        """
-        if base is None:
-            raise ValueError("base cannot be None")
-        if base not in taken:
-            return base
-
-        if transform is None:
-            i = 1
-            new = f"{base}_{i}"
-            while new in taken:
-                i += 1
-                new = f"{base}_{i}"
-        else:
-            new = base
-            while new in taken:
-                new = transform(new)
-
-        return new
-
-    @classmethod
-    def get_random_strs(
-        cls,
-        n: int,
-        *,
-        chars: str | None = None,
-    ) -> str:
+    def get_random_strs(cls, n: int, *, chars: str | None = None) -> str:
         """
         返回给定数量的随机字符串
 
@@ -2457,7 +1910,7 @@ class StringUtil(SequenceUtil):
         ----------
         n : int
             字符数量
-        chars : t.Optional[str], optional
+        chars : typing.Optional[str], optional
             源字符串, 如果为None则使用默认的字符集, by default None
 
         Returns
@@ -2469,75 +1922,6 @@ class StringUtil(SequenceUtil):
             chars = string.ascii_letters
 
         return "".join(RandomUtil.get_random_items_from_sequence(chars, n))
-
-    @classmethod
-    def get_line_separator(cls, label: str = "") -> str:
-        """
-        获取行分隔符
-
-        Parameters
-        ----------
-        label : str, optional
-            标签, by default ""
-
-        Returns
-        -------
-        str
-            行分隔符
-        """
-        separator = "-" * 40
-        result = f"\n\n{separator}{label}{separator}\n\n"
-        return result
-
-    @classmethod
-    def get_size_string(cls, size: int) -> str:
-        """
-        获取文件大小字符串
-
-        Parameters
-        ----------
-        size : int
-            文件大小
-
-        Returns
-        -------
-        str
-            文件大小字符串
-        """
-        if size < 1 << 10:
-            return "%d B" % size
-        if size < 1 << 20:
-            return "%d KB" % (size >> 10)
-        if size < 1 << 30:
-            return "%d MB" % (size >> 20)
-        return "%d GB" % (size >> 30)
-
-    @classmethod
-    def get_random_secure_hex(cls, n: int) -> str:
-        """
-        获取随机的安全的十六进制字符串
-
-        Parameters
-        ----------
-        n : int
-            字符串数量
-
-        Returns
-        -------
-        str
-            随机的安全的十六进制字符串
-
-        Raises
-        ------
-        ValueError
-            如果 n 小于 1, 则抛出异常
-        """
-        if not isinstance(n, int) or n < 1:
-            raise ValueError("byte_count must be >= 1")
-
-        random_bytes = os.urandom(n)
-        hex_bytes = binascii.hexlify(random_bytes)
-        return hex_bytes.decode()
 
     @classmethod
     def get_random_chinese(cls) -> str:
@@ -2555,7 +1939,7 @@ class StringUtil(SequenceUtil):
     @classmethod
     def generate_box_string_from_dict(
         cls,
-        data: t.Mapping[str, T],
+        data: typing.Mapping[str, Any],
         *,
         title: str = " RESULT ",
     ) -> str:
@@ -2564,7 +1948,7 @@ class StringUtil(SequenceUtil):
 
         Parameters
         ----------
-        data : t.Mapping[str, Any]
+        data : typing.Mapping[str, Any]
             待生成的数据
         title : str, optional
             标题, by default " RESULT "
@@ -2577,13 +1961,15 @@ class StringUtil(SequenceUtil):
 
         def get_center_title(title: str) -> str:
             if not title.startswith(" ") and not title.endswith(" "):
-                return f" {title} "
+                return " " + title + " "
             if not title.startswith(" "):
-                return f" {title}"
+                return " " + title
 
-            return title if title.endswith(" ") else f"{title} "
+            if not title.endswith(" "):
+                return title + " "
+            return title
 
-        def get_max_length_from_dict(data: t.Mapping[str, T], level: int = 0) -> tuple[int, int]:
+        def get_max_length_from_dict(data: typing.Mapping[str, Any], level: int = 0) -> tuple[int, int]:
             max_key_length = 0
             max_value_length = 0
             for key, value in data.items():
@@ -2623,17 +2009,17 @@ class StringUtil(SequenceUtil):
                         else:
                             raise TypeError(f"Unsupported type: {type(item)} in nested dict")
                 else:
-                    _append_content_line(f"{k}", f"{v}", level)
+                    _append_content_line(k, v, level)
 
         def _append_content_line(key: str, value: str, level: int) -> None:
             prefix = "| "
             symbol = " : "
-            suffix = " |"
+            sufix = " |"
 
-            current_key_length = get_length_with_level(key, level)
+            current_key_length = get_length_with_level(str(key), level)
             current_key_padding_length = max_key_length - current_key_length
 
-            current_value_length = cls.get_width(value)
+            current_value_length = cls.get_width(str(value))
             current_value_padding_length = max_value_length - current_value_length
 
             level_padding = get_left_padding_str(level)
@@ -2646,7 +2032,7 @@ class StringUtil(SequenceUtil):
             if current_value_padding_length > 0:
                 value_padding = " " * current_value_padding_length
 
-            content.append(f"{prefix}{level_padding}{key}{key_padding}{symbol}{value}{value_padding}{suffix}")
+            content.append(f"{prefix}{level_padding}{key}{key_padding}{symbol}{value}{value_padding}{sufix}")
 
         max_key_length, max_value_length = get_max_length_from_dict(data)
         print(f"{max_key_length=}")
@@ -2682,12 +2068,7 @@ class StringUtil(SequenceUtil):
         return box_string
 
     @classmethod
-    def get_annotation_str(
-        cls,
-        s: str,
-        *,
-        annotation_syntax: str = "--",
-    ) -> str:
+    def get_annotation_str(cls, s: str, annotation_syntax: str = "--") -> str:
         """
         生成备注释信息
 
@@ -2773,14 +2154,12 @@ class StringUtil(SequenceUtil):
         ValueError
             如果对齐方式不是 "left", "right" 或 "center", 则抛出异常
         """
-        if align in {"left", "right", "center"}:
-            return (
-                cls._align_text(text, len(text) + 1, padding, align)
-                if align in {"left", "right"}
-                else cls._align_text(text, len(text) + 2, padding, align)
-            )
-        else:
+        if align not in ["left", "right", "center"]:
             raise ValueError(f"align must be 'left', 'right' or 'center', but got {align}")
+        if align in ["left", "right"]:
+            return cls._align_text(text, len(text) + 1, padding, align)
+        else:
+            return cls._align_text(text, len(text) + 2, padding, align)
 
     @classmethod
     def get_common_suffix(cls, str1: str, str2: str) -> str:
@@ -2832,67 +2211,28 @@ class StringUtil(SequenceUtil):
         return "".join(common_str_lst)
 
     @classmethod
-    def get_most_common_letter(cls, text: str) -> str:
+    def group_by_length(cls, s: str, n: int) -> list[str]:
         """
-        获取给定字符串中最多的字母
-
-        Parameters
-        ----------
-        text : str
-            待检测字符串
-
-        Returns
-        -------
-        str
-            字符串中最多的字母
-        """
-        if cls.is_blank(text):
-            return cls.EMPTY
-        text = text.lower()
-        return max(string.ascii_lowercase, key=text.count)
-
-    @classmethod
-    def get_right(cls, s: str, len: int) -> str:
-        """
-        获取最右边的字符串
+        根据制定的长度分组字符串
 
         Parameters
         ----------
         s : str
-            待获取字符串
-        len : int
-            获取的长度
+            待分组字符串
+        n : int
+            每组字符串数量
 
         Returns
         -------
-        str
-            获取后的字符串
+        typing.List[str]
+            分组后的字符串
         """
-        if s is None or len < 0:
-            return cls.EMPTY
-        if len >= (s_len := cls.get_length(s)):
-            return s
-
-        return cls.sub_sequence(s, s_len - len)
+        if SequenceUtil.is_empty(s):
+            return []
+        return [s[i : i + n] for i in range(0, len(s), n)]
 
     @classmethod
-    def get_ascii_number_pairs(cls, text: str) -> list[tuple[str, int]]:
-        """
-        获取字符串-ASCII码对
-
-        Parameters
-        ----------
-        text : str
-            待获取字符串
-
-        Returns
-        -------
-        list[tuple[str, int]]
-            字符串-ASCII码对列表
-        """
-        return [(c, ord(c)) for c in text]
-
-    @classmethod
+    @UnCheckFunction()
     def format_in_currency(cls, s: str | float) -> str:
         """
         格式化字符串为货币格式
@@ -2923,62 +2263,16 @@ class StringUtil(SequenceUtil):
             integer_part, decimal_part = s.split(".")
 
         rev_str = integer_part[::-1]
-        str_lst = list(SequenceUtil.get_chunks(rev_str, 3))
-        res_lst = [i[::-1] for i in str_lst[::-1]]
+        str_lst = cls.group_by_length(rev_str, 3)
+        res_lst = []
+        for i in str_lst[::-1]:
+            res_lst.append(i[::-1])
+
         integer_str = ",".join(res_lst)
-        decimal_str = f".{decimal_part}" if StringUtil.is_not_blank(decimal_part) else ""
+        decimal_str = "." + decimal_part if StringUtil.is_not_blank(decimal_part) else ""
         sign_str = "-" if negative_flg else ""
 
         return f"{sign_str}{integer_str}{decimal_str}"
-
-    @classmethod
-    def unwrap(cls, s: str, wrap_str: str) -> str:
-        """
-        折叠字符串中给定的字符
-
-        Parameters
-        ----------
-        s : str
-            待折叠字符串
-        wrap_str : str
-            给定的字符
-
-        Returns
-        -------
-        str
-            折叠后的字符串
-        """
-        if cls.is_empty(s) or cls.get_length(wrap_str) != 1 or wrap_str == CharPool.NUL or cls.get_length(s) < 2:
-            return s
-
-        res_lst = []
-
-        for start_idx in range(len(s)):
-            current_char = s[start_idx]
-            if current_char != wrap_str:
-                res_lst.append(current_char)
-            elif SequenceUtil.is_empty(res_lst) or res_lst[-1] != wrap_str:
-                res_lst.append(current_char)
-        return "".join(res_lst)
-
-    @classmethod
-    def shuffle(cls, s: str) -> str:
-        """
-        打乱字符串并返回
-
-        Parameters
-        ----------
-        s : str
-            待打乱字符串
-
-        Returns
-        -------
-        str
-            打乱后的字符串
-        """
-        chars = list(s)
-        random.shuffle(chars)
-        return "".join(chars)
 
     @classmethod
     def append_if_missing(cls, s: str, suffix: str, case_insensitive: bool = True) -> str:
@@ -2999,7 +2293,7 @@ class StringUtil(SequenceUtil):
         str
             填充后的字符串
         """
-        if cls.ends_with(s, suffix, case_insensitive=case_insensitive):
+        if cls.is_ends_with(s, suffix, case_insensitive=case_insensitive):
             return s
         else:
             return s + suffix
@@ -3104,7 +2398,7 @@ class StringUtil(SequenceUtil):
 
     @classmethod
     @UnCheckFunction()
-    def get_roman_range(cls, start: int, end: int, step: int = 1) -> t.Generator[str, None, None]:
+    def get_roman_range(cls, start: int, end: int, step: int = 1) -> typing.Generator[str, None, None]:
         """
         跟 range 函数一样生成罗马数字序列
 
@@ -3119,12 +2413,12 @@ class StringUtil(SequenceUtil):
 
         Returns
         -------
-        t.Generator[str, None, None]
+        typing.Generator[str, None, None]
             罗马数字字符串生成器
 
         Yields
         ------
-        Iterator[t.Generator[str, None, None]]
+        Iterator[typing.Generator[str, None, None]]
             罗马数字字符串迭代器
 
         Raises
@@ -3183,12 +2477,7 @@ class StringUtil(SequenceUtil):
         return "".join(filter_result)
 
     @classmethod
-    def remove_suffixes(
-        cls,
-        s: str,
-        *suffixes,
-        **kwargs,
-    ) -> str:
+    def remove_suffix(cls, s: str, suffix: str, case_insensitive: bool = True) -> str:
         """
         移除字符串中的指定后缀
 
@@ -3206,54 +2495,14 @@ class StringUtil(SequenceUtil):
         str
             移除后的字符串
         """
-        case_insensitive = kwargs.get("case_insensitive", True) if kwargs else True
-        for suffix in suffixes:
-            s = cls.remove_suffix(s, suffix, case_insensitive=case_insensitive)
-
-        return s
-
-    @classmethod
-    def remove_suffix(
-        cls,
-        s: str,
-        suffix: str,
-        *,
-        case_insensitive: bool = True,
-    ) -> str:
-        """
-        移除字符串中的指定后缀
-
-        Parameters
-        ----------
-        s : str | None
-            待移除字符串
-        suffix : str
-            指定后缀
-        case_insensitive : bool, optional
-            是否忽略大小写, by default True
-
-        Returns
-        -------
-        str
-            移除后的字符串
-        """
-        if case_insensitive:
-            s = s.lower()
-            suffix = suffix.lower()
-
         # NOTE 兼容3.9之前的版本，3.9之后可以直接调用str.removesuffix()方法
-        if sys.version_info[0] >= 3 and sys.version_info[1] >= 9:
-            return s.removesuffix(suffix)
+        if cls.is_ends_with(s, suffix, case_insensitive=case_insensitive):
+            return s[: -len(suffix)]
         else:
-            return s[: -len(suffix)] if cls.ends_with(s, suffix, case_insensitive=case_insensitive) else s
+            return s
 
     @classmethod
-    def remove_prefixes(
-        cls,
-        s: str,
-        *prefixes,
-        **kwargs,
-    ) -> str:
+    def remove_prefix(cls, s: str, prefix: str, case_insensitive: bool = True) -> str:
         """
         移除字符串中的指定前缀
 
@@ -3271,46 +2520,11 @@ class StringUtil(SequenceUtil):
         str
             移除后的字符串
         """
-        case_insensitive = kwargs.get("case_insensitive", True) if kwargs else True
-        for prefix in prefixes:
-            s = cls.remove_prefix(s, prefix, case_insensitive=case_insensitive)
-
-        return s
-
-    @classmethod
-    def remove_prefix(
-        cls,
-        s: str,
-        prefix: str,
-        *,
-        case_insensitive: bool = True,
-    ) -> str:
-        """
-        移除字符串中的指定前缀
-
-        Parameters
-        ----------
-        s : str
-            待移除字符串
-        prefix : str
-            指定的前缀
-        case_insensitive : bool, optional
-            是否忽略大小写, by default True
-
-        Returns
-        -------
-        str
-            移除后的字符串
-        """
-        if case_insensitive:
-            s = s.lower()
-            prefix = prefix.lower()
-
         # NOTE 兼容3.9之前的版本，3.9之后可以直接调用str.removesuffix()方法
-        if sys.version_info[0] >= 3 and sys.version_info[1] >= 9:
-            return s.removeprefix(prefix)
+        if cls.is_starts_with(s, prefix, case_insensitive=case_insensitive):
+            return s[len(prefix) :]
         else:
-            return s[len(prefix) :] if cls.starts_with(s, prefix, case_insensitive=case_insensitive) else s
+            return s
 
     @classmethod
     def remove_char_at(cls, s: str, idx: int) -> str:
@@ -3336,15 +2550,13 @@ class StringUtil(SequenceUtil):
         if cls.is_blank(s):
             return cls.EMPTY
 
-        return s[:-1] if idx >= length or idx == length - 1 else s[:idx] + s[idx + 1 :]
+        if idx >= length or idx == length - 1:
+            return s[:-1]
+
+        return s[:idx] + s[idx + 1 :]
 
     @classmethod
-    def remove_range(
-        cls,
-        s: str,
-        start: int,
-        end: int,
-    ) -> str:
+    def remove_range(cls, s: str, start: int, end: int) -> str:
         """
         移除字符串中的指定范围的字符
 
@@ -3371,7 +2583,10 @@ class StringUtil(SequenceUtil):
         if cls.is_blank(s):
             return cls.EMPTY
 
-        return s[:start] if end >= cls.get_length(s) else s[:start] + s[end:]
+        if end >= cls.get_length(s):
+            return s[:start]
+
+        return s[:start] + s[end:]
 
     @classmethod
     def remove_non_ascii(cls, s: str) -> str:
@@ -3453,7 +2668,7 @@ class StringUtil(SequenceUtil):
         if cls.is_blank(source) or cls.is_blank(dest):
             return dest
         source_len = cls.get_length(source)
-        return dest[:start] + source + dest[start + source_len :]
+        return dest[:start] + str(source) + dest[start + source_len :]
 
     @classmethod
     def insert_str_at(cls, s: str, idx: int, sub_str: str) -> str:
@@ -3480,7 +2695,10 @@ class StringUtil(SequenceUtil):
             return sub_str
 
         length = cls.get_length(s)
-        return s + sub_str if idx >= length else s[:idx] + sub_str + s[idx:]
+        if idx >= length:
+            return s + sub_str
+
+        return s[:idx] + sub_str + s[idx:]
 
     @classmethod
     def abbreviate(cls, s: str, length: int, ellipsis: str = "...") -> str:
@@ -3601,7 +2819,7 @@ class StringUtil(SequenceUtil):
         return basic_str.capitalize()
 
     @classmethod
-    def get_random_chinese_generator(cls, length: int = 10) -> t.Generator[str, None, None]:
+    def get_random_chinese_generator(cls, length: int = 10) -> typing.Generator[str, None, None]:
         """
         获取指定长度的随机中文字符
 
@@ -3612,16 +2830,25 @@ class StringUtil(SequenceUtil):
 
         Returns
         -------
-        t.Generator[str, None, None]
+        typing.Generator[str, None, None]
             随机中文字符生成器
 
         Yields
         ------
-        Iterator[t.Generator[str, None, None]]
+        Iterator[typing.Generator[str, None, None]]
             随机中文字符生成器
         """
         for _ in range(length):
             yield cls.get_random_chinese()
+
+    @classmethod
+    def _align_text(cls, text: str, width: int, padding: str = " ", align: str = "left") -> str:
+        if align == "left":
+            return text.rjust(width, padding)
+        elif align == "right":
+            return text.ljust(width, padding)
+        else:
+            return text.center(width, padding)
 
     @classmethod
     def only_numerics(cls, s: str) -> str:
@@ -3639,37 +2866,6 @@ class StringUtil(SequenceUtil):
             仅保留数字的字符串
         """
         return "".join(filter(str.isdigit, s))
-
-    @t.overload
-    def only(cls, s: str, strategy: Strategy) -> str: ...
-
-    @t.overload
-    def only(cls, s: str, strategy: str) -> str: ...
-
-    @classmethod
-    def only(cls, s: str, strategy) -> str:
-        if strategy is None:
-            return s
-
-        if isinstance(strategy, str):
-            strategy = Strategy(strategy.upper())
-
-        if strategy == Strategy.NUMERICS:
-            return cls.only_numerics(s)
-        elif strategy == Strategy.ALPHABETIC:
-            return cls.only_alphabetic(s)
-        elif strategy == Strategy.ALPHANUMERIC:
-            return cls.only_alphanumeric(s)
-        elif strategy == Strategy.UPPERCASE:
-            return cls.only_uppercase(s)
-        elif strategy == Strategy.LOWERCASE:
-            return cls.only_lowercase(s)
-        elif strategy == Strategy.PRINTABLE:
-            return cls.only_printable(s)
-        elif strategy == Strategy.ASCII:
-            return cls.only_ascii(s)
-        else:
-            raise ValueError(f"Unsupported strategy: {strategy}")
 
     @classmethod
     def only_alphabetic(cls, s: str) -> str:
@@ -3807,21 +3003,11 @@ class StringUtil(SequenceUtil):
         sub_seq_length = cls.get_length(value)
         split_main_seq = sequence[from_index:]
 
-        return next(
-            (
-                i + from_index
-                for i in range(len(split_main_seq))
-                if cls.is_sub_equal(
-                    split_main_seq,
-                    i,
-                    value,
-                    0,
-                    sub_seq_length,
-                    case_insensitive=case_insensitive,
-                )
-            ),
-            cls.INDEX_NOT_FOUND,
-        )
+        for i in range(len(split_main_seq)):
+            if cls.is_sub_equal(split_main_seq, i, value, 0, sub_seq_length, case_insensitive=case_insensitive):
+                return i + from_index
+
+        return cls.INDEX_NOT_FOUND
 
     @classmethod
     def last_index_of(
@@ -3858,21 +3044,11 @@ class StringUtil(SequenceUtil):
         else:
             from_idx = main_seq_length - abs(from_idx) if from_idx < 0 else from_idx
 
-        return next(
-            (
-                i
-                for i in range(from_idx, -1, -1)
-                if cls.is_sub_equal(
-                    sequence,
-                    i,
-                    value,
-                    0,
-                    sub_seq_length,
-                    case_insensitive=case_insensitive,
-                )
-            ),
-            cls.INDEX_NOT_FOUND,
-        )
+        for i in range(from_idx, -1, -1):
+            if cls.is_sub_equal(sequence, i, value, 0, sub_seq_length, case_insensitive=case_insensitive):
+                return i
+
+        return cls.INDEX_NOT_FOUND
 
     @classmethod
     def is_sub_equal(
@@ -3967,314 +3143,3 @@ class StringUtil(SequenceUtil):
                 basic_dict["other"] += 1
 
         return basic_dict
-
-    @classmethod
-    def swap_case(cls, s: str) -> str:
-        """
-        交换字符串中的大小写
-
-        Parameters
-        ----------
-        s : str
-            待交换字符串
-
-        Returns
-        -------
-        str
-            交换后的字符串
-        """
-        return "".join(map(lambda x: x.swapcase(), s))
-
-    @classmethod
-    @functools.cache
-    def _pattern_cache(cls, pattern: str) -> re.Pattern:
-        pattern = re.sub(r"\{(?P<name>\w+)\}", r"(?P<\g<name>>.+)", pattern)
-        return re.compile(pattern)
-
-    @classmethod
-    def _align_text(cls, text: str, width: int, padding: str = " ", align: str = "left") -> str:
-        if align == "left":
-            return text.rjust(width, padding)
-        elif align == "right":
-            return text.ljust(width, padding)
-        else:
-            return text.center(width, padding)
-
-
-class ReUtil:
-    # 正则表达式匹配中文汉字
-    RE_CHINESE = RegexPool.CHINESE
-    # 正则表达式匹配中文字符串
-    RE_CHINESES = RegexPool.CHINESES
-    # 正则中需要被转义的关键字
-    RE_KEY = {
-        "$",
-        "(",
-        ")",
-        "*",
-        "+",
-        ".",
-        "[",
-        "]",
-        "?",
-        "\\",
-        "^",
-        "{",
-        "}",
-        "|",
-        ":",
-        "<",
-        ">",
-        "=",
-    }
-
-    @classmethod
-    def get_group_1(
-        cls,
-        pattern: re.Pattern,
-        s: str,
-    ) -> str | None:
-        """
-        获取匹配的第一个分组
-
-        Parameters
-        ----------
-        pattern : re.Pattern
-            编译后的正则模式
-        s : str
-            待提取字符串
-
-        Returns
-        -------
-        typing.Optional[str]
-            如果匹配成功, 返回第一个分组的字符串, 否则返回None
-
-        Notes
-        ----------
-        1. 依赖于`get_matched_group_by_idx`方法
-        """
-        cls.is_match(pattern, s, raise_exception=False)
-        return cls.get_matched_group_by_idx(pattern, s, 1)
-
-    @classmethod
-    def get_group_2(
-        cls,
-        pattern: re.Pattern,
-        s: str,
-    ) -> str | None:
-        """
-        获取匹配的第二个分组
-
-        Parameters
-        ----------
-        pattern : re.Pattern
-            编译后的正则模式
-        s : str
-            待提取字符串
-
-        Returns
-        -------
-        typing.Optional[str]
-            如果匹配成功, 返回第二个分组的字符串, 否则返回None
-
-        Notes
-        ----------
-        1. 依赖于`get_matched_group_by_idx`方法
-        """
-        cls.is_match(pattern, s, raise_exception=False)
-        return cls.get_matched_group_by_idx(pattern, s, 2)
-
-    @classmethod
-    def get_matched_group_by_idx(
-        cls,
-        pattern: re.Pattern,
-        s: str,
-        group_index: int = 1,
-    ) -> str | None:
-        """
-        获取指定的分组
-
-        Parameters
-        ----------
-        pattern : re.Pattern
-            编译后的正则模式
-        s : str
-            待提取字符串
-        group_index : int, optional
-            分组序号, by default 0
-
-        Returns
-        -------
-        typing.Optional[str]
-            如果匹配成功, 返回指定分组的字符串, 否则返回None
-
-        Notes
-        ----------
-        1. 如果没有匹配, 返回None, 如果给定的分组序号大于分组数量-1, 也返回None
-        2. 如果字符串为空, 也返回None
-        """
-        if StringUtil.is_blank(s):
-            return None
-        res = cls.get_matched_groups(pattern, s)
-        return SequenceUtil.get_element(res, group_index - 1)
-
-    @classmethod
-    def get_matched_groups(cls, pattern: re.Pattern, s: str) -> tuple[str, ...]:
-        """
-        获取所有匹配的分组
-
-        Parameters
-        ----------
-        pattern : re.Pattern
-            编译后的正则模式
-        s : str
-            待匹配字符串
-
-        Returns
-        -------
-        _type_
-            所有匹配的分组
-        """
-        matched = pattern.match(s)
-        return matched.groups() if matched is not None else ()
-
-    @classmethod
-    def get_match_obj(cls, pattern: re.Pattern, s: str) -> re.Match | None:
-        """
-        获取匹配对象
-
-        Parameters
-        ----------
-        pattern : re.Pattern
-            编译后的正则模式
-        s : str
-            待匹配字符串
-
-        Returns
-        -------
-        typing.Optional[re.Match]
-            如果匹配成功, 返回匹配对象, 否则返回None
-        """
-        return pattern.match(s)
-
-    @classmethod
-    def get_match_group(
-        cls,
-        pattern: re.Pattern,
-        s: str,
-    ) -> dict[str, T] | None:
-        match_obj = cls.get_match_obj(pattern, s)
-        return dict(match_obj.groupdict()) if match_obj is not None else None
-
-    @classmethod
-    def is_match(cls, pattern: re.Pattern, s: str, *, raise_exception: bool = False) -> bool:
-        """
-        检查是否匹配
-
-        Parameters
-        ----------
-        pattern : re.Pattern
-            编译后的正则模式
-        s : str
-            待匹配字符串
-        raise_exception : bool, optional
-            如果匹配失败, 是否抛出异常, by default False
-
-        Returns
-        -------
-        bool
-            如果匹配成功, 返回True, 如果匹配失败, 且raise_error为True, 抛出异常, 否则返回False
-
-        Raises
-        ------
-        TypeError
-            如果pattern不是re.Pattern对象抛出异常
-        ValueError
-            如果raise_error为True, 且匹配失败, 抛出ValueError异常
-        """
-
-        if not isinstance(pattern, re.Pattern):
-            raise TypeError("pattern must be a re.Pattern object")
-
-        res = pattern.match(s)
-        if res is None and raise_exception:
-            raise RegexValidationError(pattern, s, f"pattern {pattern} not match string {s}")
-
-        return res is not None
-
-    @classmethod
-    def is_contains(cls, pattern: re.Pattern, s: str, *, raise_exception: bool = False) -> bool:
-        """
-        检查是否包含
-
-        Parameters
-        ----------
-        pattern : re.Pattern
-            编译后的正则模式
-        s : str
-            待匹配字符串
-        raise_exception : bool, optional
-            如果匹配失败, 是否抛出异常, by default False
-
-        Returns
-        -------
-        bool
-            如果匹配成功, 返回True, 如果匹配失败, 且raise_error为True, 抛出异常, 否则返回False
-
-        Raises
-        ------
-        TypeError
-            如果pattern不是re.Pattern对象抛出异常
-        ValueError
-            如果raise_error为True, 且匹配失败, 抛出ValueError异常
-        """
-
-        if not isinstance(pattern, re.Pattern):
-            raise TypeError("pattern must be a re.Pattern object")
-
-        res = pattern.search(s)
-        if res is None and raise_exception:
-            raise RegexValidationError(pattern, s, f"pattern {pattern} not match string {s}")
-
-        return res is not None
-
-    @classmethod
-    def is_match_reg(cls, s: str, reg: str, *, raise_exception: bool = False) -> bool:
-        """
-        是否匹配正则表达式
-
-        Parameters
-        ----------
-        s : str
-            待匹配字符串
-        reg : str
-            待匹配正则表达式
-        raise_exception : bool, optional
-            匹配不成功是否引发异常, by default False
-
-        Returns
-        -------
-        bool
-            是否匹配成功
-        """
-        pattern = re.compile(reg)
-        return cls.is_match(pattern, s, raise_exception=raise_exception)
-
-    @classmethod
-    def find_all(cls, pattern: re.Pattern, s: str, from_index: int = 0) -> list[str]:
-        """
-        找到所有匹配的字符串
-
-        Parameters
-        ----------
-        pattern : re.Pattern
-            编译后的正则模式
-        s : str
-            待匹配字符串
-
-        Returns
-        -------
-        list[str]
-            所有匹配的字符串列表
-        """
-        return pattern.findall(s, from_index)

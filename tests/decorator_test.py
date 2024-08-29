@@ -17,14 +17,8 @@ Change Activity:
 import time
 
 import allure
-import pytest
 
-from .context_test import Singleton, StringUtil, TraceUsedTime, UnCheckFunction, log_func_call
-
-
-@log_func_call
-def divide(a, b):
-    return a / b
+from .context_test import Singleton, StringUtil, TraceUsedTime, UnCheckFunction
 
 
 @Singleton
@@ -36,6 +30,9 @@ class SingletonCls:
 @allure.feature("自定义装饰器")
 @allure.description("自定义装饰器,可以计算运算时间, 单例模式等功能")
 @allure.tag("装饰器")
+@allure.feature("自定义装饰器")
+@allure.description("自定义装饰器,可以计算运算时间, 单例模式等功能")
+@allure.tag("装饰器")
 class TestDecorator:
     @allure.story("测试TraceUsedTime装饰器")
     @allure.description("测试TraceUsedTime装饰器,可以计算函数执行时间")
@@ -44,6 +41,22 @@ class TestDecorator:
         @TraceUsedTime("enter msg", "exit msg")
         def test_trace_used_time(self) -> None:
             time.sleep(1)
+
+    @allure.story("测试TraceUsedTime装饰器")
+    @allure.description("测试TraceUsedTime装饰器,可以计算函数执行时间")
+    class TestUseTime:
+        @allure.title("测试TraceUsedTime装饰器")
+        @TraceUsedTime("enter msg", "exit msg")
+        def test_trace_used_time(self) -> None:
+            time.sleep(1)
+
+    @allure.story("测试 UnCheckFunction 装饰器")
+    @allure.description("测试 UnCheckFunction 装饰器, 可以提示调用者函数是否会对参数进行检测")
+    class TestUnCheckedFunction:
+        @allure.title("测试 UnCheckFunction 装饰器")
+        @UnCheckFunction(True)
+        def test_uncheck_function(self) -> None:
+            print("test_uncheck_function")
 
     @allure.story("测试 UnCheckFunction 装饰器")
     @allure.description("测试 UnCheckFunction 装饰器, 可以提示调用者函数是否会对参数进行检测")
@@ -62,19 +75,3 @@ class TestDecorator:
             s2 = SingletonCls("s2")
             assert StringUtil.equals(s1.name, s2.name)
             assert s1 is s2
-
-        @allure.title("测试函数调用装饰器")
-        @pytest.mark.parametrize(
-            "a,b,expected",
-            [
-                (10, 5, 2),
-                pytest.param(10, 0, None, marks=pytest.mark.xfail(raises=ZeroDivisionError)),
-            ],
-        )
-        def test_log_func_call(
-            self,
-            a,
-            b,
-            expected,
-        ) -> None:
-            assert divide(a, b) == expected

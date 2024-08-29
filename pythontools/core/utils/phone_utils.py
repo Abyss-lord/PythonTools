@@ -14,9 +14,8 @@ Change Activity:
 """
 # here put the import lib
 
-from ..constants.pattern_pool import PatternPool
 from ..decorator import UnCheckFunction
-from .basic_utils import ReUtil, StringUtil
+from .basicutils import StringUtil
 
 # 是否显示Warning信息
 WARNING_ENABLED = True
@@ -188,6 +187,7 @@ class PhoneUtil:
 
     @classmethod
     @UnCheckFunction(WARNING_ENABLED)
+    @UnCheckFunction(WARNING_ENABLED)
     def hide_before(cls, phone: str) -> str:
         """
         隐藏手机号前7位 替换字符为 "*" 栗子
@@ -205,6 +205,7 @@ class PhoneUtil:
         return StringUtil.hide(phone, 0, 7)
 
     @classmethod
+    @UnCheckFunction(WARNING_ENABLED)
     @UnCheckFunction(WARNING_ENABLED)
     def hide_between(cls, phone: str) -> str:
         """
@@ -224,6 +225,7 @@ class PhoneUtil:
 
     @classmethod
     @UnCheckFunction(WARNING_ENABLED)
+    @UnCheckFunction(WARNING_ENABLED)
     def hide_after(cls, phone: str) -> str:
         """
         隐藏手机号最后4位 替换字符为"*" 栗子
@@ -241,6 +243,7 @@ class PhoneUtil:
         return StringUtil.hide(phone, 7, 11)
 
     @classmethod
+    @UnCheckFunction(WARNING_ENABLED)
     @UnCheckFunction(WARNING_ENABLED)
     def get_phone_before(cls, phone: str) -> str:
         """
@@ -260,6 +263,7 @@ class PhoneUtil:
 
     @classmethod
     @UnCheckFunction(WARNING_ENABLED)
+    @UnCheckFunction(WARNING_ENABLED)
     def get_phone_between(cls, phone: str) -> str:
         """
         获取手机号中间4位
@@ -277,6 +281,7 @@ class PhoneUtil:
         return StringUtil.sub_sequence(phone, 3, 7)
 
     @classmethod
+    @UnCheckFunction(WARNING_ENABLED)
     @UnCheckFunction(WARNING_ENABLED)
     def get_phone_after(cls, phone: str) -> str:
         """

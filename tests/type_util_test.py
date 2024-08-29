@@ -59,6 +59,10 @@ class TestTypeUtil:
         logger.debug(res)
 
     @classmethod
+    def test_show_function_info(cls) -> None:
+        TypeUtil.show_function_info(StringUtil.get_common_suffix, show_detail=True)
+
+    @classmethod
     def test_get_class_name(cls) -> None:
         res = TypeUtil.get_class_name(StringUtil)
         logger.debug(res)
