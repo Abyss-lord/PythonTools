@@ -103,8 +103,7 @@ class TestJoiner:
 
     @allure.title("测试设置实例属性")
     def test_set_params(cls):
-        @allure.step("步骤1:测试链式调用")
-        def test_set_args_chain():
+        with allure.step("步骤1:测试链式调用"):
             joiner = StrJoiner.get_instance(",", prefix="(", suffix=")")
             joiner.set_delimiter("|").set_prefix("[").set_suffix("]").set_empty_result("NULL").set_null_mode(
                 NullMode.EMPTY
@@ -112,8 +111,7 @@ class TestJoiner:
             joiner.append("hello").append("world")
             assert joiner.get_merged_string() == "[hello|world]"
 
-        @allure.step("步骤2:非链式调用")
-        def test_set_args_not_chain():
+        with allure.step("步骤2:测试非链式调用"):
             joiner = StrJoiner.get_instance(",", prefix="(", suffix=")")
             joiner.set_delimiter("|")
             joiner.set_prefix("[")
@@ -123,44 +121,31 @@ class TestJoiner:
             joiner.append("hello").append("world")
             assert joiner.get_merged_string() == "[hello|world]"
 
-        test_set_args_chain()
-        test_set_args_not_chain()
-
     @allure.title("测试不同Null值处理方式")
     def test_null_mode(cls):
-        @allure.step("步骤1:测试 IGNORE 模式")
-        def test_null_mode_ignore():
+        with allure.step("步骤1:测试 IGNORE 模式"):
             joiner = StrJoiner.get_instance(",", prefix="(", suffix=")")
             joiner.set_null_mode(NullMode.IGNORE)
             joiner.append("hello").append(None).append(None)
             assert joiner.get_merged_string() == "(hello)"
 
-        @allure.step("步骤2:测试 EMPTY 模式")
-        def test_null_mode_empty():
+        with allure.step("步骤2:测试 EMPTY 模式"):
             joiner = StrJoiner.get_instance(",", prefix="(", suffix=")")
             joiner.set_null_mode(NullMode.EMPTY)
             joiner.append("hello").append(None).append(None)
             assert joiner.get_merged_string() == "(hello,,)"
 
-        @allure.step("步骤3:测试 NULL_STRING 模式")
-        def test_null_mode_null_string():
+        with allure.step("步骤3:测试 NULL_STRING 模式"):
             joiner = StrJoiner.get_instance(",", prefix="(", suffix=")")
             joiner.set_null_mode(NullMode.NULL_STRING)
             joiner.append("hello").append(None).append(None)
             assert joiner.get_merged_string() == "(hello,NONE,NONE)"
 
-        @allure.step("步骤4:测试无效Null值处理方式")
-        @allure.severity(allure.severity_level.CRITICAL)
-        def test_invalid_null_mode():
+        with allure.step("步骤4:测试非法Null值处理方式"):
             joiner = StrJoiner.get_instance(",", prefix="(", suffix=")")
             with pytest.raises(ValueError):
                 joiner.set_null_mode("invalid_null_mode")
                 joiner.append("hello").append(None).append(None)
-
-        test_null_mode_ignore()
-        test_null_mode_empty()
-        test_null_mode_null_string()
-        test_invalid_null_mode()
 
 
 @allure.feature("测试字符串拼接类StrFinder")
@@ -230,6 +215,10 @@ class TestFinder:
 
 
 @allure.feature("测试密码强度工具类PasswdStrengthUtil")
+@allure.description("""
+                    测试密码强度工具类PasswdStrengthUtil,该类用于计算密码强度
+                    """)
+@allure.tag("Text", "util")
 class TestPasswd:
     @allure.title("测试密码强度")
     def test_passwd(self) -> None:
@@ -242,8 +231,11 @@ class TestPasswd:
             assert PasswdStrengthUtil.get_strength_score(test_passwd_2) == 0
 
 
+@allure.feature("哈希工具类")
+@allure.description("哈希工具类，提供哈希方法")
+@allure.tag("Hash", "tag")
 class TestHash:
-    @classmethod
+    @allure.title("测试哈希方法")
     def test_hash(cls) -> None:
         test_cases = [
             "",  # 空字符串
@@ -271,10 +263,13 @@ class TestHash:
         h.hash_32("hello world".encode(CharsetUtil.UTF_8))
 
 
+@allure.feature("CSV工具类")
+@allure.description("CSV工具类，提供CSV读取方法")
+@allure.tag("CSV", "tag")
 class TestCsv:
     TEST_CSV_FILE = "tests/resources/test_csv.csv"
 
-    @classmethod
+    @allure.title("测试默认配置项")
     def test_get_config(cls) -> None:
         config = CsvConfig()
         assert config.delimiter == ","
@@ -283,7 +278,7 @@ class TestCsv:
         assert config.lineterminator == "\r\n"
         assert config.text_qualifier == '"'
 
-    @classmethod
+    @allure.title("测试设置配置项")
     def test_set_config(cls) -> None:
         config = CsvConfig()
         config.set_skip_initial_space(True).set_strict_mode(True).set_delimiter("|").set_lineterminator("\n")
@@ -292,7 +287,7 @@ class TestCsv:
         assert config.skip_initial_space
         assert config.lineterminator == "\n"
 
-    @classmethod
+    @allure.title("测试读取CSV文件文件头")
     def test_reader_get_header(cls) -> None:
         reader = CsvReader(cls.TEST_CSV_FILE)
         csv_data = reader.read()
@@ -300,13 +295,13 @@ class TestCsv:
         for row in csv_data.data:
             logger.debug(row)
 
-    @classmethod
+    @allure.title("测试以字典方式读取CSV文件数据")
     def test_get_dicts_from_csv(cls) -> None:
         data_dict = CsvReader.get_dicts_from_csv(cls.TEST_CSV_FILE)
         for i in data_dict:
             logger.debug(i)
 
-    @classmethod
+    @allure.title("测试以命名元祖的方式读取CSV文件数据")
     def test_get_namedtuple_from_csv(cls) -> None:
         Row = namedtuple("Row", ["id", "name", "age", "gender"])
         namedtuple_lst = CsvReader.get_namedtuple_from_csv(cls.TEST_CSV_FILE, Row)
