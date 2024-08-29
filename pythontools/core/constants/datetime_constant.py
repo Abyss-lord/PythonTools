@@ -17,9 +17,8 @@ Change Activity:
 import calendar
 from collections import namedtuple
 from datetime import date, datetime
-from datetime import date, datetime
 from enum import Enum
-from typing import Literal, Optional
+from typing import Optional
 
 QuarterTuple = namedtuple(
     "QuarterTuple",
