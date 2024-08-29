@@ -1127,8 +1127,10 @@ class StringUtil(SequenceUtil):
         bool
             字符串是否全为空白字符
         """
-        if s is None or len(s) == 0:
+        if s is None:
             return False
+        if cls.get_length(s) == 0:
+            return True
         for c in s:
             if not c.isspace():
                 return False
@@ -1337,7 +1339,7 @@ class StringUtil(SequenceUtil):
         return False
 
     @classmethod
-    def is_endswith(
+    def is_ends_with(
         cls,
         s: str,
         suffix: str,
@@ -1420,13 +1422,13 @@ class StringUtil(SequenceUtil):
         if cls.is_empty(suffixes) or cls.is_blank(s):
             return False
         for suffix in suffixes:
-            if cls.is_endswith(s, suffix, case_insensitive=case_insensitive):
+            if cls.is_ends_with(s, suffix, case_insensitive=case_insensitive):
                 return True
 
         return False
 
     @classmethod
-    def has_number(cls, s: str) -> bool:
+    def contain_digit(cls, s: str) -> bool:
         """
         判断字符串是否包含数字
 
@@ -1630,7 +1632,7 @@ class StringUtil(SequenceUtil):
         ValueError
             如果 number 不是[1-20]范围的数字则抛出异常
         """
-        if 1 <= number <= 20:
+        if not (1 <= number <= 20):
             raise ValueError("number should be between 1 and 20")
         return chr(ord("①") + number - 1)
 
@@ -1767,11 +1769,8 @@ class StringUtil(SequenceUtil):
         bool
             返回两个字符串是否相等
         """
-        if (s1 is None and s2 is not None) or (s1 is not None and s2 is None):
-            return False
-
         if s1 is None or s2 is None:
-            return True
+            return False
 
         if strict_mode:
             return s1 == s2
@@ -1920,7 +1919,7 @@ class StringUtil(SequenceUtil):
             随机字符串
         """
         if chars is None:
-            chars = string.ascii_letters + string.digits
+            chars = string.ascii_letters
 
         return "".join(RandomUtil.get_random_items_from_sequence(chars, n))
 
@@ -2087,9 +2086,11 @@ class StringUtil(SequenceUtil):
         """
         line_lst = []
         lines = s.splitlines()
+        if not lines:
+            return f"{annotation_syntax} {s}"
         for line in lines:
             if not line.startswith(annotation_syntax):
-                line_lst.append(annotation_syntax + " " + line)
+                line_lst.append(f"{annotation_syntax} {line}")
             else:
                 line_lst.append(line)
 
@@ -2110,6 +2111,8 @@ class StringUtil(SequenceUtil):
         int
             字符串长度
         """
+        if s is None:
+            return 0
         if cls.is_all_whitespace(s):
             return len(s)
 
@@ -2290,7 +2293,7 @@ class StringUtil(SequenceUtil):
         str
             填充后的字符串
         """
-        if cls.is_endswith(s, suffix, case_insensitive=case_insensitive):
+        if cls.is_ends_with(s, suffix, case_insensitive=case_insensitive):
             return s
         else:
             return s + suffix
@@ -2313,11 +2316,34 @@ class StringUtil(SequenceUtil):
         str
             重复后的字符串
         """
+        if cls.get_length(s) == 0:
+            return cls.EMPTY
         str_length = len(s)
         if str_length >= length:
             return s[:length]
         else:
             return s + cls.repeat_by_length(s, length - str_length)
+
+    @classmethod
+    def repeat_by_count(cls, s: str, num: int) -> str:
+        """
+        重复字符串，直到数量达到指定数量
+
+        Parameters
+        ----------
+        s : str
+            待重复字符串
+        num : int
+            重复后字符串数量
+
+        Returns
+        -------
+        str
+            重复后的字符串
+        """
+        if num == 0:
+            return cls.EMPTY
+        return s if num == 1 else s + cls.repeat_by_count(s, num - 1)
 
     @classmethod
     @UnCheckFunction()
@@ -2470,7 +2496,7 @@ class StringUtil(SequenceUtil):
             移除后的字符串
         """
         # NOTE 兼容3.9之前的版本，3.9之后可以直接调用str.removesuffix()方法
-        if cls.is_endswith(s, suffix, case_insensitive=case_insensitive):
+        if cls.is_ends_with(s, suffix, case_insensitive=case_insensitive):
             return s[: -len(suffix)]
         else:
             return s
@@ -2789,11 +2815,11 @@ class StringUtil(SequenceUtil):
         -------
         1. 该方法依赖于`StringUtil.get_random_strs()`
         """
-        basic_str = cls.get_random_strs(k)
+        basic_str = cls.get_random_str_lower(k)
         return basic_str.capitalize()
 
     @classmethod
-    def get_random_chineses(cls, length: int = 10) -> typing.Generator[str, None, None]:
+    def get_random_chinese_generator(cls, length: int = 10) -> typing.Generator[str, None, None]:
         """
         获取指定长度的随机中文字符
 
