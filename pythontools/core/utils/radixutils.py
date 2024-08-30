@@ -42,9 +42,7 @@ class RadixUtil:
         """
 
         def to_decimal(num: int | str, from_base: int) -> int:
-            if isinstance(num, int):
-                return num
-            return int(num, base=from_base)
+            return num if isinstance(num, int) else int(num, base=from_base)
 
         def from_decimal(num: int, base: int) -> str:
             if num == 0:
@@ -81,8 +79,7 @@ class RadixUtil:
         base_to_expression = cls.convert_base(i, 10, 2)
         length = len(base_to_expression)
 
-        for i, v in enumerate(base_to_expression):
-            if v == "1":
-                return length - i - 1
-
-        return cls.INDEX_NOT_FOUND
+        return next(
+            (length - i - 1 for i, v in enumerate(base_to_expression) if v == "1"),
+            cls.INDEX_NOT_FOUND,
+        )

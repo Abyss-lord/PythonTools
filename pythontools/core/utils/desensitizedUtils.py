@@ -66,8 +66,6 @@ class DesensitizedUtil:
             return DesensitizedUtil.desensitize_mobile_phone(value)
         elif desensitized_type == DesensitizedType.PASSWORD:
             return DesensitizedUtil.desensitize_password(value)
-        elif desensitized_type == DesensitizedType.MOBILE_PHONE:
-            return DesensitizedUtil.desensitize_phone(value)
         elif desensitized_type == DesensitizedType.IPV6:
             return DesensitizedUtil.desensitize_ipv6(value)
         elif desensitized_type == DesensitizedType.ALL_MASK:
@@ -384,7 +382,7 @@ class DesensitizedUtil:
         """
         if isinstance(ipv4, bytes):
             ipv4 = ipv4.decode()
-        return StringUtil.sub_before(ipv4, CharPool.DOT, False) + ".*.*.*"
+        return f"{StringUtil.sub_before(ipv4, CharPool.DOT, False)}.*.*.*"
 
     @classmethod
     def desensitize_ipv6(cls, ipv6: str | bytes) -> str:
@@ -404,7 +402,7 @@ class DesensitizedUtil:
         if isinstance(ipv6, bytes):
             ipv6 = ipv6.decode()
 
-        return StringUtil.sub_before(ipv6, CharPool.COLON, False) + ":*:*:*:*:*:*:*"
+        return f"{StringUtil.sub_before(ipv6, CharPool.COLON, False)}:*:*:*:*:*:*:*"
 
     @classmethod
     def desensitize_address(cls, address: str | bytes, sensitive_size: int) -> str:

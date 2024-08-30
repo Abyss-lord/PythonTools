@@ -45,12 +45,10 @@ class TypeValidator:
         if len(base_cls) != 1 or base_cls[0] is tuple:
             return False
         f = getattr(t, "_fields", None)
-        if not isinstance(f, tuple):
-            return False
-        return all(isinstance(n, str) for n in f)
+        return all(isinstance(n, str) for n in f) if isinstance(f, tuple) else False
 
     @classmethod
-    def is_iterable(obj: T) -> bool:
+    def is_iterable(cls, obj: T) -> bool:
         try:
             iter(obj)
         except TypeError:
@@ -63,14 +61,12 @@ class TypeValidator:
         return inspect.ismodule(obj)
 
     @classmethod
-    def is_clss_object(cls, obj: T) -> bool:
+    def is_class_object(cls, obj: T) -> bool:
         return inspect.isclass(obj)
 
     @classmethod
     def is_abstract_clss_object(cls, obj: T) -> bool:
-        if not cls.is_clss_object(obj):
-            return False
-        return inspect.isabstract(obj)
+        return inspect.isabstract(obj) if cls.is_class_object(obj) else False
 
     @classmethod
     def is_function_object(cls, obj: T) -> bool:

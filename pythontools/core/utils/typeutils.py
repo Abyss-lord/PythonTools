@@ -42,9 +42,7 @@ class TypeUtil:
         str
             对象的类名
         """
-        func_module = "Unknown" if (module := inspect.getmodule(obj)) is None else module.__name__
-
-        return func_module
+        return "Unknown" if (module := inspect.getmodule(obj)) is None else module.__name__
 
     @classmethod
     def get_class_mro(cls, obj) -> list[str]:
@@ -61,12 +59,12 @@ class TypeUtil:
         List[str]
             对象的原始类列表
         """
-        if TypeValidator.is_clss_object(obj):
+        if TypeValidator.is_class_object(obj):
             mro = inspect.getmro(obj)
-            return [name for c in mro if (name := c.__name__) != "object"]
         else:
             mro = inspect.getmro(obj.__class__)
-            return [name for c in mro if (name := c.__name__) != "object"]
+
+        return [name for c in mro if (name := c.__name__) != "object"]
 
     @classmethod
     def get_function_info(cls, func: Callable[[Any], Any], *, show_detail: bool = False) -> Mapping[str, Any]:
@@ -123,7 +121,7 @@ class TypeUtil:
 
                 arguments_dict[argument_title] = sub_dict
 
-                func_info_dict.update(arguments_dict)
+                func_info_dict |= arguments_dict
 
         return func_info_dict
 

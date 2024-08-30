@@ -325,9 +325,7 @@ class PasswdStrengthUtil:
 
     @classmethod
     def _calc_grade_by_length(cls, length: int) -> int:
-        grade = 0
-        if length < 3:
-            grade = -100
+        grade = -100 if length < 3 else 0
         if length <= 4:
             grade -= 1
         if length <= 6:

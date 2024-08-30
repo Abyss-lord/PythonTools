@@ -21,13 +21,15 @@ Person = namedtuple("Person", ["sex", "sex_code"])
 
 
 MALE_SET: frozenset[str] = frozenset(["MALE", "male", "男性", "男", "男的"])
-FEMALE_SET: frozenset[str] = frozenset([
-    "FEMALE",
-    "female",
-    "女性",
-    "女",
-    "女的",
-])
+FEMALE_SET: frozenset[str] = frozenset(
+    [
+        "FEMALE",
+        "female",
+        "女性",
+        "女",
+        "女的",
+    ]
+)
 
 
 class Gender(Enum):
@@ -36,10 +38,7 @@ class Gender(Enum):
 
     @classmethod
     def get_gender_by_code(cls, code: int) -> "Gender":
-        if code % 2 == 1:
-            return cls.MALE
-        else:
-            return cls.FEMALE
+        return cls.MALE if code % 2 == 1 else cls.FEMALE
 
     @classmethod
     def get_gender_by_name(cls, name: str) -> "Gender":

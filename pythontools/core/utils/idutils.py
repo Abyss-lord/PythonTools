@@ -339,9 +339,8 @@ class IDCardUtil:
         gender_code = gender_enum_obj.value.sex_code
         code17 = f"{area}{birthday_format_str}{sequence_code}{gender_code}"
         checksum_code = cls.get_check_sum(code17)
-        code18 = f"{code17}{checksum_code}"
 
-        return code18
+        return f"{code17}{checksum_code}"
 
     @classmethod
     def generate_random_valid_15_id(cls, *, gender: str = "男") -> str:
@@ -472,14 +471,9 @@ class IDCardUtil:
             校验位
         """
         code17 = SequenceUtil.sub_sequence(s, 0, 17)
-        check_sum = 0
-        for i in range(0, 17):
-            check_sum += ((1 << (17 - i)) % 11) * BasicConvertor.to_int(code17[i])
+        check_sum = sum(((1 << (17 - i)) % 11) * BasicConvertor.to_int(code17[i]) for i in range(17))
         check_digit = (12 - (check_sum % 11)) % 11
-        if check_digit < 10:
-            return f"{check_digit}"
-        else:
-            return "X"
+        return f"{check_digit}" if check_digit < 10 else "X"
 
     @classmethod
     def get_birthday_from_id(cls, s: str) -> datetime | None:
@@ -584,9 +578,7 @@ class IDCardUtil:
             如果身份证无效, 则返回 None, 否则返回出生年份
         """
         dt = cls.get_birthday_from_id(s)
-        if dt is None:
-            return -1
-        return dt.year
+        return -1 if dt is None else dt.year
 
     @classmethod
     def get_month_from_id(cls, s: str) -> int | None:
@@ -604,9 +596,7 @@ class IDCardUtil:
             如果身份证无效, 则返回 None, 否则返回出生月份
         """
         dt = cls.get_birthday_from_id(s)
-        if dt is None:
-            return -1
-        return dt.month
+        return -1 if dt is None else dt.month
 
     @classmethod
     def get_day_from_id(cls, s: str) -> int | None:
@@ -624,9 +614,7 @@ class IDCardUtil:
             如果身份证无效, 则返回 None, 否则返回出生日
         """
         dt = cls.get_birthday_from_id(s)
-        if dt is None:
-            return -1
-        return dt.day
+        return -1 if dt is None else dt.day
 
     @classmethod
     def get_card_from_id(cls, id: str) -> IDCard:

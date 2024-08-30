@@ -13,6 +13,8 @@ Change Activity:
 -------------------------------------------------
 """
 
+import contextlib
+
 # here put the import lib
 import json
 
@@ -101,11 +103,8 @@ class StringValidator:
             return False
 
         # PERF 不应该用try-except作为分支逻辑
-        try:
+        with contextlib.suppress(TypeError, ValueError, OverflowError):
             return isinstance(json.loads(s), dict | list)
-        except (TypeError, ValueError, OverflowError):
-            pass
-
         return False
 
     @classmethod
@@ -153,9 +152,7 @@ class StringValidator:
         bool
             是否匹配
         """
-        if min_length < 0:
-            min_length = 0
-
+        min_length = max(min_length, 0)
         reg = "^\\w{" + str(min_length) + "," + str(max_length) + "}$"
         if max_length <= 0:
             reg = "^\\w{" + str(min_length) + ",}$"

@@ -196,9 +196,7 @@ class StrFinder(AbstractStrFinder):
         int
             如果没有找到返回-1,否则返回开始位置索引
         """
-        if from_idx < 0:
-            from_idx = 0
-
+        from_idx = max(from_idx, 0)
         text_length = StringUtil.get_length(self.text)
         str_to_find_length = StringUtil.get_length(self.str_to_find)
 
@@ -351,12 +349,11 @@ class PatternFinder(AbstractStrFinder):
         int
             如果没有找到返回-1,否则返回开始位置索引
         """
-        matches = ReUtil.find_all(self.pattern, self.text, from_idx)
-        if not matches:
-            return PatternFinder.INDEX_NOT_FOUND
-        else:
+        if matches := ReUtil.find_all(self.pattern, self.text, from_idx):
             self.matches = matches
             return StringUtil.first_index_of(self.text, from_idx, matches[0])
+        else:
+            return PatternFinder.INDEX_NOT_FOUND
 
     def end(self, start_idx: int) -> int:
         """

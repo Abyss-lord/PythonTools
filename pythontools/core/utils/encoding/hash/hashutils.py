@@ -63,14 +63,14 @@ class MetroHash(Hash128, Hash64, Hash32):
         def read_u8(data, offset):
             return struct.unpack_from("<B", data, offset)[0]
 
-        hash = (seed + cls.k2_64) * cls.k0_64
-        v0 = hash
+        hash_val = (seed + cls.k2_64) * cls.k0_64
+        v0 = hash_val
 
         if (bytes_length := StringUtil.get_length(data)) >= 32:
             while bytes_length >= 32:
                 v0 += 1
 
-        return hash
+        return hash_val
 
     @classmethod
     def hash_128(cls, data: bytes | str) -> int:
@@ -125,7 +125,7 @@ class FnvHash(Hash64, Hash32, Hash128):
     k64_prime = 0x100000001B3
     k128_prime = 0x10000000000000000000000
 
-    def hash_128(cls, data: bytes | str) -> int:
+    def hash_128(self, data: bytes | str) -> int:
         """
         128 位哈希算法
 
@@ -139,7 +139,7 @@ class FnvHash(Hash64, Hash32, Hash128):
         int
             128 位哈希值
         """
-        return cls.__hash(data, FnvHash.k128_offset, FnvHash.k128_prime, 128)
+        return self.__hash(data, FnvHash.k128_offset, FnvHash.k128_prime, 128)
 
     def hash_64(self, data: bytes | str) -> int:
         """
@@ -157,7 +157,7 @@ class FnvHash(Hash64, Hash32, Hash128):
         """
         return self.__hash(data, FnvHash.k64_offset, FnvHash.k64_prime, 64)
 
-    def hash_32(cls, data: bytes | str) -> int:
+    def hash_32(self, data: bytes | str) -> int:
         """
         32 位哈希算法
 
@@ -171,9 +171,9 @@ class FnvHash(Hash64, Hash32, Hash128):
         int
             32 位哈希值
         """
-        return cls.__hash(data, FnvHash.k32_offset, FnvHash.k32_prime, 32)
+        return self.__hash(data, FnvHash.k32_offset, FnvHash.k32_prime, 32)
 
-    def hash(cls, data: bytes | str) -> int:
+    def hash(self, data: bytes | str) -> int:
         """
         哈希算法
 
@@ -195,7 +195,7 @@ class FnvHash(Hash64, Hash32, Hash128):
         raise UnsupportedOperationError("can not use hash method, please use hash_32, hash_64 or hash_128 method")
 
     def __hash(
-        cls,
+        self,
         data: bytes | str,
         basic_offset: int,
         prime: int,

@@ -49,10 +49,9 @@ class AbstractConverter(Converter):
     def convert(self, value: Any, default_value: Any, *, raise_exception: bool = False) -> Any:
         if self.is_converted_type(value):
             return self._convert(value, default_value, raise_exception=raise_exception)
-        else:
-            if raise_exception:
-                raise TypeError(f"Unsupported type: {type(value)}")
-            return default_value
+        if raise_exception:
+            raise TypeError(f"Unsupported type: {type(value)}")
+        return default_value
 
     def get_descreption(self) -> str:
         return f"Convert any value to {self.type_name}"
@@ -70,12 +69,11 @@ class StringConverter(AbstractConverter):
             return self.convert_container_value(value, default_value, raise_exception=raise_exception)
 
     def is_converted_type(self, value: Any) -> bool:
-        return isinstance(value, PRIMITIVE_TYPE) or isinstance(value, CONTAINER_TYPE)
+        return isinstance(value, (PRIMITIVE_TYPE | CONTAINER_TYPE))  # type: ignore
 
     def convert_primitive_value(self, value: Any, default_value: str, *, raise_exception: bool = False) -> str:
         try:
-            str_value = str(value)
-            return str_value
+            return str(value)
         except Exception as err:
             if raise_exception:
                 raise ConversionError(value, self.type_name) from err
@@ -131,7 +129,7 @@ class IntegerConverter(AbstractConverter):
         return default_value
 
     def is_converted_type(self, value: Any) -> bool:
-        return isinstance(value, NUMERIC_TYPE) or isinstance(value, str)
+        return isinstance(value, (NUMERIC_TYPE | str))
 
 
 class FloatConverter(AbstractConverter):
@@ -160,7 +158,7 @@ class FloatConverter(AbstractConverter):
         return default_value
 
     def is_converted_type(self, value: Any) -> bool:
-        return isinstance(value, NUMERIC_TYPE) or isinstance(value, str)
+        return isinstance(value, (NUMERIC_TYPE | str))
 
 
 class BooleanConverter(AbstractConverter):
@@ -223,14 +221,11 @@ class BooleanConverter(AbstractConverter):
         :param strict_mode: 是否启动严格模式, 如果开启严格模式, 则不会使用BOOL进行布尔运算, 否则会进行布尔运算
         :return: boolean值
         """
-        if len(value_str.strip()) == 0:
+        if not value_str.strip():
             return False
 
         value_str = value_str.strip().lower()
         true_flg = value_str in BooleanConverter.TRUE_SET
         false_flg = value_str in BooleanConverter.FALSE_SET
 
-        if not true_flg and not false_flg:
-            return bool(value_str)
-
-        return False if false_flg else True
+        return bool(value_str) if not true_flg and not false_flg else not false_flg

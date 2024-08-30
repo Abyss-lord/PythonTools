@@ -35,7 +35,7 @@ class GrayCode:
         i = 0
         while True:
             # PERF 可能会有性能问题
-            if len(code) == 0:
+            if not code:
                 yield "0"
             else:
                 yield "".join([f"{i}" for i in code])

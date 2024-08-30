@@ -269,11 +269,10 @@ class FileUtil:
         path_obj = cls.get_path_object(p)
 
         basename = cls.get_basename_from_path(path_obj)
-
-        if StringUtil.is_starts_with(basename, ".") or StringUtil.is_starts_with(basename, "__"):
-            return True
-
-        return False
+        #
+        return bool(
+            StringUtil.is_starts_with(basename, ".") or StringUtil.is_starts_with(basename, "__"),
+        )
 
     @classmethod
     def is_contain_ignore(cls, p: str | PathLike[str]) -> bool:
@@ -375,7 +374,7 @@ class FileUtil:
         # 获取文件扩展名
         file_extension = cls.get_extension_from_path(p)
 
-        return eq(file_extension, extension) or eq(file_extension, "." + extension)
+        return eq(file_extension, extension) or eq(file_extension, f".{extension}")
 
     @classmethod
     def is_newer_than(
@@ -457,8 +456,7 @@ class FileUtil:
             cls.is_exist(p, raise_exception=True)
 
         path_obj = cls.get_path_object(p)
-        t = path_obj.stat().st_ctime_ns
-        return t
+        return path_obj.stat().st_ctime_ns
 
     @classmethod
     def get_create_time_in_milliseconds(
@@ -486,8 +484,11 @@ class FileUtil:
             cls.is_exist(p, raise_exception=True)
 
         t = cls.get_create_time_in_nanoseconds(p, check_exist=True)
-        create_time_in_milliseconds = DatetimeUtil.convert_time(t, TimeUnit.NANOSECONDS, TimeUnit.MILLISECONDS)
-        return create_time_in_milliseconds
+        return DatetimeUtil.convert_time(
+            t,
+            TimeUnit.NANOSECONDS,
+            TimeUnit.MILLISECONDS,
+        )
 
     @classmethod
     def get_create_time_in_seconds(
@@ -515,9 +516,11 @@ class FileUtil:
             cls.is_exist(p, raise_exception=True)
 
         t = cls.get_create_time_in_nanoseconds(p, check_exist=True)
-        create_time_in_seconds = DatetimeUtil.convert_time(t, TimeUnit.NANOSECONDS, TimeUnit.SECONDS)
-
-        return create_time_in_seconds
+        return DatetimeUtil.convert_time(
+            t,
+            TimeUnit.NANOSECONDS,
+            TimeUnit.SECONDS,
+        )
 
     @classmethod
     def get_create_time_in_string_format(
@@ -548,9 +551,10 @@ class FileUtil:
             cls.is_exist(p, raise_exception=True)
 
         create_time_in_seconds = cls.get_create_time_in_seconds(p, check_exist=True)
-        format_time = time.strftime(time_format, time.localtime(create_time_in_seconds))
-
-        return format_time
+        return time.strftime(
+            time_format,
+            time.localtime(create_time_in_seconds),
+        )
 
     @classmethod
     def get_last_modify_time_in_nanoseconds(cls, p: str | PathLike[str], *, check_exist: bool = False) -> int:
@@ -572,8 +576,7 @@ class FileUtil:
         path_obj = cls.get_path_object(p)
         if check_exist:
             cls.is_exist(p, raise_exception=True)
-        t = path_obj.stat().st_mtime_ns
-        return t
+        return path_obj.stat().st_mtime_ns
 
     @classmethod
     def get_last_modify_time_in_milliseconds(cls, p: str | PathLike[str], *, check_exist: bool = False) -> float | int:
@@ -593,10 +596,11 @@ class FileUtil:
             文件最后修改时间(毫秒)
         """
         last_modify_time_in_nanoseconds = cls.get_last_modify_time_in_nanoseconds(p, check_exist=check_exist)
-        last_modify_time_in_mill = DatetimeUtil.convert_time(
-            last_modify_time_in_nanoseconds, TimeUnit.NANOSECONDS, TimeUnit.MILLISECONDS
+        return DatetimeUtil.convert_time(
+            last_modify_time_in_nanoseconds,
+            TimeUnit.NANOSECONDS,
+            TimeUnit.MILLISECONDS,
         )
-        return last_modify_time_in_mill
 
     @classmethod
     def get_last_modify_time_in_seconds(cls, p: str | PathLike[str], *, check_exist: bool = False) -> float:
@@ -616,11 +620,7 @@ class FileUtil:
             文件最后修改时间(秒)
         """
         last_modify_time_in_nanoseconds = cls.get_last_modify_time_in_nanoseconds(p, check_exist=check_exist)
-        last_modify_time_in_second = DatetimeUtil.convert_time(
-            last_modify_time_in_nanoseconds, TimeUnit.NANOSECONDS, TimeUnit.SECONDS
-        )
-
-        return last_modify_time_in_second
+        return DatetimeUtil.convert_time(last_modify_time_in_nanoseconds, TimeUnit.NANOSECONDS, TimeUnit.SECONDS)
 
     @classmethod
     def get_last_modify_time_in_string_format(
@@ -651,9 +651,7 @@ class FileUtil:
             cls.is_exist(p, raise_exception=True)
 
         last_modify_time_in_second = cls.get_last_modify_time_in_seconds(p, check_exist=True)
-        format_time = time.strftime(time_format, time.localtime(last_modify_time_in_second))
-
-        return format_time
+        return time.strftime(time_format, time.localtime(last_modify_time_in_second))
 
     @classmethod
     def list_dirs(
@@ -719,7 +717,7 @@ class FileUtil:
             cls.is_dir(p, raise_exception=True)
         path_obj = cls.get_path_object(p)
 
-        wildcard = "*" if not extension else f"*.{extension}"
+        wildcard = f"*.{extension}" if extension else "*"
 
         if ignore_hidden_dir:
             return [i.absolute() for i in path_obj.rglob(wildcard) if cls.is_file(i) and not cls.is_contain_ignore(i)]
@@ -875,7 +873,7 @@ class FileUtil:
             随机文件名
         """
         dt = datetime.now()
-        return "{}_{}_{}".format(dt.strftime("%Y%m%d_%H%M%S%f"), uuid.uuid4().hex[0:6], cls.secure_filename(seed_name))
+        return f'{dt.strftime("%Y%m%d_%H%M%S%f")}_{uuid.uuid4().hex[:6]}_{cls.secure_filename(seed_name)}'
 
     @classmethod
     def secure_filename(cls, filename: str) -> str:

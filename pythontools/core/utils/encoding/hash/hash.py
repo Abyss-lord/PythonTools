@@ -19,28 +19,28 @@ from abc import ABC, abstractmethod
 
 class Hash(ABC):
     @abstractmethod
-    def hash(cls, data: bytes | str) -> int: ...
+    def hash(self, data: bytes | str) -> int: ...
 
 
 class Hash128(Hash):
-    def hash(cls, data: bytes | str) -> int:
-        return cls.hash_128(data)
+    def hash(self, data: bytes | str) -> int:
+        return self.hash_128(data)
 
     @abstractmethod
-    def hash_128(cls, data: bytes | str) -> int: ...
+    def hash_128(self, data: bytes | str) -> int: ...
 
 
 class Hash64(Hash):
-    def hash(cls, data: bytes | str) -> int:
-        return cls.hash_64(data)
+    def hash(self, data: bytes | str) -> int:
+        return self.hash_64(data)
 
     @abstractmethod
-    def hash_64(cls, data: bytes | str) -> int: ...
+    def hash_64(self, data: bytes | str) -> int: ...
 
 
 class Hash32(Hash):
-    def hash(cls, data: bytes | str) -> int:
-        return cls.hash_32(data)
+    def hash(self, data: bytes | str) -> int:
+        return self.hash_32(data)
 
     @abstractmethod
-    def hash_32(cls, data: bytes | str) -> int: ...
+    def hash_32(self, data: bytes | str) -> int: ...

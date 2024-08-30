@@ -72,7 +72,7 @@ class BooleanUtil:
         return bool(val)
 
     @classmethod
-    def negate(cls, state: bool, *, raise_exception: bool = False) -> bool:
+    def negate(cls, state: Any, *, raise_exception: bool = False) -> bool:
         """
         安全取相反值
         :param state: Boolean值
@@ -105,7 +105,7 @@ class BooleanUtil:
                 raise ValueError(f"{value_str} is not a boolean value")
             return bool(value_str)
 
-        return False if false_flg else True
+        return not false_flg
 
     @classmethod
     def boolean_to_int(cls, value: bool, *, strict_mode: bool = False) -> int:
@@ -118,7 +118,7 @@ class BooleanUtil:
         if not isinstance(value, bool):
             if strict_mode:
                 raise ValueError(f"{value} is not a boolean value")
-            return 1 if bool(value) else 0
+            return 1 if value else 0
 
         return 1 if value else 0
 
@@ -217,11 +217,7 @@ class BooleanUtil:
             _description_
         """
 
-        for flg in values:
-            if not flg:
-                return False
-
-        return True
+        return all(values)
 
     @classmethod
     def or_all(cls, *values) -> bool:
@@ -257,11 +253,7 @@ class BooleanUtil:
         if SequenceUtil.is_empty(values):
             raise ValueError("Empty sequence")
 
-        for flg in values:
-            if flg:
-                return True
-
-        return False
+        return any(values)
 
     @classmethod
     def xor(cls, *values, strict: bool = True) -> bool:
@@ -299,10 +291,10 @@ class BooleanUtil:
         return result
 
     @classmethod
-    def _check_boolean_value(cls, value: bool, *, strict_mode: bool = False) -> bool:
+    def _check_boolean_value(cls, value: Any, *, strict_mode: bool = False) -> bool:
         if not isinstance(value, bool) and strict_mode:
             raise ValueError(f"{value} is not a boolean value")
-        StringUtil.EMPTY
+
         return bool(value)
 
 
@@ -383,11 +375,7 @@ class SequenceUtil:
         main_split_seq = main_seq[start_idx : start_idx + split_length]
         sub_split_seq = sub_seq[sub_start_idx : sub_start_idx + split_length]
 
-        for i, j in zip(main_split_seq, sub_split_seq):
-            if i != j:
-                return False
-
-        return True
+        return all(i == j for i, j in zip(main_split_seq, sub_split_seq))
 
     @classmethod
     def reverse_sequence(cls, sequence: typing.Sequence[Any]) -> typing.Sequence:
@@ -405,10 +393,7 @@ class SequenceUtil:
         :param sequence: 待检测序列
         :return: 如果包含None则返回True, 否则返回False
         """
-        for item in sequence:
-            if item is None:
-                return True
-        return False
+        return any(item is None for item in sequence)
 
     @classmethod
     def get_length(cls, sequence: typing.Sequence[Any]) -> int:
@@ -440,7 +425,7 @@ class SequenceUtil:
             如果序列为None则抛出异常
         """
         if sequence is None or not isinstance(sequence, typing.Sequence):
-            raise ValueError("Invalid sequence")
+            raise ValueError(f"Invalid sequence, {sequence}")
         return len(sequence)
 
     @classmethod
@@ -533,10 +518,10 @@ class SequenceUtil:
         else:
             from_idx = length - abs(from_idx) if from_idx < 0 else from_idx
 
-        for i in range(from_idx, -1, -1):
-            if sequence[i] == value:
-                return i
-        return cls.INDEX_NOT_FOUND
+        return next(
+            (i for i in range(from_idx, -1, -1) if sequence[i] == value),
+            cls.INDEX_NOT_FOUND,
+        )
 
     @classmethod
     def contains_any(cls, sequence: typing.Sequence[Any], *args) -> bool:
@@ -560,11 +545,7 @@ class SequenceUtil:
         bool
             如果包含args中的任意元素返回True, 否则返回False
         """
-        # PERF 可能有更好的方案
-        for i in args:
-            if i in sequence:
-                return True
-        return False
+        return any(i in sequence for i in args)
 
     @classmethod
     def new_list(cls, capacity: int, fill_val: Any = None) -> list[Any]:
@@ -619,13 +600,12 @@ class SequenceUtil:
             返回序列操作前后的长度差
         """
         old_length = len(lst)
-        if 0 <= idx < old_length:
-            res = [i for i in lst[:idx]]
-            res += [value] + [i for i in lst[idx:]]
+        if not 0 <= idx < old_length:
+            return list(lst) + [value]
+        res = list(lst[:idx])
+        res += [value] + list(lst[idx:])
 
-            return res
-        else:
-            return [i for i in lst] + [value]
+        return res
 
     @classmethod
     def resize(cls, lst: typing.Sequence[Any], new_length: int, *, fill_val: Any = None) -> typing.Sequence[Any]:
@@ -654,14 +634,14 @@ class SequenceUtil:
             调整后新生成的序列, 长度为new_length,
         """
 
-        if 0 > new_length:
-            return [i for i in lst]
+        if new_length < 0:
+            return list(lst)
 
         if new_length <= len(lst):
             return [lst[i] for i in range(new_length)]
 
         diff_length = new_length - len(lst)
-        return [i for i in lst] + cls.new_list(diff_length, fill_val)
+        return list(lst) + cls.new_list(diff_length, fill_val)
 
     @classmethod
     def remove_none_item(cls, lst: typing.Sequence[Any]) -> typing.Sequence[Any]:
@@ -832,6 +812,7 @@ class SequenceUtil:
 
     @classmethod
     def get_first_match_item(
+        cls,
         iterable: typing.Iterable[Any],
         func: typing.Callable[[Any], bool],
         default_val: Any = None,
@@ -902,12 +883,8 @@ class SequenceUtil:
         if abs(move_length) > seq_length:
             move_length %= seq_length
 
-        res = []
-        for i in seq[-move_length:]:
-            res.append(i)
-        for i in seq[:-move_length]:
-            res.append(i)
-
+        res = list(seq[-move_length:])
+        res.extend(iter(seq[:-move_length]))
         return res
 
     @classmethod
@@ -1129,13 +1106,7 @@ class StringUtil(SequenceUtil):
         """
         if s is None:
             return False
-        if cls.get_length(s) == 0:
-            return True
-        for c in s:
-            if not c.isspace():
-                return False
-
-        return True
+        return True if cls.get_length(s) == 0 else all(c.isspace() for c in s)
 
     @classmethod
     def is_ascii_control(cls, s: str) -> bool:
@@ -1152,10 +1123,7 @@ class StringUtil(SequenceUtil):
         bool
             如果字符串中的每个字符都是ASCII控制字符, 则返回True, 否则返回False
         """
-        for c in s:
-            if not (ord(c) < 32 or ord(c) == 127):
-                return False
-        return True
+        return all((ord(c) < 32 or ord(c) == 127) for c in s)
 
     @classmethod
     def is_unicode_str(cls, s: str) -> bool:
@@ -1222,7 +1190,7 @@ class StringUtil(SequenceUtil):
         if not cls.is_string(s, raise_type_exception=raise_type_exception):
             return False
 
-        val = str(s) if not isinstance(s, str) else s
+        val = s if isinstance(s, str) else str(s)
         for c in val:
             if c in (string.ascii_letters + string.digits + string.punctuation):
                 return False
@@ -1248,13 +1216,7 @@ class StringUtil(SequenceUtil):
         :param args: 待判断字符串
         :return: 如果有空白字符串返回True, 否则返回False
         """
-        if cls.is_empty(args):
-            return True
-        for arg in args:
-            if cls.is_blank(arg):
-                return True
-
-        return False
+        return True if cls.is_empty(args) else any(cls.is_blank(arg) for arg in args)
 
     @classmethod
     def is_all_blank(cls, *args) -> bool:
@@ -1266,11 +1228,7 @@ class StringUtil(SequenceUtil):
         if cls.is_empty(args):
             return True
 
-        for arg in args:
-            if cls.is_not_blank(arg):
-                return False
-
-        return True
+        return not any(cls.is_not_blank(arg) for arg in args)
 
     @classmethod
     def is_starts_with(
@@ -1330,13 +1288,11 @@ class StringUtil(SequenceUtil):
         bool
             如果字符串以任何一个字符串开始返回True, 否则返回False
         """
-        if cls.is_empty(prefixes) or cls.is_blank(s):
-            return False
-        for prefix in prefixes:
-            if cls.is_starts_with(s, prefix, case_insensitive=case_insensitive):
-                return True
-
-        return False
+        return (
+            False
+            if cls.is_empty(prefixes) or cls.is_blank(s)
+            else any(cls.is_starts_with(s, prefix, case_insensitive=case_insensitive) for prefix in prefixes)
+        )
 
     @classmethod
     def is_ends_with(
@@ -1421,11 +1377,7 @@ class StringUtil(SequenceUtil):
         """
         if cls.is_empty(suffixes) or cls.is_blank(s):
             return False
-        for suffix in suffixes:
-            if cls.is_ends_with(s, suffix, case_insensitive=case_insensitive):
-                return True
-
-        return False
+        return any(cls.is_ends_with(s, suffix, case_insensitive=case_insensitive) for suffix in suffixes)
 
     @classmethod
     def contain_digit(cls, s: str) -> bool:
@@ -1505,10 +1457,7 @@ class StringUtil(SequenceUtil):
         :param default_str: 默认字符串
         :return: 转换后的字符串
         """
-        if s is None or cls.EMPTY == s:
-            return default_str
-        else:
-            return s
+        return default_str if s is None or cls.EMPTY == s else s
 
     @classmethod
     def empty_to_none(cls, s: str) -> str | None:
@@ -1527,10 +1476,7 @@ class StringUtil(SequenceUtil):
         :param default_str: 默认字符串
         :return: 转换后的字符串
         """
-        if cls.is_blank(s):
-            return default_str
-        else:
-            return s
+        return default_str if cls.is_blank(s) else s
 
     @classmethod
     def to_bytes(cls, byte_or_str: bytes | str, encoding=CharsetUtil.UTF_8) -> bytes:
@@ -1540,11 +1486,10 @@ class StringUtil(SequenceUtil):
         :param encoding: 编码方式
         :return: 如果是bytes序列则返回自身, 否则编码后返回
         """
-        assert isinstance(byte_or_str, bytes) or isinstance(byte_or_str, str)
-        if isinstance(byte_or_str, bytes):
-            return byte_or_str
-        else:
-            return byte_or_str.encode(encoding)
+        if not isinstance(byte_or_str, (str | bytes)):
+            raise TypeError(f"Expected bytes or str, but found {type(byte_or_str)}")
+
+        return byte_or_str if isinstance(byte_or_str, bytes) else byte_or_str.encode(encoding)
 
     @classmethod
     def to_str(cls, byte_or_str: bytes | str, encoding=CharsetUtil.UTF_8) -> str:
@@ -1554,11 +1499,9 @@ class StringUtil(SequenceUtil):
         :param encoding: 解码方式
         :return: 如果是字符串则返回自身, 否则解码后返回
         """
-        assert isinstance(byte_or_str, bytes) or isinstance(byte_or_str, str)
-        if isinstance(byte_or_str, str):
-            return byte_or_str
-        else:
-            return byte_or_str.decode(encoding)
+        if not isinstance(byte_or_str, (str | bytes)):
+            raise TypeError(f"Expected bytes or str, but found {type(byte_or_str)}")
+        return byte_or_str if isinstance(byte_or_str, str) else byte_or_str.decode(encoding)
 
     @classmethod
     def as_set(cls, *args, froze: bool = False) -> Set[Any]:
@@ -1575,7 +1518,7 @@ class StringUtil(SequenceUtil):
         Set[Any]
             返回的集合
         """
-        return set(args) if not froze else frozenset(args)
+        return frozenset(args) if froze else set(args)
 
     @classmethod
     def convert_to_circled(cls, char: str) -> str:
@@ -1685,7 +1628,7 @@ class StringUtil(SequenceUtil):
             return s
 
         try:
-            separator_idx = s.index(separator) if not use_last_separator else s.rindex(separator)
+            separator_idx = s.rindex(separator) if use_last_separator else s.index(separator)
         except ValueError:
             return s
         else:
@@ -1717,7 +1660,7 @@ class StringUtil(SequenceUtil):
             return s
 
         try:
-            separator_idx = s.index(separator) if not use_last_separator else s.rindex(separator)
+            separator_idx = s.rindex(separator) if use_last_separator else s.index(separator)
         except ValueError:
             return s
         else:
@@ -1785,9 +1728,8 @@ class StringUtil(SequenceUtil):
             if case_insensitive:
                 if i.lower() != j.lower() and i.upper() != j.upper():
                     return False
-            else:
-                if i != j:
-                    return False
+            elif i != j:
+                return False
 
         return True
 
@@ -1823,11 +1765,7 @@ class StringUtil(SequenceUtil):
         """
         if cls.is_empty(args):
             return False
-        for arg in args:
-            if cls.equals(s, arg, case_insensitive=case_insensitive):
-                return True
-
-        return False
+        return any(cls.equals(s, arg, case_insensitive=case_insensitive) for arg in args)
 
     @classmethod
     def hide(cls, s: str, start: int, end: int, *, replace_char: str = "*") -> str:
@@ -1856,9 +1794,7 @@ class StringUtil(SequenceUtil):
         if start > len(s):
             return s
 
-        if end >= len(s):
-            end = len(s)
-
+        end = min(end, len(s))
         new_str_lst = []
         for i, v in enumerate(s):
             if start <= i < end:
@@ -1961,13 +1897,11 @@ class StringUtil(SequenceUtil):
 
         def get_center_title(title: str) -> str:
             if not title.startswith(" ") and not title.endswith(" "):
-                return " " + title + " "
+                return f" {title} "
             if not title.startswith(" "):
-                return " " + title
+                return f" {title}"
 
-            if not title.endswith(" "):
-                return title + " "
-            return title
+            return title if title.endswith(" ") else f"{title} "
 
         def get_max_length_from_dict(data: typing.Mapping[str, Any], level: int = 0) -> tuple[int, int]:
             max_key_length = 0
@@ -2009,17 +1943,17 @@ class StringUtil(SequenceUtil):
                         else:
                             raise TypeError(f"Unsupported type: {type(item)} in nested dict")
                 else:
-                    _append_content_line(k, v, level)
+                    _append_content_line(f"{k}", f"{v}", level)
 
         def _append_content_line(key: str, value: str, level: int) -> None:
             prefix = "| "
             symbol = " : "
-            sufix = " |"
+            suffix = " |"
 
-            current_key_length = get_length_with_level(str(key), level)
+            current_key_length = get_length_with_level(key, level)
             current_key_padding_length = max_key_length - current_key_length
 
-            current_value_length = cls.get_width(str(value))
+            current_value_length = cls.get_width(value)
             current_value_padding_length = max_value_length - current_value_length
 
             level_padding = get_left_padding_str(level)
@@ -2032,7 +1966,7 @@ class StringUtil(SequenceUtil):
             if current_value_padding_length > 0:
                 value_padding = " " * current_value_padding_length
 
-            content.append(f"{prefix}{level_padding}{key}{key_padding}{symbol}{value}{value_padding}{sufix}")
+            content.append(f"{prefix}{level_padding}{key}{key_padding}{symbol}{value}{value_padding}{suffix}")
 
         max_key_length, max_value_length = get_max_length_from_dict(data)
         print(f"{max_key_length=}")
@@ -2154,12 +2088,14 @@ class StringUtil(SequenceUtil):
         ValueError
             如果对齐方式不是 "left", "right" 或 "center", 则抛出异常
         """
-        if align not in ["left", "right", "center"]:
-            raise ValueError(f"align must be 'left', 'right' or 'center', but got {align}")
-        if align in ["left", "right"]:
-            return cls._align_text(text, len(text) + 1, padding, align)
+        if align in {"left", "right", "center"}:
+            return (
+                cls._align_text(text, len(text) + 1, padding, align)
+                if align in {"left", "right"}
+                else cls._align_text(text, len(text) + 2, padding, align)
+            )
         else:
-            return cls._align_text(text, len(text) + 2, padding, align)
+            raise ValueError(f"align must be 'left', 'right' or 'center', but got {align}")
 
     @classmethod
     def get_common_suffix(cls, str1: str, str2: str) -> str:
@@ -2264,12 +2200,9 @@ class StringUtil(SequenceUtil):
 
         rev_str = integer_part[::-1]
         str_lst = cls.group_by_length(rev_str, 3)
-        res_lst = []
-        for i in str_lst[::-1]:
-            res_lst.append(i[::-1])
-
+        res_lst = [i[::-1] for i in str_lst[::-1]]
         integer_str = ",".join(res_lst)
-        decimal_str = "." + decimal_part if StringUtil.is_not_blank(decimal_part) else ""
+        decimal_str = f".{decimal_part}" if StringUtil.is_not_blank(decimal_part) else ""
         sign_str = "-" if negative_flg else ""
 
         return f"{sign_str}{integer_str}{decimal_str}"
@@ -2550,10 +2483,7 @@ class StringUtil(SequenceUtil):
         if cls.is_blank(s):
             return cls.EMPTY
 
-        if idx >= length or idx == length - 1:
-            return s[:-1]
-
-        return s[:idx] + s[idx + 1 :]
+        return s[:-1] if idx >= length or idx == length - 1 else s[:idx] + s[idx + 1 :]
 
     @classmethod
     def remove_range(cls, s: str, start: int, end: int) -> str:
@@ -2583,10 +2513,7 @@ class StringUtil(SequenceUtil):
         if cls.is_blank(s):
             return cls.EMPTY
 
-        if end >= cls.get_length(s):
-            return s[:start]
-
-        return s[:start] + s[end:]
+        return s[:start] if end >= cls.get_length(s) else s[:start] + s[end:]
 
     @classmethod
     def remove_non_ascii(cls, s: str) -> str:
@@ -2668,7 +2595,7 @@ class StringUtil(SequenceUtil):
         if cls.is_blank(source) or cls.is_blank(dest):
             return dest
         source_len = cls.get_length(source)
-        return dest[:start] + str(source) + dest[start + source_len :]
+        return dest[:start] + source + dest[start + source_len :]
 
     @classmethod
     def insert_str_at(cls, s: str, idx: int, sub_str: str) -> str:
@@ -2695,10 +2622,7 @@ class StringUtil(SequenceUtil):
             return sub_str
 
         length = cls.get_length(s)
-        if idx >= length:
-            return s + sub_str
-
-        return s[:idx] + sub_str + s[idx:]
+        return s + sub_str if idx >= length else s[:idx] + sub_str + s[idx:]
 
     @classmethod
     def abbreviate(cls, s: str, length: int, ellipsis: str = "...") -> str:
@@ -3003,11 +2927,21 @@ class StringUtil(SequenceUtil):
         sub_seq_length = cls.get_length(value)
         split_main_seq = sequence[from_index:]
 
-        for i in range(len(split_main_seq)):
-            if cls.is_sub_equal(split_main_seq, i, value, 0, sub_seq_length, case_insensitive=case_insensitive):
-                return i + from_index
-
-        return cls.INDEX_NOT_FOUND
+        return next(
+            (
+                i + from_index
+                for i in range(len(split_main_seq))
+                if cls.is_sub_equal(
+                    split_main_seq,
+                    i,
+                    value,
+                    0,
+                    sub_seq_length,
+                    case_insensitive=case_insensitive,
+                )
+            ),
+            cls.INDEX_NOT_FOUND,
+        )
 
     @classmethod
     def last_index_of(
@@ -3044,11 +2978,21 @@ class StringUtil(SequenceUtil):
         else:
             from_idx = main_seq_length - abs(from_idx) if from_idx < 0 else from_idx
 
-        for i in range(from_idx, -1, -1):
-            if cls.is_sub_equal(sequence, i, value, 0, sub_seq_length, case_insensitive=case_insensitive):
-                return i
-
-        return cls.INDEX_NOT_FOUND
+        return next(
+            (
+                i
+                for i in range(from_idx, -1, -1)
+                if cls.is_sub_equal(
+                    sequence,
+                    i,
+                    value,
+                    0,
+                    sub_seq_length,
+                    case_insensitive=case_insensitive,
+                )
+            ),
+            cls.INDEX_NOT_FOUND,
+        )
 
     @classmethod
     def is_sub_equal(

@@ -47,7 +47,7 @@ class RandomUtil:
         if start > end:
             raise ValueError(f"{start=} must be less than {end=}")
 
-        return random.randrange(start, end) if not both_include else random.randint(start, end)
+        return random.randint(start, end) if both_include else random.randrange(start, end)
 
     @classmethod
     def get_random_item_from_sequence(cls, seq: typing.Sequence[Any]) -> Any | None:
@@ -56,9 +56,7 @@ class RandomUtil:
         :param seq: 待抽取序列
         :return: 序列元素
         """
-        if seq is None or len(seq) == 0:
-            return None
-        return random.choice(seq)
+        return None if seq is None or len(seq) == 0 else random.choice(seq)
 
     @classmethod
     def get_random_items_from_sequence(cls, seq: typing.Sequence[Any], k: int) -> list[Any]:
@@ -70,14 +68,12 @@ class RandomUtil:
         """
 
         if seq is None or len(seq) == 0:
-            return list()
+            return []
 
         if k < 0:
             raise ValueError(f"{k=} must be greater than or equal to 0")
 
-        if k >= len(seq):
-            return [i for i in seq]
-        return random.sample(seq, k)
+        return list(seq) if k >= len(seq) else random.sample(seq, k)
 
     @classmethod
     def get_random_distinct_items_from_sequence(cls, seq: typing.Sequence[Any], k: int) -> set[Any]:
@@ -212,8 +208,7 @@ class RandomUtil:
         """
         if start >= end:
             raise ValueError(f"{start=} must be less than {end=}")
-        random_float = round(random.uniform(start, end), precision)
-        return random_float
+        return round(random.uniform(start, end), precision)
 
     @classmethod
     def get_random_complex(cls) -> complex:

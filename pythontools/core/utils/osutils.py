@@ -47,9 +47,7 @@ class SysUtil:
             是否是 Mac 平台
         """
         platform_info = cls.get_platform_info()
-        if StringUtil.is_starts_with(platform_info, "macos", case_insensitive=True):
-            return True
-        return False
+        return StringUtil.is_starts_with(platform_info, "macos", case_insensitive=True)
 
     @classmethod
     def is_linux_platform(cls) -> bool:
@@ -66,9 +64,7 @@ class SysUtil:
         1. 依赖 platform 库
         """
         platform_info = cls.get_platform_info()
-        if StringUtil.is_starts_with(platform_info, "linux", case_insensitive=True):
-            return True
-        return False
+        return StringUtil.is_starts_with(platform_info, "linux", case_insensitive=True)
 
     @classmethod
     def is_windows_platform(cls) -> bool:
@@ -85,9 +81,7 @@ class SysUtil:
         1. 依赖 platform 库
         """
         platform_info = cls.get_platform_info()
-        if StringUtil.is_starts_with(platform_info, "windows", case_insensitive=True):
-            return True
-        return False
+        return StringUtil.is_starts_with(platform_info, "windows", case_insensitive=True)
 
     @classmethod
     def is_py2(cls) -> bool:
@@ -109,11 +103,7 @@ class SysUtil:
         ValueError
             如果不是Python2也不是Python3, 则抛出ValueError
         """
-        if sys.version_info >= (3, 0):  # noqa: UP036
-            return False
-        if sys.version_info < (3, 0):  # noqa: UP036
-            return True
-        raise ValueError("cannot determine if it's python2")
+        return sys.version_info < (3, 0)
 
     @classmethod
     def is_py3(cls) -> bool:
@@ -131,10 +121,7 @@ class SysUtil:
             是否Python3
         """
 
-        if (3, 0) <= sys.version_info <= (4, 0):
-            return True
-        else:
-            return False
+        return (3, 0) <= sys.version_info <= (4, 0)
 
     @classmethod
     def get_system_property(cls, name: str, default_value: str = "", *, quiet: bool = False) -> typing.Any:
@@ -184,5 +171,4 @@ class SysUtil:
             if not quiet:
                 warnings.warn(f"get system properties error: {e}")
 
-        environ_dict = {k: v for k, v in res.items()}
-        return environ_dict
+        return dict(res)

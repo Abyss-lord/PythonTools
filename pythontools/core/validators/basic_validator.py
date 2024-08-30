@@ -206,10 +206,7 @@ class BasicValidator:
         # 如果是同一个地址则直接返回True
         if val1 is val2:
             return True
-        if val1.__class__ != val2.__class__:
-            return False
-
-        return val1 == val2
+        return False if val1.__class__ != val2.__class__ else val1 == val2
 
     @classmethod
     def is_between(

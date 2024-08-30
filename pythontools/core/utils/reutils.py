@@ -148,9 +148,7 @@ class ReUtil:
             所有匹配的分组
         """
         matched = pattern.match(s)
-        if matched is None:
-            return tuple()
-        return matched.groups()
+        return matched.groups() if matched is not None else ()
 
     @classmethod
     def is_match(cls, pattern: re.Pattern, s: str, *, raise_exception: bool = False) -> bool:
@@ -227,5 +225,4 @@ class ReUtil:
         list[str]
             所有匹配的字符串列表
         """
-        res = pattern.findall(s, from_index)
-        return res
+        return pattern.findall(s, from_index)

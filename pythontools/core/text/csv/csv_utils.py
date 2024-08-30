@@ -55,8 +55,7 @@ class CsvUtil:
     ) -> Generator[dict[str | Any, str | Any], Any, None]:
         path_obj = FileUtil.get_path_object(f_name)
         with open(path_obj, encoding=encoding, newline=newline) as f_in:
-            csv_reader = csv.DictReader(f_in, delimiter=delimiter)
-            yield from csv_reader
+            yield from csv.DictReader(f_in, delimiter=delimiter)
             FileUtil
 
     @classmethod
@@ -78,15 +77,15 @@ class CsvUtil:
             csv_writer.writerows(in_list)
 
     @classmethod
-    def get_lists_from_csv(f_name, encoding="utf-8", newline="", delimiter=","):
+    def get_lists_from_csv(cls, encoding="utf-8", newline="", delimiter=","):
         raise NotImplementedError()
 
     @classmethod
-    def save_lists_to_csv(in_list, f_name, field_names, encoding="utf-8", newline="", delimiter=","):
+    def save_lists_to_csv(cls, f_name, field_names, encoding="utf-8", newline="", delimiter=","):
         raise NotImplementedError()
 
     @classmethod
-    def get_fieldnames_from_csv(f_name, encoding="utf-8", newline="", delimiter=","):
+    def get_fieldnames_from_csv(cls, encoding="utf-8", newline="", delimiter=","):
         raise NotImplementedError()
 
     @classmethod

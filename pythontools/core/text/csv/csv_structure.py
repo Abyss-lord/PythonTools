@@ -134,7 +134,7 @@ class CsvRow:
         tuple[Any, ...]
             行原始数据的拷贝
         """
-        return tuple([i for i in self.data])
+        return tuple(list(self.data))
 
     def get_data_by_idx(self, idx: int) -> Any:
         """
@@ -150,9 +150,7 @@ class CsvRow:
         Any
             索引对应的数据
         """
-        if idx < 0 or idx >= self.get_cnt_of_fields():
-            return None
-        return self.data[idx]
+        return None if idx < 0 or idx >= self.get_cnt_of_fields() else self.data[idx]
 
     def to_namedtuple(self, model_cls: type[NamedTuple]) -> type[NamedTuple]:
         """
@@ -193,9 +191,9 @@ class CsvRow:
         if self.data is not None:
             raise ValueError("already set")
         if isinstance(data, Sequence) and not isinstance(data, str):
-            self.data = tuple([i for i in data])
+            self.data = tuple(list(data))
         elif isinstance(data, Mapping):
-            self.data = tuple([v for v in self.header_map.values()])
+            self.data = tuple(list(self.header_map.values()))
         else:
             raise TypeError("data must be a sequence or mapping")
 
@@ -285,9 +283,7 @@ class CsvData:
         int
             如果标题名存在, 则返回索引, 否则返回 -1
         """
-        if header_name not in self.header_map:
-            return -1
-        return self.header_map[header_name]
+        return self.header_map[header_name] if header_name in self.header_map else -1
 
     def get_value_by_header(self, header_name: str, row_num: int) -> Any:
         """
@@ -309,9 +305,7 @@ class CsvData:
         if row is None:
             return None
         idx = self.get_idx_by_header(header_name)
-        if idx == -1:
-            return None
-        return row.get_data_by_idx(idx)
+        return None if idx == -1 else row.get_data_by_idx(idx)
 
     def append_row(self, row: CsvRow) -> None:
         """
