@@ -39,6 +39,14 @@ class Quarter(Enum):
     Q3 = QuarterTuple("Q3", "第三季度", 3)
     Q4 = QuarterTuple("Q4", "第四季度", 4)
 
+    @staticmethod
+    def get_max_value() -> int:
+        return Quarter.Q4.get_value()
+
+    @staticmethod
+    def get_min_value() -> int:
+        return Quarter.Q1.get_value()
+
     @classmethod
     def get_quarter(cls, dt: datetime | int | str) -> Optional["Quarter"]:
         """
@@ -101,7 +109,7 @@ class Quarter(Enum):
         bool
             True: 有效, False: 无效
         """
-        return 1 <= quarter <= 4
+        return Quarter.get_min_value() <= quarter <= Quarter.get_max_value()
 
     def get_chinese_format(self) -> str:
         """
@@ -147,19 +155,19 @@ class Quarter(Enum):
         """
         return self.value.name
 
-    def get_val(self) -> int:
+    def get_value(self) -> int:
         """
         获取季度值
 
         Example:
         -------
-        >>> Quarter.Q1.get_val()
+        >>> Quarter.Q1.get_value()
         1
-        >>> Quarter.Q2.get_val()
+        >>> Quarter.Q2.get_value()
         2
-        >>> Quarter.Q3.get_val()
+        >>> Quarter.Q3.get_value()
         3
-        >>> Quarter.Q4.get_val()
+        >>> Quarter.Q4.get_value()
         4
 
         Returns
@@ -241,6 +249,14 @@ class Month(Enum):
     NOVEMBER = MonthTuple("NOVEMBER", "十一月", "nov", 11)
     DECEMBER = MonthTuple("DECEMBER", "十二月", "dec", 12)
 
+    @staticmethod
+    def get_max_value() -> int:
+        return Month.DECEMBER.get_value()
+
+    @staticmethod
+    def get_min_value() -> int:
+        return Month.JANUARY.get_value()
+
     @classmethod
     def get_month(cls, name: int | str | datetime) -> Optional["Month"]:
         """
@@ -305,7 +321,7 @@ class Month(Enum):
         bool
             True: 有效, False: 无效
         """
-        return 1 <= month <= 12
+        return Month.get_min_value() <= month <= Month.get_max_value()
 
     def get_name(self) -> str:
         """
@@ -443,6 +459,14 @@ class Week(Enum):
     SATURDAY = WeekTuple("SATURDAY", "六", "sat", calendar.SATURDAY, 6)
     SUNDAY = WeekTuple("SUNDAY", "日", "sun", calendar.SUNDAY, 7)
 
+    @staticmethod
+    def get_max_value() -> int:
+        return Week.SUNDAY.get_iso8601_value()
+
+    @staticmethod
+    def get_min_value() -> int:
+        return Week.MONDAY.get_iso8601_value()
+
     @classmethod
     def get_week(cls, name: int | str | datetime) -> Optional["Week"]:
         """
@@ -505,7 +529,7 @@ class Week(Enum):
         bool
             True: 有效, False: 无效
         """
-        return 1 <= weekday <= 7
+        return Week.get_min_value() <= weekday <= Week.get_max_value()
 
     def get_name(self) -> str:
         """

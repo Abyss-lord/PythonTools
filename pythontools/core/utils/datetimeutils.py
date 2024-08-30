@@ -15,6 +15,7 @@ Change Activity:
 # here put the import lib
 
 import calendar
+import datetime as dt_lib
 import time
 from collections.abc import Generator
 from datetime import date, datetime, timedelta, tzinfo
@@ -814,6 +815,258 @@ class DatetimeUtil:
         return cls.is_weekday_by_dt(datetime(year, month, day))
 
     @classmethod
+    def is_valid_year(cls, year: int) -> bool:
+        """
+        判断给定年份是否合规
+
+        Parameters
+        ----------
+        year : int
+            待检测年份
+
+        Returns
+        -------
+        bool
+            如果给定年份在 1900~9999 之间，则返回True, 否则返回False
+        """
+        return cls._is_range_contain(year, 1900, dt_lib.MAXYEAR)
+
+    @classmethod
+    def is_valid_quarter(cls, quarter: Quarter | int) -> bool:
+        """
+        判断给定的季度是否合规
+
+        Parameters
+        ----------
+        quarter : Quarter | int
+            待检测季度
+
+        Returns
+        -------
+        bool
+            如果给定的季度在 1~4 之间，则返回True, 否则返回False
+        """
+        if isinstance(quarter, Quarter):
+            quarter = quarter.get_value()
+        return cls._is_range_contain(Quarter.get_min_value(), Quarter.get_max_value(), quarter)
+
+    @classmethod
+    def is_valid_month(cls, month: Month | int) -> bool:
+        """
+        判断给定的月份是否合规
+
+        Parameters
+        ----------
+        month : Month | int
+            待检测月份
+
+        Returns
+        -------
+        bool
+            如果给定的月份在 1~12 之间，则返回True, 否则返回False
+        """
+        if isinstance(month, Month):
+            month = month.get_value()
+        return cls._is_range_contain(Month.get_min_value(), Month.get_max_value(), month)
+
+    @classmethod
+    def is_valid_weekday(cls, day: int | Week) -> bool:
+        """
+        判断给定的星期是否合规
+
+        Parameters
+        ----------
+        day : int | Week
+            待检测的星期几
+
+        Returns
+        -------
+        bool
+            如果给定的星期在 1~7 之间，则返回True, 否则返回False
+        """
+        if isinstance(day, Week):
+            day = day.get_iso8601_value()
+        return cls._is_range_contain(Week.get_min_value(), Week.get_max_value(), day)
+
+    @classmethod
+    def is_valid_hour(cls, hour: int) -> bool:
+        """
+        判断给定的小时是否合规
+
+        Parameters
+        ----------
+        hour : int
+            待检测小时
+
+        Returns
+        -------
+        bool
+            如果给定的小时在 0~23 之间，则返回True, 否则返回False
+        """
+        return cls._is_range_contain(0, 23, hour)
+
+    @classmethod
+    def is_valid_minute(cls, minute: int) -> bool:
+        """
+        判断给定的分钟是否合规
+
+        Parameters
+        ----------
+        minute : int
+            待检测分钟
+
+        Returns
+        -------
+        bool
+            如果给定的分钟在 0~59 之间，则返回True, 否则返回False
+        """
+        return cls._is_range_contain(0, 59, minute)
+
+    @classmethod
+    def is_valid_second(cls, second: int) -> bool:
+        """
+        判断给定的秒是否合规
+
+        Parameters
+        ----------
+        second : int
+            待检测秒数
+
+        Returns
+        -------
+        bool
+            如果给定的秒数在 0~59 之间，则返回True, 否则返回False
+        """
+        return cls._is_range_contain(0, 59, second)
+
+    @classmethod
+    def is_valid_millisecond(cls, millisecond: int) -> bool:
+        """
+        判断给定的毫秒是否合规
+
+        Parameters
+        ----------
+        millisecond : int
+            待检测毫秒
+
+        Returns
+        -------
+        bool
+            如果给定的毫秒在 0~999 之间，则返回True, 否则返回False
+        """
+        return cls._is_range_contain(0, 999, millisecond)
+
+    @classmethod
+    def is_valid_datetime(
+        cls,
+        *,
+        year: int,
+        month: int,
+        day: int,
+        hour: int,
+        minute: int,
+        second: int,
+    ) -> bool:
+        """
+        判断给定的日期时间是否合规
+
+        Parameters
+        ----------
+        year : int
+            待检测年份
+        month : int
+            待检测月份
+        day : int
+            待检测日
+        hour : int
+            待检测小时
+        minute : int
+            待检测分钟
+        second : int
+            待检测秒数
+
+        Returns
+        -------
+        bool
+            如果给定的日期时间在合规的范围内, 则返回True, 否则返回False
+        """
+        return cls.is_valid_date(year, month, day) and cls.is_valid_time(hour, minute, second)
+
+    @classmethod
+    def is_valid_date(cls, year: int, month: int, day: int) -> bool:
+        """
+        验证是否为生日
+
+        Example:
+        ----------
+        >>> Validator.is_valid_date(1990, 1, 1) # returns True
+        >>> Validator.is_valid_date(1990, 13, 1) # returns False
+
+        Parameters
+        ----------
+        year : int
+            年
+        month : int
+            月
+        day : int
+            日
+
+        Returns
+        -------
+        bool
+            如果是合法的日期, 则返回True, 否则返回False
+        """
+
+        # 判断年
+        # NOTE datetime.MINYEAR的值是1, 这里的逻辑是否要修改
+        if not cls.is_valid_year(year):
+            return False
+
+        # 判断月
+        if month < 1 or month > 12:
+            return False
+
+        # 单独判断天
+        if day < 1 or day > 31:
+            return False
+
+        # 处理30天的月
+        if day > 30 and month in {4, 6, 9, 11}:
+            return False
+
+        # 处理闰年的情况
+        if month == 2:
+            return day < 29 or (day < 30 and DatetimeUtil.is_leap_year(year))
+
+        return True
+
+    @classmethod
+    def is_valid_time(cls, hour: int, minute: int, second: int) -> bool:
+        """
+        验证是否为有效时间
+
+        Example:
+        ----------
+        >>> Validator.is_valid_time(23, 59, 59) # returns True
+        >>> Validator.is_valid_time(24, 0, 0) # returns False
+
+        Parameters
+        ----------
+        hour : int
+            小时
+        minute : int
+            分钟
+        second : int
+            秒
+
+        Returns
+        -------
+        bool
+            如果是合法的时间, 则返回True, 否则返回False
+        """
+        return cls.is_valid_hour(hour) and cls.is_valid_minute(minute) and cls.is_valid_second(second)
+
+    @classmethod
     def has_tz(cls, dt: datetime) -> bool:
         """
         返回给定的日期对象是否含有时区信息
@@ -1063,9 +1316,19 @@ class DatetimeUtil:
     def utc_to_local(cls, date_obj: datetime, tz: str) -> datetime:
         """
         UTC 时间转指定时区时间
-        :param date_obj: 待转换的 Datetime 对象, 表示一个 UTC 时间
-        :param tz: 指定的时区
-        :return: 转换后的 Datetime 对象
+
+        Parameters
+        ----------
+        date_obj : `datetime.datetime`
+            待转换的 :py:class:`datetime.datetime` 对象
+        tz : :obj:`str`, optional
+            指定时区
+
+        Returns
+        -------
+        :py:class:`datetime.datetime`
+            转换后的 `datetime` 对象
+
         """
         if not isinstance(date_obj, datetime):
             raise TypeError(f"date_obj must be datetime.datetime, not {type(date_obj)}")
@@ -1268,6 +1531,192 @@ class DatetimeUtil:
                 break
 
     @classmethod
+    def check_and_get_year(cls, year: int) -> int:
+        return cls._check_range_or_raise(dt_lib.MINYEAR, dt_lib.MAXYEAR, year)
+
+    @classmethod
+    def check_and_get_quarter(cls, quarter: int) -> int:
+        """
+        检查并获取季度值
+
+        Parameters
+        ----------
+        quarter : int
+            待检查的季度值
+
+        Returns
+        -------
+        int
+            如果是合法的季度值, 则返回季度值, 否则抛出 ValueError
+
+        Raises
+        ------
+        ValueError
+            如果给定的季度值不合法, 则抛出 ValueError
+        """
+        return cls._check_range_or_raise(1, 4, quarter)
+
+    @classmethod
+    def check_and_get_month(cls, month: int) -> int:
+        """
+        检查并获取月份值
+
+        Parameters
+        ----------
+        month : int
+            待检测月份值
+
+        Returns
+        -------
+        int
+            如果是合法的月份值, 则返回月份值, 否则抛出 ValueError
+
+        Raises
+        ------
+        ValueError
+            如果给定的月份值不合法, 则抛出 ValueError
+        """
+        return cls._check_range_or_raise(1, 12, month)
+
+    @classmethod
+    def check_and_get_weekday(cls, weekday: int) -> int:
+        """
+        检查并获取星期值
+
+        Parameters
+        ----------
+        weekday : int
+            待检测星期值
+
+        Returns
+        -------
+        int
+            如果是合法的星期值, 则返回星期值, 否则抛出 ValueError
+
+        Raises
+        ------
+        ValueError
+            如果给定的星期值不合法, 则抛出 ValueError
+        """
+        return cls._check_range_or_raise(1, 7, weekday)
+
+    @classmethod
+    def check_and_get_day(cls, year: int, month: int, day: int) -> int:
+        """
+        检查并获取日期值
+
+        Parameters
+        ----------
+        year : int
+            待检测年份
+        month : int
+            待检测月份
+        day : int
+            待检测日
+
+        Returns
+        -------
+        int
+            如果是合法的日期值, 则返回日期值, 否则抛出 ValueError
+
+        Raises
+        ------
+        ValueError
+            如果给定的日期值不合法, 则抛出 ValueError
+        """
+        if cls.is_valid_date(year, month, day):
+            return day
+        raise ValueError(f"wrong date {year}-{month}-{day}")
+
+    @classmethod
+    def check_and_get_hour(cls, hour: int) -> int:
+        """
+        检查并获取小时值
+
+        Parameters
+        ----------
+        hour : int
+            待检测小时值
+
+        Returns
+        -------
+        int
+            如果是合法的小时值, 则返回小时值, 否则抛出 ValueError
+
+        Raises
+        ------
+        ValueError
+            如果给定的小时值不合法, 则抛出 ValueError
+        """
+        return cls._check_range_or_raise(0, 23, hour)
+
+    @classmethod
+    def check_and_get_minute(cls, minute: int) -> int:
+        """
+        检查并获取分钟值
+
+        Parameters
+        ----------
+        minute : int
+            待检测分钟值
+
+        Returns
+        -------
+        int
+            如果是合法的分钟值, 则返回分钟值, 否则抛出 ValueError
+
+        Raises
+        ------
+        ValueError
+            如果给定的分钟值不合法, 则抛出 ValueError
+        """
+        return cls._check_range_or_raise(0, 59, minute)
+
+    @classmethod
+    def check_and_get_second(cls, second: int) -> int:
+        """
+        检查并获取秒值
+
+        Parameters
+        ----------
+        second : int
+            待检测秒值
+
+        Returns
+        -------
+        int
+            如果是合法的秒值, 则返回秒值, 否则抛出 ValueError
+
+        Raises
+        ------
+        ValueError
+            如果给定的秒值不合法, 则抛出 ValueError
+        """
+        return cls._check_range_or_raise(0, 59, second)
+
+    @classmethod
+    def check_and_get_millisecond(cls, millisecond: int) -> int:
+        """
+        检查并获取毫秒值
+
+        Parameters
+        ----------
+        millisecond : int
+            待检测毫秒值
+
+        Returns
+        -------
+        int
+            如果是合法的毫秒值, 则返回毫秒值, 否则抛出 ValueError
+
+        Raises
+        ------
+        ValueError
+            如果给定的毫秒值不合法, 则抛出 ValueError
+        """
+        return cls._check_range_or_raise(0, 999, millisecond)
+
+    @classmethod
     def nth_day_of_month(cls, *, year: int, month: int, weekday: int, n: int) -> date:
         """
         返回给定日期的第n个星期几的日期
@@ -1349,3 +1798,13 @@ class DatetimeUtil:
     @classmethod
     def _cyclic_acquire(cls, val: int, max_val: int, offset: int):
         return (val + offset) % max_val
+
+    @classmethod
+    def _check_range_or_raise(cls, min_val: int, max_val: int, val: int) -> int:
+        if cls._is_range_contain(min_val, max_val, val):
+            return val
+        raise ValueError(f"value must be between {min_val} and {max_val}, but got {val}")
+
+    @classmethod
+    def _is_range_contain(cls, min_val: int, max_val: int, val: int) -> bool:
+        return min_val <= val <= max_val

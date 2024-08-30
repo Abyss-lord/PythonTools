@@ -261,7 +261,7 @@ class IDCardUtil:
         if not cls.is_valid_id_15(id_card):
             raise ValueError("id card is invalid")
 
-        birthday = "19" + StringUtil.sub_sequence(id_card, 6, 12)
+        birthday = f"19{StringUtil.sub_sequence(id_card, 6, 12)}"
         province_code = StringUtil.sub_sequence(id_card, 0, 6)
         sequence_code = StringUtil.sub_sequence(id_card, 12)
         core_17 = f"{province_code}{birthday}{sequence_code}"
@@ -445,18 +445,16 @@ class IDCardUtil:
         if cls.CHINA_ID_MIN_LENGTH != StringUtil.get_length(s):
             return False
 
-        if StringValidator.is_number(s):
-            province_code = StringUtil.sub_sequence(s, 0, 2)
-            # 校验省
-            if province_code not in PRO_DICT:
-                return False
-
-            birthday = "19" + StringUtil.sub_sequence(s, 6, 12)
-
-            return DatetimeValidator.is_valid_birthday(birthday)
-
-        else:
+        if not StringValidator.is_number(s):
             return False
+        province_code = StringUtil.sub_sequence(s, 0, 2)
+        # 校验省
+        if province_code not in PRO_DICT:
+            return False
+
+        birthday = f"19{StringUtil.sub_sequence(s, 6, 12)}"
+
+        return DatetimeValidator.is_valid_birthday(birthday)
 
     @classmethod
     def get_check_sum(cls, s: str) -> str:
@@ -541,7 +539,7 @@ class IDCardUtil:
         datetime | None
             对应的生日 Datetime 对象, 如果身份证无效则返回 None
         """
-        birthday = "19" + StringUtil.sub_sequence(s, 6, 12)
+        birthday = f"19{StringUtil.sub_sequence(s, 6, 12)}"
         return cls.get_birthday_dt_obj_from_string(birthday)
 
     @classmethod

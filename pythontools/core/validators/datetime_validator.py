@@ -16,12 +16,11 @@ Change Activity:
 
 __all__ = ["DatetimeValidator"]
 
-import datetime
 
-from ..constants.pattern_pool import PatternPool
-from ..convert.convertor import BasicConvertor
-from ..utils.datetimeutils import DatetimeUtil
-from ..utils.reutils import ReUtil
+from pythontools.core.constants.pattern_pool import PatternPool
+from pythontools.core.convert.convertor import BasicConvertor
+from pythontools.core.utils.datetimeutils import DatetimeUtil  # type: ignore
+from pythontools.core.utils.reutils import ReUtil
 
 
 class DatetimeValidator:
@@ -52,58 +51,9 @@ class DatetimeValidator:
             如果是合法的生日, 则返回True, 否则返回False
         """
 
-        # PERF 增加更多支持的日期格式
-        matched = ReUtil.is_match(PatternPool.BIRTHDAY_PATTERN, birthday)
-        if matched:
+        if _ := ReUtil.is_match(PatternPool.BIRTHDAY_PATTERN, birthday):
             year = BasicConvertor.to_int(ReUtil.get_matched_group_by_idx(PatternPool.BIRTHDAY_PATTERN, birthday, 1))
             month = BasicConvertor.to_int(ReUtil.get_matched_group_by_idx(PatternPool.BIRTHDAY_PATTERN, birthday, 3))
             day = BasicConvertor.to_int(ReUtil.get_matched_group_by_idx(PatternPool.BIRTHDAY_PATTERN, birthday, 5))
-            return cls.is_valid_date(year, month, day)  # type: ignore
+            return DatetimeUtil.is_valid_date(year, month, day)  # type: ignore
         return False
-
-    @classmethod
-    def is_valid_date(cls, year: int, month: int, day: int) -> bool:
-        """
-        验证是否为生日
-
-        Example:
-        ----------
-        >>> Validator.is_valid_date(1990, 1, 1) # returns True
-        >>> Validator.is_valid_date(1990, 13, 1) # returns False
-
-        Parameters
-        ----------
-        year : int
-            年
-        month : int
-            月
-        day : int
-            日
-
-        Returns
-        -------
-        bool
-            如果是合法的日期, 则返回True, 否则返回False
-        """
-        # 判断年
-        # NOTE datetime.MINYEAR的值是1, 这里的逻辑是否要修改
-        if year < datetime.MINYEAR or year > DatetimeUtil.this_year():
-            return False
-
-        # 判断月
-        if month < 1 or month > 12:
-            return False
-
-        # 单独判断天
-        if day < 1 or day > 31:
-            return False
-
-        # 处理30天的月
-        if day > 30 and month in [4, 6, 9, 11]:
-            return False
-
-        # 处理闰年的情况
-        if month == 2:
-            return day < 29 or (day < 30 and DatetimeUtil.is_leap_year(year))
-
-        return True
