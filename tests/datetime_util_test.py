@@ -141,6 +141,61 @@ class TestDateTimeUtil:
             with pytest.raises(ValueError):
                 DatetimeUtil.get_age(None)
 
+        @allure.title("测试检查并获取")
+        def test_check_and_get_dt(self) -> None:
+            with allure.step("步骤1:测试检查给定的年份"):
+                assert DatetimeUtil.check_and_get_year(2024) == 2024
+                with pytest.raises(ValueError):
+                    DatetimeUtil.check_and_get_year(1865)
+
+            with allure.step("步骤2:测试检查给定的季度"):
+                assert DatetimeUtil.check_and_get_quarter(1) == 1
+                assert DatetimeUtil.check_and_get_quarter(2) == 2
+                with pytest.raises(ValueError):
+                    DatetimeUtil.check_and_get_quarter(5)
+
+            with allure.step("步骤3:测试检查给定的月份"):
+                assert DatetimeUtil.check_and_get_month(1) == 1
+                assert DatetimeUtil.check_and_get_month(12) == 12
+                with pytest.raises(ValueError):
+                    DatetimeUtil.check_and_get_month(0)
+
+            with allure.step("步骤4:测试检查给定的日期"):
+                assert DatetimeUtil.check_and_get_day(2024, 3, 1) == 1
+                assert DatetimeUtil.check_and_get_day(2024, 5, 31) == 31
+                with pytest.raises(ValueError):
+                    DatetimeUtil.check_and_get_day(2024, 2, 30)
+
+            with allure.step("步骤5:测试检查给定的星期几"):
+                assert DatetimeUtil.check_and_get_weekday(2) == 2
+                assert DatetimeUtil.check_and_get_weekday(7) == 7
+                with pytest.raises(ValueError):
+                    DatetimeUtil.check_and_get_weekday(0)
+
+            with allure.step("步骤6:测试检查给定的小时"):
+                assert DatetimeUtil.check_and_get_hour(0) == 0
+                assert DatetimeUtil.check_and_get_hour(23) == 23
+                with pytest.raises(ValueError):
+                    DatetimeUtil.check_and_get_hour(-1)
+
+            with allure.step("步骤7:测试检查给定的分钟"):
+                assert DatetimeUtil.check_and_get_minute(0) == 0
+                assert DatetimeUtil.check_and_get_minute(59) == 59
+                with pytest.raises(ValueError):
+                    DatetimeUtil.check_and_get_minute(-1)
+
+            with allure.step("步骤8:测试检查给定的秒"):
+                assert DatetimeUtil.check_and_get_second(0) == 0
+                assert DatetimeUtil.check_and_get_second(59) == 59
+                with pytest.raises(ValueError):
+                    DatetimeUtil.check_and_get_second(-1)
+
+            with allure.step("步骤9:测试检查给定的毫秒"):
+                assert DatetimeUtil.check_and_get_millisecond(0) == 0
+                assert DatetimeUtil.check_and_get_millisecond(999) == 999
+                with pytest.raises(ValueError):
+                    DatetimeUtil.check_and_get_millisecond(-1)
+
     @allure.story("判断时间、日期属性")
     @allure.description("工具类支持判断时间、日期的属性，如是否闰年、是否同一天、是否同一月、是否同一年等")
     class TestDtProperty:
@@ -150,6 +205,90 @@ class TestDateTimeUtil:
             assert not DatetimeUtil.is_leap_year(2025)
             assert not DatetimeUtil.is_leap_year(1900)
             assert not DatetimeUtil.is_leap_year(2100)
+
+        @allure.title("测试给定的年、月、日是否合规")
+        def test_is_valid_dt_args(self):
+            with allure.step("步骤1:测试年份是否合规"):
+                assert DatetimeUtil.is_valid_year(2024)
+                assert DatetimeUtil.is_valid_year(2025)
+                assert not DatetimeUtil.is_valid_year(1899)
+                assert not DatetimeUtil.is_valid_year(1231321321321321321321)
+
+            with allure.step("步骤2:测试季度是否合规"):
+                assert DatetimeUtil.is_valid_quarter(Quarter.Q1)
+                assert DatetimeUtil.is_valid_quarter(Quarter.Q2)
+                assert DatetimeUtil.is_valid_quarter(Quarter.Q3)
+                assert DatetimeUtil.is_valid_quarter(Quarter.Q4)
+
+                assert DatetimeUtil.is_valid_quarter(1)
+                assert DatetimeUtil.is_valid_quarter(2)
+                assert DatetimeUtil.is_valid_quarter(3)
+                assert DatetimeUtil.is_valid_quarter(4)
+
+                assert not DatetimeUtil.is_valid_quarter(0)
+                assert not DatetimeUtil.is_valid_quarter(5)
+
+            with allure.step("步骤2:测试月份是否合规"):
+                assert DatetimeUtil.is_valid_month(2)
+                assert DatetimeUtil.is_valid_month(12)
+                assert not DatetimeUtil.is_valid_month(0)
+                assert not DatetimeUtil.is_valid_month(13)
+
+            with allure.step("步骤3:测试星期几是否合规"):
+                assert DatetimeUtil.is_valid_weekday(2)
+                assert DatetimeUtil.is_valid_weekday(7)
+                assert not DatetimeUtil.is_valid_weekday(0)
+
+            with allure.step("步骤4:测试小时是否合规"):
+                assert DatetimeUtil.is_valid_hour(0)
+                assert DatetimeUtil.is_valid_hour(23)
+                assert not DatetimeUtil.is_valid_hour(-1)
+                assert not DatetimeUtil.is_valid_hour(24)
+
+            with allure.step("步骤5:测试分钟是否合规"):
+                assert DatetimeUtil.is_valid_minute(0)
+                assert DatetimeUtil.is_valid_minute(59)
+                assert not DatetimeUtil.is_valid_minute(-1)
+                assert not DatetimeUtil.is_valid_minute(60)
+
+            with allure.step("步骤6:测试秒是否合规"):
+                assert DatetimeUtil.is_valid_second(0)
+                assert DatetimeUtil.is_valid_second(59)
+                assert not DatetimeUtil.is_valid_second(-1)
+                assert not DatetimeUtil.is_valid_second(60)
+
+            with allure.step("步骤7:测试毫秒是否合规"):
+                assert DatetimeUtil.is_valid_millisecond(0)
+                assert DatetimeUtil.is_valid_millisecond(999)
+                assert not DatetimeUtil.is_valid_millisecond(-1)
+                assert not DatetimeUtil.is_valid_millisecond(1000)
+
+            with allure.step("步骤8:测试给定的日期是否合规"):
+                assert DatetimeUtil.is_valid_date(2022, 12, 1)
+                assert DatetimeUtil.is_valid_date(2024, 2, 29)
+                assert DatetimeUtil.is_valid_date(1900, 2, 28)
+                assert DatetimeUtil.is_valid_date(2022, 3, 31)
+                assert not DatetimeUtil.is_valid_date(2022, 12, 33)
+                assert not DatetimeUtil.is_valid_date(2022, 13, 1)
+                assert not DatetimeUtil.is_valid_date(2022, 2, 29)
+                assert not DatetimeUtil.is_valid_date(1900, 2, 29)
+                assert not DatetimeUtil.is_valid_date(0, 1, 1)
+                assert not DatetimeUtil.is_valid_date(2022, 4, 31)
+
+            with allure.step("步骤9:测试给定的时间是否合规"):
+                assert DatetimeUtil.is_valid_time(23, 59, 59)
+                assert DatetimeUtil.is_valid_time(0, 0, 0)
+                assert not DatetimeUtil.is_valid_time(-1, 0, 0)
+
+            with allure.step("步骤10:测试给定的日期时间是否合规"):
+                assert DatetimeUtil.is_valid_datetime(year=2022, month=12, day=1, hour=23, minute=59, second=59)
+                assert DatetimeUtil.is_valid_datetime(year=2024, month=2, day=29, hour=23, minute=59, second=59)
+                assert DatetimeUtil.is_valid_datetime(year=1900, month=2, day=28, hour=23, minute=59, second=59)
+                assert DatetimeUtil.is_valid_datetime(year=2022, month=3, day=31, hour=23, minute=59, second=59)
+                assert not DatetimeUtil.is_valid_datetime(year=2022, month=12, day=33, hour=23, minute=59, second=59)
+                assert not DatetimeUtil.is_valid_datetime(year=2022, month=13, day=1, hour=23, minute=59, second=59)
+                assert not DatetimeUtil.is_valid_datetime(year=2022, month=2, day=29, hour=23, minute=59, second=59)
+                assert not DatetimeUtil.is_valid_datetime(year=1900, month=2, day=29, hour=23, minute=59, second=59)
 
         @allure.title("测试是否同一年")
         def test_is_same_year(self):

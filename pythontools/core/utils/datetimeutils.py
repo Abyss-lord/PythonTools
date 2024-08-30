@@ -829,7 +829,7 @@ class DatetimeUtil:
         bool
             如果给定年份在 1900~9999 之间，则返回True, 否则返回False
         """
-        return cls._is_range_contain(year, 1900, dt_lib.MAXYEAR)
+        return cls._is_range_contain(1900, dt_lib.MAXYEAR, year)
 
     @classmethod
     def is_valid_quarter(cls, quarter: Quarter | int) -> bool:
@@ -1532,7 +1532,7 @@ class DatetimeUtil:
 
     @classmethod
     def check_and_get_year(cls, year: int) -> int:
-        return cls._check_range_or_raise(dt_lib.MINYEAR, dt_lib.MAXYEAR, year)
+        return cls._check_range_or_raise(1900, dt_lib.MAXYEAR, year)
 
     @classmethod
     def check_and_get_quarter(cls, quarter: int) -> int:

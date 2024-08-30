@@ -31,19 +31,6 @@ BASIC_US_FAKE = Faker("en-US")
 @allure.description("日期、时间验证器")
 @allure.tag("validator", "datetime")
 class TestValidator:
-    @allure.title("验证给定的日期是否有效")
-    def test_is_valid_date(self) -> None:
-        assert DatetimeValidator.is_valid_date(2022, 12, 1)
-        assert DatetimeValidator.is_valid_date(2024, 2, 29)
-        assert DatetimeValidator.is_valid_date(1900, 2, 28)
-        assert DatetimeValidator.is_valid_date(2022, 3, 31)
-        assert not DatetimeValidator.is_valid_date(2022, 12, 33)
-        assert not DatetimeValidator.is_valid_date(2022, 13, 1)
-        assert not DatetimeValidator.is_valid_date(2022, 2, 29)
-        assert not DatetimeValidator.is_valid_date(1900, 2, 29)
-        assert not DatetimeValidator.is_valid_date(0, 1, 1)
-        assert not DatetimeValidator.is_valid_date(2022, 4, 31)
-
     @allure.title("验证给定的生日是否有效")
     def test_is_valid_birthday(self) -> None:
         assert DatetimeValidator.is_valid_birthday("20221201")
