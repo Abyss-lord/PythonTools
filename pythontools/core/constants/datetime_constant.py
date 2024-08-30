@@ -177,6 +177,50 @@ class Quarter(Enum):
         """
         return self.value.val
 
+    def is_first_quarter(self) -> bool:
+        """
+        判断当前季度是否为第一季度
+
+        Example:
+        -------
+        >>> Quarter.Q1.is_first_quarter()
+        True
+        >>> Quarter.Q2.is_first_quarter()
+        False
+        >>> Quarter.Q3.is_first_quarter()
+        False
+        >>> Quarter.Q4.is_first_quarter()
+        False
+
+        Returns
+        -------
+        bool
+            True: 当前季度为第一季度, False: 当前季度不是第一季度
+        """
+        return self == Quarter.Q1
+
+    def is_last_quarter(self) -> bool:
+        """
+        判断当前季度是否为最后一季度
+
+        Example:
+        -------
+        >>> Quarter.Q1.is_last_quarter()
+        False
+        >>> Quarter.Q2.is_last_quarter()
+        False
+        >>> Quarter.Q3.is_last_quarter()
+        False
+        >>> Quarter.Q4.is_last_quarter()
+        True
+
+        Returns
+        -------
+        bool
+            True: 当前季度为最后一季度, False: 当前季度不是最后一季度
+        """
+        return self == Quarter.Q4
+
     @classmethod
     def _get_quarter_by_name(cls, name: str) -> Optional["Quarter"]:
         if name.endswith("季度"):
@@ -386,6 +430,28 @@ class Month(Enum):
             year = year.year
 
         return self._get_last_day_of_month_by_number(year)
+
+    def is_first_month(self) -> bool:
+        """
+        判断当前月份是否为第一月
+
+        Returns
+        -------
+        bool
+            True: 当前月份为第一月, False: 当前月份不是第一月
+        """
+        return self == Month.JANUARY
+
+    def is_last_month(self) -> bool:
+        """
+        判断当前月份是否为最后一月
+
+        Returns
+        -------
+        bool
+            True: 当前月份为最后一月, False: 当前月份不是最后一月
+        """
+        return self == Month.DECEMBER
 
     def _get_last_day_of_month_by_number(self, year: int) -> int:
         month = self.get_value()
@@ -599,6 +665,28 @@ class Week(Enum):
             表示周的英文简称
         """
         return self.value.alias
+
+    def is_first_day_of_week(self) -> bool:
+        """
+        判断当前星期是否为星期一
+
+        Returns
+        -------
+        bool
+            True: 当前星期为星期一, False: 当前星期不是星期一
+        """
+        return self == Week.MONDAY
+
+    def is_last_day_of_week(self) -> bool:
+        """
+        判断当前星期是否为星期日
+
+        Returns
+        -------
+        bool
+            True: 当前星期为星期日, False: 当前星期不是星期日
+        """
+        return self == Week.SUNDAY
 
     @classmethod
     def _get_week_by_date(cls, dt: datetime) -> Optional["Week"]:
