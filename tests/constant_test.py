@@ -96,10 +96,46 @@ class TestConstant:
 
         @allure.title("测试获取季度枚举类值")
         def test_get_val(self) -> None:
-            assert Quarter.Q1.get_val() == 1
-            assert Quarter.Q2.get_val() == 2
-            assert Quarter.Q3.get_val() == 3
-            assert Quarter.Q4.get_val() == 4
+            assert Quarter.Q1.get_value() == 1
+            assert Quarter.Q2.get_value() == 2
+            assert Quarter.Q3.get_value() == 3
+            assert Quarter.Q4.get_value() == 4
+
+        @allure.title("测试获取季度枚举类最大、最小值")
+        def test_get_max_and_min_value(self) -> None:
+            assert Quarter.get_max_value() == 4
+            assert Quarter.get_min_value() == 1
+
+        @allure.title("测试判断季度枚举类是否为第一个季度或者最后一个季度")
+        def test_is_first_or_last_quarter(self) -> None:
+            with allure.step("步骤1:测试判断第一个季度"):
+                assert Quarter.Q1.is_first_quarter()
+                assert not Quarter.Q2.is_first_quarter()
+                assert not Quarter.Q3.is_first_quarter()
+                assert not Quarter.Q4.is_first_quarter()
+
+            with allure.step("步骤2:测试判断最后一个季度"):
+                assert not Quarter.Q1.is_last_quarter()
+                assert not Quarter.Q2.is_last_quarter()
+                assert not Quarter.Q3.is_last_quarter()
+                assert Quarter.Q4.is_last_quarter()
+
+        @allure.title("测试判断给定季度值是否合法")
+        def test_is_valid_quarter(self) -> None:
+            assert Quarter.is_valid_quarter(1)
+            assert Quarter.is_valid_quarter(2)
+            assert Quarter.is_valid_quarter(3)
+            assert Quarter.is_valid_quarter(4)
+            assert not Quarter.is_valid_quarter(0)
+            assert not Quarter.is_valid_quarter(5)
+            assert not Quarter.is_valid_quarter(6)
+            assert not Quarter.is_valid_quarter(7)
+            assert not Quarter.is_valid_quarter(8)
+            assert not Quarter.is_valid_quarter(9)
+            assert not Quarter.is_valid_quarter(10)
+            assert not Quarter.is_valid_quarter(11)
+            assert not Quarter.is_valid_quarter(12)
+            assert not Quarter.is_valid_quarter(13)
 
     @allure.story("月常量类")
     @allure.description("月常量枚举类, 用于获取月份的中文名称、名称、值")
@@ -275,6 +311,59 @@ class TestConstant:
             assert Month.NOVEMBER.get_value() == 11
             assert Month.DECEMBER.get_value() == 12
 
+        @allure.title("测试获取月份枚举类最大、最小值")
+        def test_get_max_and_min_value(self) -> None:
+            assert Month.get_max_value() == 12
+            assert Month.get_min_value() == 1
+
+        @allure.title("测试判断月份枚举类是否为第一个月或者最后一个月")
+        def test_is_first_or_last_month(self) -> None:
+            with allure.step("步骤1:测试判断第一个月"):
+                assert Month.JANUARY.is_first_month()
+                assert not Month.FEBRUARY.is_first_month()
+                assert not Month.MARCH.is_first_month()
+                assert not Month.APRIL.is_first_month()
+                assert not Month.MAY.is_first_month()
+                assert not Month.JUNE.is_first_month()
+                assert not Month.JULY.is_first_month()
+                assert not Month.AUGUST.is_first_month()
+                assert not Month.SEPTEMBER.is_first_month()
+                assert not Month.OCTOBER.is_first_month()
+                assert not Month.NOVEMBER.is_first_month()
+                assert not Month.DECEMBER.is_first_month()
+
+            with allure.step("步骤2:测试判断最后一个月"):
+                assert not Month.JANUARY.is_last_month()
+                assert not Month.FEBRUARY.is_last_month()
+                assert not Month.MARCH.is_last_month()
+                assert not Month.APRIL.is_last_month()
+                assert not Month.MAY.is_last_month()
+                assert not Month.JUNE.is_last_month()
+                assert not Month.JULY.is_last_month()
+                assert not Month.AUGUST.is_last_month()
+                assert not Month.SEPTEMBER.is_last_month()
+                assert not Month.OCTOBER.is_last_month()
+                assert not Month.NOVEMBER.is_last_month()
+                assert Month.DECEMBER.is_last_month()
+
+        @allure.title("测试判断给定月份值是否合法")
+        def test_is_valid_month(self) -> None:
+            assert Month.is_valid_month(1)
+            assert Month.is_valid_month(2)
+            assert Month.is_valid_month(3)
+            assert Month.is_valid_month(4)
+            assert Month.is_valid_month(5)
+            assert Month.is_valid_month(6)
+            assert Month.is_valid_month(7)
+            assert Month.is_valid_month(8)
+            assert Month.is_valid_month(9)
+            assert Month.is_valid_month(10)
+            assert Month.is_valid_month(11)
+            assert Month.is_valid_month(12)
+
+            assert not Month.is_valid_month(0)
+            assert not Month.is_valid_month(13)
+
     @allure.story("周单位枚举")
     @allure.description("周单位枚举, 表示周一到周日的枚举")
     class TestWeek:
@@ -416,6 +505,43 @@ class TestConstant:
             assert Week.FRIDAY.get_iso8601_value() == 5
             assert Week.SATURDAY.get_iso8601_value() == 6
             assert Week.SUNDAY.get_iso8601_value() == 7
+
+        @allure.title("测试周最大值和最小值")
+        def test_get_max_and_min_value(self) -> None:
+            assert Week.get_max_value() == 7
+            assert Week.get_min_value() == 1
+
+        @allure.title("测试判断周枚举实例是否为第一个周或者最后一个周")
+        def test_is_first_or_last_week(self) -> None:
+            with allure.step("步骤1:测试判断第一个周"):
+                assert Week.MONDAY.is_first_day_of_week()
+                assert not Week.TUESDAY.is_first_day_of_week()
+                assert not Week.WEDNESDAY.is_first_day_of_week()
+                assert not Week.THURSDAY.is_first_day_of_week()
+                assert not Week.FRIDAY.is_first_day_of_week()
+                assert not Week.SATURDAY.is_first_day_of_week()
+                assert not Week.SUNDAY.is_first_day_of_week()
+
+            with allure.step("步骤2:测试判断最后一个周"):
+                assert not Week.MONDAY.is_last_day_of_week()
+                assert not Week.TUESDAY.is_last_day_of_week()
+                assert not Week.WEDNESDAY.is_last_day_of_week()
+                assert not Week.THURSDAY.is_last_day_of_week()
+                assert not Week.FRIDAY.is_last_day_of_week()
+                assert not Week.SATURDAY.is_last_day_of_week()
+                assert Week.SUNDAY.is_last_day_of_week()
+
+        @allure.title("测试判断给定周值是否合法")
+        def test_is_valid_week(self) -> None:
+            assert Week.is_valid_weekday(1)
+            assert Week.is_valid_weekday(2)
+            assert Week.is_valid_weekday(3)
+            assert Week.is_valid_weekday(4)
+            assert Week.is_valid_weekday(5)
+            assert Week.is_valid_weekday(6)
+            assert Week.is_valid_weekday(7)
+            assert not Week.is_valid_weekday(0)
+            assert not Week.is_valid_weekday(8)
 
     @allure.story("时间单位枚举")
     @allure.description("时间单位枚举, 表示时间单位的枚举, 纳秒,微秒,毫秒,秒,分钟,小时,天")
