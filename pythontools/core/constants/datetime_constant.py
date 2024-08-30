@@ -79,6 +79,30 @@ class Quarter(Enum):
         else:
             raise TypeError("dt must be datetime or int or str")
 
+    @classmethod
+    def is_valid_quarter(cls, quarter: int) -> bool:
+        """
+        检查给定的季度是否有效
+
+        Example:
+        -------
+        >>> Quarter.is_valid_quarter(1)
+        True
+        >>> Quarter.is_valid_quarter(5)
+        False
+
+        Parameters
+        ----------
+        quarter : int
+            季度数字
+
+        Returns
+        -------
+        bool
+            True: 有效, False: 无效
+        """
+        return 1 <= quarter <= 4
+
     def get_chinese_format(self) -> str:
         """
         获取季度中文名称
@@ -259,6 +283,30 @@ class Month(Enum):
         else:
             raise TypeError("name must be int or str")
 
+    @classmethod
+    def is_valid_month(cls, month: int) -> bool:
+        """
+        检查给定的月份是否有效
+
+        Example:
+        -------
+        >>> Month.check_valid_month(1)
+        True
+        >>> Month.check_valid_month(13)
+        False
+
+        Parameters
+        ----------
+        month : int
+            月份数字
+
+        Returns
+        -------
+        bool
+            True: 有效, False: 无效
+        """
+        return 1 <= month <= 12
+
     def get_name(self) -> str:
         """
         获取月份枚举的完整英文名称
@@ -434,6 +482,30 @@ class Week(Enum):
             return cls._get_week_by_date(name)
         else:
             raise TypeError("name must be int or str")
+
+    @classmethod
+    def is_valid_weekday(cls, weekday: int) -> bool:
+        """
+        检查给定的星期是否有效
+
+        Example:
+        -------
+        >>> Week.is_valid_weekday(1)
+        True
+        >>> Week.is_valid_weekday(8)
+        False
+
+        Parameters
+        ----------
+        weekday : int
+            星期数字
+
+        Returns
+        -------
+        bool
+            True: 有效, False: 无效
+        """
+        return 1 <= weekday <= 7
 
     def get_name(self) -> str:
         """
