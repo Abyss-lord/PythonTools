@@ -46,3 +46,9 @@ class TestReUtil:
         _ = PatternPool.BIRTHDAY_PATTERN.search(birthday)
         res3 = PatternPool.BIRTHDAY_PATTERN.match(birthday)
         _ = res3.groups()
+
+    @allure.title("测试match方法")
+    def test_match_method(cls):
+        m = PatternPool.ISO8601.match("2022-12-01T12:34:56Z")
+        groups: dict[str, str] = {k: v for k, v in m.groupdict().items() if v is not None}
+        logger.debug(f"{groups=}")
