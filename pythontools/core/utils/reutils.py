@@ -15,10 +15,11 @@ Change Activity:
 
 # here put the import lib
 import re
+from typing import Any
 
-from ..constants.pattern_pool import RegexPool
-from ..errors import ValidationError
-from .basicutils import SequenceUtil, StringUtil
+from pythontools.core.constants.pattern_pool import RegexPool
+from pythontools.core.errors import ValidationError
+from pythontools.core.utils.basicutils import SequenceUtil, StringUtil
 
 
 class ReUtil:
@@ -151,6 +152,34 @@ class ReUtil:
         return matched.groups() if matched is not None else ()
 
     @classmethod
+    def get_match_obj(cls, pattern: re.Pattern, s: str) -> re.Match | None:
+        """
+        获取匹配对象
+
+        Parameters
+        ----------
+        pattern : re.Pattern
+            编译后的正则模式
+        s : str
+            待匹配字符串
+
+        Returns
+        -------
+        typing.Optional[re.Match]
+            如果匹配成功, 返回匹配对象, 否则返回None
+        """
+        return pattern.match(s)
+
+    @classmethod
+    def get_match_group(
+        cls,
+        pattern: re.Pattern,
+        s: str,
+    ) -> dict[str, Any] | None:
+        match_obj = cls.get_match_obj(pattern, s)
+        return dict(match_obj.groupdict()) if match_obj is not None else None
+
+    @classmethod
     def is_match(cls, pattern: re.Pattern, s: str, *, raise_exception: bool = False) -> bool:
         """
         检查是否匹配
@@ -180,7 +209,7 @@ class ReUtil:
         if not isinstance(pattern, re.Pattern):
             raise TypeError("pattern must be a re.Pattern object")
 
-        res = pattern.search(s)
+        res = pattern.match(s)
         if res is None and raise_exception:
             raise ValidationError(pattern, s, f"pattern {pattern} not match string {s}")
 

@@ -69,7 +69,7 @@ class StringConverter(AbstractConverter):
             return self.convert_container_value(value, default_value, raise_exception=raise_exception)
 
     def is_converted_type(self, value: Any) -> bool:
-        return isinstance(value, (PRIMITIVE_TYPE | CONTAINER_TYPE))  # type: ignore
+        return isinstance(value, (PRIMITIVE_TYPE, CONTAINER_TYPE))  # type: ignore  # noqa: UP038
 
     def convert_primitive_value(self, value: Any, default_value: str, *, raise_exception: bool = False) -> str:
         try:
