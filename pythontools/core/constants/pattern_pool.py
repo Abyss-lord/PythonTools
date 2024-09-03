@@ -151,6 +151,46 @@ class RegexPool:
     MAGNET_LINK = r"/^magnet:\?xt=urn:btih:[0-9a-fA-F]{40,}.*$/"
     # A 股股票代码
     A_STOCK = r"/^(s[hz]|S[HZ])(000[\d]{3}|002[\d]{3}|300[\d]{3}|600[\d]{3}|60[\d]{4})$/"
+    # ISO8601 日期格式
+    iso8601 = r"""(?P<year>[0-9]{4})
+    (
+        (
+            (-(?P<monthdash>[0-9]{1,2}))
+            |
+            (?P<month>[0-9]{2})
+            (?!$)  # Don't allow YYYYMM
+        )
+        (
+            (
+                (-(?P<daydash>[0-9]{1,2}))
+                |
+                (?P<day>[0-9]{2})
+            )
+            (
+                (
+                    (?P<separator>[ T])
+                    (?P<hour>[0-9]{2})
+                    (:{0,1}(?P<minute>[0-9]{2})){0,1}
+                    (
+                        :{0,1}(?P<second>[0-9]{1,2})
+                        ([.,](?P<second_fraction>[0-9]+)){0,1}
+                    ){0,1}
+                    (?P<timezone>
+                        Z
+                        |
+                        (
+                            (?P<tz_sign>[-+])
+                            (?P<tz_hour>[0-9]{2})
+                            :{0,1}
+                            (?P<tz_minute>[0-9]{2}){0,1}
+                        )
+                    ){0,1}
+                ){0,1}
+            )
+        ){0,1}  # YYYY-MM
+    ){0,1}  # YYYY only
+    $
+    """
 
 
 class PatternPool:
@@ -274,3 +314,5 @@ class PatternPool:
     MAGNET_LINK = re.compile(RegexPool.MAGNET_LINK)
     # A 股股票代码
     A_STOCK = re.compile(RegexPool.A_STOCK)
+    # ISO8601 日期格式
+    ISO8601 = re.compile(RegexPool.iso8601, re.VERBOSE)

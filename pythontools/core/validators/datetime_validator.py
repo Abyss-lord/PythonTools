@@ -57,3 +57,28 @@ class DatetimeValidator:
             day = BasicConvertor.to_int(ReUtil.get_matched_group_by_idx(PatternPool.BIRTHDAY_PATTERN, birthday, 5))
             return DatetimeUtil.is_valid_date(year, month, day)  # type: ignore
         return False
+
+    @classmethod
+    def is_iso8601_datetime(cls, datetime_str: str) -> bool:
+        """
+        验证是否为ISO8601格式的日期时间字符串
+
+        Example:
+        ----------
+        >>> Validator.is_iso8601_datetime('2021-01-01T12:00:00Z') # returns True
+        >>> Validator.is_iso8601_datetime('2021-01-01T12:00:00+08:00') # returns True
+        >>> Validator.is_iso8601_datetime('2021-01-01T12:00:00') # returns True
+        >>> Validator.is_iso8601_datetime('2021-01-01 12:00:00') # returns False
+
+        Parameters
+        ----------
+        datetime_str : str
+            待检测日期时间字符串
+
+        Returns
+        -------
+        bool
+            如果是合法的ISO8601格式的日期时间字符串, 则返回True, 否则返回False
+        """
+
+        return bool(_ := ReUtil.is_match(PatternPool.ISO8601, datetime_str))

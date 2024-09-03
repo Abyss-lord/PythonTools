@@ -350,9 +350,9 @@ class Month(Enum):
 
         Example:
         -------
-        >>> Month.check_valid_month(1)
+        >>> Month.is_valid_month(1)
         True
-        >>> Month.check_valid_month(13)
+        >>> Month.is_valid_month(13)
         False
 
         Parameters
