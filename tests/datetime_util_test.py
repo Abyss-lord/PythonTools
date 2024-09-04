@@ -196,6 +196,100 @@ class TestDateTimeUtil:
                 with pytest.raises(ValueError):
                     DatetimeUtil.check_and_get_millisecond(-1)
 
+        @allure.title("测试获取dt的小时数")
+        def test_get_hour_of_dt(self) -> None:
+            with allure.step("步骤1:测试获取datetime对象的小时数(24小时制)"):
+                dt = datetime(2024, 1, 1, 12, 30, 0)
+                assert DatetimeUtil.get_24_hour_from_dt(dt) == "12"
+                dt = datetime(2024, 1, 1, 13, 0, 0)
+                assert DatetimeUtil.get_24_hour_from_dt(dt) == "13"
+                dt = datetime(2024, 1, 1, 0, 0, 0)
+                assert DatetimeUtil.get_24_hour_from_dt(dt) == "00"
+                dt = datetime(2024, 1, 1, 23, 59, 59)
+                assert DatetimeUtil.get_24_hour_from_dt(dt) == "23"
+
+            with allure.step("步骤2:测试获取datetime对象的小时数(12小时制)"):
+                dt = datetime(2024, 1, 1, 12, 30, 0)
+                assert DatetimeUtil.get_hour_from_dt(dt) == "12"
+                dt = datetime(2024, 1, 1, 13, 0, 0)
+                assert DatetimeUtil.get_hour_from_dt(dt) == "01"
+                dt = datetime(2024, 1, 1, 0, 0, 0)
+                assert DatetimeUtil.get_hour_from_dt(dt) == "12"
+                dt = datetime(2024, 1, 1, 23, 59, 59)
+                assert DatetimeUtil.get_hour_from_dt(dt) == "11"
+
+        @allure.title("测试获取dt的分钟数")
+        def test_get_minute_of_dt(self) -> None:
+            dt = datetime(2024, 1, 1, 12, 30, 0)
+            assert DatetimeUtil.get_minute_from_dt(dt) == "30"
+            dt = datetime(2024, 1, 1, 12, 59, 0)
+            assert DatetimeUtil.get_minute_from_dt(dt) == "59"
+            dt = datetime(2024, 1, 1, 12, 0, 0)
+            assert DatetimeUtil.get_minute_from_dt(dt) == "00"
+
+        @allure.title("测试获取dt的秒数")
+        def test_get_second_of_dt(self) -> None:
+            dt = datetime(2024, 1, 1, 12, 30, 0)
+            assert DatetimeUtil.get_second_from_dt(dt) == "00"
+            dt = datetime(2024, 1, 1, 12, 30, 59)
+            assert DatetimeUtil.get_second_from_dt(dt) == "59"
+            dt = datetime(2024, 1, 1, 12, 30, 1)
+            assert DatetimeUtil.get_second_from_dt(dt) == "01"
+
+        @allure.title("测试获取dt的上下午")
+        def test_get_am_pm_of_dt(self) -> None:
+            dt = datetime(2024, 1, 1, 12, 30, 0)
+            assert DatetimeUtil.get_am_or_pm_from_dt(dt) == "PM"
+            dt = datetime(2024, 1, 1, 0, 30, 0)
+            assert DatetimeUtil.get_am_or_pm_from_dt(dt) == "AM"
+            dt = datetime(2024, 1, 1, 11, 30, 0)
+            assert DatetimeUtil.get_am_or_pm_from_dt(dt) == "AM"
+            dt = datetime(2024, 1, 1, 12, 30, 0)
+            assert DatetimeUtil.get_am_or_pm_from_dt(dt) == "PM"
+
+        @allure.title("测试获取dt的时间")
+        def test_get_time_of_dt(self) -> None:
+            with allure.step("步骤1:测试获取datetime对象的时间(12小时制)"):
+                dt = datetime(2024, 1, 1, 12, 30, 0)
+                assert DatetimeUtil.get_time_from_dt(dt) == "12:30:00 PM"
+                dt = datetime(2024, 1, 1, 0, 30, 0)
+                assert DatetimeUtil.get_time_from_dt(dt) == "12:30:00 AM"
+                dt = datetime(2024, 1, 1, 11, 30, 0)
+                assert DatetimeUtil.get_time_from_dt(dt) == "11:30:00 AM"
+
+            with allure.step("步骤2:测试获取datetime对象的时间(24小时制)"):
+                dt = datetime(2024, 1, 1, 12, 30, 0)
+                assert DatetimeUtil.get_time_24_from_dt(dt) == "12:30:00"
+                dt = datetime(2024, 1, 1, 0, 30, 0)
+                assert DatetimeUtil.get_time_24_from_dt(dt) == "00:30:00"
+                dt = datetime(2024, 1, 1, 11, 30, 0)
+                assert DatetimeUtil.get_time_24_from_dt(dt) == "11:30:00"
+                dt = datetime(2024, 1, 1, 23, 59, 59)
+                assert DatetimeUtil.get_time_24_from_dt(dt) == "23:59:59"
+                dt = datetime(2024, 1, 1, 17, 23, 59, 999999)
+                assert DatetimeUtil.get_time_24_from_dt(dt) == "17:23:59"
+
+            with allure.step("步骤3:测试获取datetime对象的时间不带秒"):
+                dt = datetime(2024, 1, 1, 13, 30, 0)
+                assert DatetimeUtil.get_time_24_from_dt(dt, show_seconds=False) == "13:30"
+                dt = datetime(2024, 1, 1, 12, 30, 0)
+                assert DatetimeUtil.get_time_from_dt(dt, show_seconds=False) == "12:30 PM"
+
+        @allure.title("测试获取dt日期所在的那一周的周一日期对象")
+        def test_get_week_start_dt(self) -> None:
+            dt = datetime(2024, 9, 2)
+            assert DatetimeUtil.get_week_monday_by_dt(dt) == datetime(2024, 9, 2)
+            dt = datetime(2024, 9, 3)
+            assert DatetimeUtil.get_week_monday_by_dt(dt) == datetime(2024, 9, 2)
+            dt = datetime(2024, 9, 4)
+            assert DatetimeUtil.get_week_monday_by_dt(dt) == datetime(2024, 9, 2)
+            dt = datetime(2024, 9, 5)
+            assert DatetimeUtil.get_week_monday_by_dt(dt) == datetime(2024, 9, 2)
+            dt = datetime(2024, 9, 6)
+            assert DatetimeUtil.get_week_monday_by_dt(dt) == datetime(2024, 9, 2)
+            dt = datetime(2024, 9, 7)
+            assert DatetimeUtil.get_week_monday_by_dt(dt) == datetime(2024, 9, 2)
+
     @allure.story("判断时间、日期属性")
     @allure.description("工具类支持判断时间、日期的属性，如是否闰年、是否同一天、是否同一月、是否同一年等")
     class TestDtProperty:
