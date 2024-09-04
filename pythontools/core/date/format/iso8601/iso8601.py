@@ -38,7 +38,7 @@ class ISO8601:
         Parameters
         ----------
         matches : dict[str, str]
-            匹配对象
+            匹配对象, :py:class:`Match`.groupdict()返回值
         default_timezone : timezone | None, optional
             默认时区, by default UTC
 

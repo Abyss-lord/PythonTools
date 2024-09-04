@@ -1378,6 +1378,10 @@ class DatetimeUtil:
         return age
 
     @classmethod
+    def get_weeks_of_month(cls, year: int, month: int, start: int) -> int:
+        raise NotImplementedError()
+
+    @classmethod
     def nanos_to_seconds(cls, duration: int) -> float:
         """
         纳秒转秒
@@ -1431,6 +1435,158 @@ class DatetimeUtil:
         return Week.get_week(day_of_week + 1)
 
     @classmethod
+    def get_week_monday_by_dt(cls, dt: datetime) -> datetime:
+        """
+        获取指定日期所在周的星期一日期
+
+        Parameters
+        ----------
+        dt : datetime
+            待获取日期对象
+
+        Returns
+        -------
+        datetime
+            日期所在周的星期一日期
+        """
+        return None if dt is None else dt - timedelta(days=dt.weekday())
+
+    @classmethod
+    def get_hour_from_dt(cls, dt: datetime) -> str:
+        """
+        获取指定日期的小时字符串
+
+        Parameters
+        ----------
+        dt : datetime
+            待获取日期对象
+
+        Returns
+        -------
+        str
+            指定日期的小时数
+        """
+        return cls._process_leading_zeros(dt.strftime("%I")) if dt is not None else ""
+
+    @classmethod
+    def get_24_hour_from_dt(cls, dt: datetime) -> str:
+        """
+        获取指定日期的小时字符串(24小时制)
+
+        Parameters
+        ----------
+        dt : datetime
+            待获取日期对象
+
+        Returns
+        -------
+        str
+            指定日期的小时数(24小时制)
+        """
+        return cls._process_leading_zeros(dt.strftime("%H")) if dt is not None else ""
+
+    @classmethod
+    def get_minute_from_dt(cls, dt: datetime) -> str:
+        """
+        获取指定日期的分钟字符串
+
+        Parameters
+        ----------
+        dt : datetime
+            待获取日期对象
+
+        Returns
+        -------
+        str
+            指定日期对象的分钟字符串
+        """
+        return cls._process_leading_zeros(str(dt.minute)) if dt is not None else ""
+
+    @classmethod
+    def get_second_from_dt(cls, dt: datetime) -> str:
+        """
+        获取指定日期的秒字符串
+
+        Parameters
+        ----------
+        dt : datetime
+            待获取日期对象
+
+        Returns
+        -------
+        str
+            指定日期对象的秒字符串
+        """
+        return cls._process_leading_zeros(str(dt.second)) if dt is not None else ""
+
+    @classmethod
+    def get_am_or_pm_from_dt(cls, dt: datetime) -> str:
+        """
+        返回给定日期对象表示的上午还是下午
+
+        Parameters
+        ----------
+        dt : datetime
+            待获取日期对象
+
+        Returns
+        -------
+        str
+            如果日期对象表示的时刻是上午, 则返回 "AM", 如果日期对象表示的时刻是下午, 则返回 "PM"
+        """
+        return dt.strftime("%p").upper()
+
+    @classmethod
+    def get_time_24_from_dt(
+        cls,
+        dt: datetime,
+        *,
+        show_seconds: bool = True,
+    ) -> str:
+        """
+        获取指定日期的24小时制时间字符串
+
+        Parameters
+        ----------
+        dt : datetime
+            待获取日期对象
+        show_seconds : bool, optional
+            是否显示秒, 默认为 True
+
+        Returns
+        -------
+        str
+            指定日期对象的24小时制时间字符串
+        """
+        format_str = "%H:%M:%S" if show_seconds else "%H:%M"
+        return dt.strftime(format_str) if dt is not None else ""
+
+    @classmethod
+    def get_time_from_dt(
+        cls,
+        dt: datetime,
+        *,
+        show_seconds: bool = True,
+    ) -> str:
+        """
+        获取指定日期的12小时制时间字符串
+
+        Parameters
+        ----------
+        dt : datetime
+            待获取日期对象
+        show_seconds : bool, optional
+            是否显示秒, 默认为 True
+
+        Returns
+        -------
+        str
+            指定日期对象的12小时制时间字符串
+        """
+        format_str = "%I:%M:%S %p" if show_seconds else "%I:%M %p"
+        return dt.strftime(format_str) if dt is not None else ""
+
+    @classmethod
     def convert_time(cls, value: int | float, from_unit: TimeUnit, to_unit: TimeUnit) -> int | float:
         if value is None or from_unit is None or to_unit is None:
             raise ValueError("value cannot be None")
@@ -1452,10 +1608,7 @@ class DatetimeUtil:
         str
             转换后的字符串
         """
-        if dt is None:
-            raise TypeError("dt cannot be None")
-
-        return dt.isoformat()
+        return dt.isoformat() if dt is not None else ""
 
     @classmethod
     def parse_period(cls, period: str) -> timedelta:
@@ -1808,3 +1961,7 @@ class DatetimeUtil:
     @classmethod
     def _is_range_contain(cls, min_val: int, max_val: int, val: int) -> bool:
         return min_val <= val <= max_val
+
+    @classmethod
+    def _process_leading_zeros(cls, time_value: str) -> str:
+        return time_value.zfill(2)
