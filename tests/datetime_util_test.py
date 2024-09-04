@@ -510,9 +510,7 @@ class TestDateTimeUtil:
                 dt = DatetimeUtil.get_random_datetime()
                 res = DatetimeUtil.datetime_to_ISO8601(dt)
                 logger.debug(f"{dt=}, {res=}")
-
-            with pytest.raises(TypeError):
-                DatetimeUtil.datetime_to_ISO8601(None)
+                assert DatetimeUtil.datetime_to_ISO8601(None) == ""
 
     @allure.story("其他功能")
     @allure.description("工具类提供其他功能，如获更精确的休眠等")
