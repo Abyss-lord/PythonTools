@@ -22,7 +22,7 @@ import pytest
 from faker import Faker
 from loguru import logger
 
-from .context_test import DatetimeUtil, Quarter, TimeUnit
+from .context_test import DatetimeUtil, Quarter, TimeUnit, Week
 
 BASIC_FAKE = Faker()
 BASIC_CHINESE_FAKE = Faker("zh_CN")
@@ -289,6 +289,99 @@ class TestDateTimeUtil:
             assert DatetimeUtil.get_week_monday_by_dt(dt) == datetime(2024, 9, 2)
             dt = datetime(2024, 9, 7)
             assert DatetimeUtil.get_week_monday_by_dt(dt) == datetime(2024, 9, 2)
+
+        @allure.title("测试获取一年中所有的 date 对象")
+        def test_get_all_dates_in_year(self) -> None:
+            with allure.step("步骤1:测试获取所有日期"):
+                lst_2024 = DatetimeUtil.get_all_dates_in_year(2024)
+                assert len(lst_2024) == 366
+                assert lst_2024[0] == date(2024, 1, 1)
+                assert lst_2024[-1] == date(2024, 12, 31)
+
+                lst_2023 = DatetimeUtil.get_all_dates_in_year(2023)
+                assert len(lst_2023) == 365
+                assert lst_2023[0] == date(2023, 1, 1)
+                assert lst_2023[-1] == date(2023, 12, 31)
+
+            with allure.step("步骤2:测试获取所有的周一"):
+                lst_2024_week_mondays = DatetimeUtil.get_all_mondays_in_year(2024)
+                s = [d.weekday() == Week.MONDAY.get_value() for d in lst_2024_week_mondays]
+                assert all(s)
+
+            with allure.step("步骤3:测试获取所有的周二"):
+                lst_2024_week_tuesdays = DatetimeUtil.get_all_tuesdays_in_year(2024)
+                s = [d.weekday() == Week.TUESDAY.get_value() for d in lst_2024_week_tuesdays]
+                assert all(s)
+
+            with allure.step("步骤4:测试获取所有的周三"):
+                lst_2024_week_wednesdays = DatetimeUtil.get_all_wednesdays_in_year(2024)
+                s = [d.weekday() == Week.WEDNESDAY.get_value() for d in lst_2024_week_wednesdays]
+                assert all(s)
+
+            with allure.step("步骤5:测试获取所有的周四"):
+                lst_2024_week_thursdays = DatetimeUtil.get_all_thursdays_in_year(2024)
+                s = [d.weekday() == Week.THURSDAY.get_value() for d in lst_2024_week_thursdays]
+                assert all(s)
+
+            with allure.step("步骤6:测试获取所有的周五"):
+                lst_2024_week_fridays = DatetimeUtil.get_all_fridays_in_year(2024)
+                s = [d.weekday() == Week.FRIDAY.get_value() for d in lst_2024_week_fridays]
+                assert all(s)
+
+            with allure.step("步骤7:测试获取所有的周六"):
+                lst_2024_week_saturdays = DatetimeUtil.get_all_saturdays_in_year(2024)
+                s = [d.weekday() == Week.SATURDAY.get_value() for d in lst_2024_week_saturdays]
+                assert all(s)
+
+            with allure.step("步骤8:测试获取所有的周日"):
+                lst_2024_week_sundays = DatetimeUtil.get_all_sundays_in_year(2024)
+                s = [d.weekday() == Week.SUNDAY.get_value() for d in lst_2024_week_sundays]
+                assert all(s)
+
+        @allure.title("测试获取给定的星期几")
+        def test_get_weekday_by_date(self) -> None:
+            with allure.step("步骤1:测试获取下一个星期几的日期"):
+                assert DatetimeUtil.get_upcoming_monday(date(2024, 8, 28)) == date(2024, 9, 2)
+                assert DatetimeUtil.get_upcoming_tuesday(date(2024, 8, 28)) == date(2024, 9, 3)
+                assert DatetimeUtil.get_upcoming_wednesday(date(2024, 8, 28)) == date(2024, 9, 4)
+                assert DatetimeUtil.get_upcoming_thursday(date(2024, 8, 28)) == date(2024, 8, 29)
+                assert DatetimeUtil.get_upcoming_friday(date(2024, 8, 28)) == date(2024, 8, 30)
+                assert DatetimeUtil.get_upcoming_saturday(date(2024, 8, 28)) == date(2024, 8, 31)
+                assert DatetimeUtil.get_upcoming_sunday(date(2024, 8, 28)) == date(2024, 9, 1)
+
+            with allure.step("步骤2:测试获取上一个星期几的日期"):
+                assert DatetimeUtil.get_last_monday(date(2024, 9, 4)) == date(2024, 9, 2)
+                assert DatetimeUtil.get_last_tuesday(date(2024, 9, 4)) == date(2024, 9, 3)
+                assert DatetimeUtil.get_last_wednesday(date(2024, 9, 4)) == date(2024, 9, 4)
+                assert DatetimeUtil.get_last_thursday(date(2024, 9, 4)) == date(2024, 8, 29)
+                assert DatetimeUtil.get_last_friday(date(2024, 9, 4)) == date(2024, 8, 30)
+                assert DatetimeUtil.get_last_saturday(date(2024, 9, 4)) == date(2024, 8, 31)
+                assert DatetimeUtil.get_last_sunday(date(2024, 9, 4)) == date(2024, 9, 1)
+
+            with allure.step("步骤3:测试获取给定日期最近的星期几"):
+                assert DatetimeUtil.get_closest_monday(date(2024, 9, 6)) == date(2024, 9, 9)
+                assert DatetimeUtil.get_closest_tuesday(date(2024, 9, 6)) == date(2024, 9, 3)
+                assert DatetimeUtil.get_closest_wednesday(date(2024, 9, 6)) == date(2024, 9, 4)
+                assert DatetimeUtil.get_closest_thursday(date(2024, 9, 6)) == date(2024, 9, 5)
+                assert DatetimeUtil.get_closest_friday(date(2024, 9, 6)) == date(2024, 9, 6)
+                assert DatetimeUtil.get_closest_saturday(date(2024, 9, 6)) == date(2024, 9, 7)
+                assert DatetimeUtil.get_closest_sunday(date(2024, 9, 6)) == date(2024, 9, 8)
+
+                assert DatetimeUtil.get_closest_monday(date(2024, 9, 2)) == date(2024, 9, 2)
+                assert DatetimeUtil.get_closest_tuesday(date(2024, 9, 2)) == date(2024, 9, 3)
+                assert DatetimeUtil.get_closest_wednesday(date(2024, 9, 2)) == date(2024, 9, 4)
+                assert DatetimeUtil.get_closest_thursday(date(2024, 9, 2)) == date(2024, 9, 5)
+                assert DatetimeUtil.get_closest_friday(date(2024, 9, 2)) == date(2024, 8, 30)
+                assert DatetimeUtil.get_closest_saturday(date(2024, 9, 2)) == date(2024, 8, 31)
+                assert DatetimeUtil.get_closest_sunday(date(2024, 9, 2)) == date(2024, 9, 1)
+
+                assert DatetimeUtil.get_closest_monday(date(2024, 9, 4)) == date(2024, 9, 2)
+                assert DatetimeUtil.get_closest_tuesday(date(2024, 9, 4)) == date(2024, 9, 3)
+                assert DatetimeUtil.get_closest_wednesday(date(2024, 9, 4)) == date(2024, 9, 4)
+                assert DatetimeUtil.get_closest_thursday(date(2024, 9, 4)) == date(2024, 9, 5)
+                assert DatetimeUtil.get_closest_friday(date(2024, 9, 4)) == date(2024, 9, 6)
+                assert DatetimeUtil.get_closest_saturday(date(2024, 9, 4)) == date(2024, 9, 7)
+                assert DatetimeUtil.get_closest_sunday(date(2024, 9, 4)) == date(2024, 9, 1)
 
     @allure.story("判断时间、日期属性")
     @allure.description("工具类支持判断时间、日期的属性，如是否闰年、是否同一天、是否同一月、是否同一年等")
