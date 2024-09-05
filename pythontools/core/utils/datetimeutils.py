@@ -24,6 +24,7 @@ import pytz
 
 from pythontools.core.constants.datetime_constant import Month, Quarter, TimeUnit, Week
 from pythontools.core.date.relativedelta import relativedelta
+from pythontools.core.errors import UnsupportedDateType
 from pythontools.core.utils.basicutils import StringUtil
 from pythontools.core.utils.randomutils import RandomUtil
 
@@ -311,6 +312,440 @@ class DatetimeUtil:
             dt = cls.local_now()
 
         return cls.offset_month(dt, -1)
+
+    @classmethod
+    def get_upcoming_day(cls, dt: datetime | date, weekday: Week) -> date:
+        """
+        获取指定日期的下一个指定星期的日期
+
+        Parameters
+        ----------
+        dt : datetime | date
+            指定的日期
+        weekday : Week
+            指定星期
+
+        Returns
+        -------
+        date
+            指定日期的下一个指定星期的日期
+        """
+        cnt_days_in_week = 7
+        cleaned_dt = cls.get_cleaned_date(dt)
+        current_weekday = dt.weekday()
+        days_until_day = (
+            cnt_days_in_week + weekday.get_value() - current_weekday
+        ) % cnt_days_in_week or cnt_days_in_week
+
+        return cleaned_dt + relativedelta(days=days_until_day)
+
+    @classmethod
+    def get_upcoming_monday(cls, dt: datetime | date) -> date:
+        """
+        获取指定日期的下一个星期一的日期
+
+        Parameters
+        ----------
+        dt : datetime | date
+            指定日期
+
+        Returns
+        -------
+        date
+            指定日期的下一个星期一的日期
+        """
+        return cls.get_upcoming_day(dt, Week.MONDAY)
+
+    @classmethod
+    def get_upcoming_tuesday(cls, dt: datetime | date) -> date:
+        """
+        获取指定日期的下一个星期二的日期
+
+        Parameters
+        ----------
+        dt : datetime | date
+            指定日期
+
+        Returns
+        -------
+        date
+            指定日期的下一个星期二的日期
+        """
+        return cls.get_upcoming_day(dt, Week.TUESDAY)
+
+    @classmethod
+    def get_upcoming_wednesday(cls, dt: datetime | date) -> date:
+        """
+        获取指定日期的下一个星期三的日期
+
+        Parameters
+        ----------
+        dt : datetime | date
+            指定日期
+
+        Returns
+        -------
+        date
+            指定日期的下一个星期三的日期
+        """
+        return cls.get_upcoming_day(dt, Week.WEDNESDAY)
+
+    @classmethod
+    def get_upcoming_thursday(cls, dt: datetime | date) -> date:
+        """
+        获取指定日期的下一个星期四的日期
+
+        Parameters
+        ----------
+        dt : datetime | date
+            指定日期
+
+        Returns
+        -------
+        date
+            指定日期的下一个星期四的日期
+        """
+        return cls.get_upcoming_day(dt, Week.THURSDAY)
+
+    @classmethod
+    def get_upcoming_friday(cls, dt: datetime | date) -> date:
+        """
+        获取指定日期的下一个星期五的日期
+
+        Parameters
+        ----------
+        dt : datetime | date
+            指定日期
+
+        Returns
+        -------
+        date
+            指定日期的下一个星期五的日期
+        """
+        return cls.get_upcoming_day(dt, Week.FRIDAY)
+
+    @classmethod
+    def get_upcoming_saturday(cls, dt: datetime | date) -> date:
+        """
+        获取指定日期的下一个星期六的日期
+
+        Parameters
+        ----------
+        dt : datetime | date
+            指定日期
+
+        Returns
+        -------
+        date
+            指定日期的下一个星期六的日期
+        """
+        return cls.get_upcoming_day(dt, Week.SATURDAY)
+
+    @classmethod
+    def get_upcoming_sunday(cls, dt: datetime | date) -> date:
+        """
+        获取指定日期的下一个星期日的日期
+
+        Parameters
+        ----------
+        dt : datetime | date
+            指定日期
+
+        Returns
+        -------
+        date
+            指定日期的下一个星期日的日期
+        """
+        return cls.get_upcoming_day(dt, Week.SUNDAY)
+
+    @classmethod
+    def get_last_day(cls, dt: datetime | date, weekday: Week) -> date:
+        """
+        获取指定日期的上一个指定星期的日期
+
+        Parameters
+        ----------
+        dt : datetime | date
+            指定的日期
+        weekday : Week
+            指定星期
+
+        Returns
+        -------
+        date
+            指定日期的上一个指定星期的日期
+        """
+        cnt_days_in_week = 7
+        cleaned_dt = cls.get_cleaned_date(dt)
+        current_weekday = dt.weekday()
+
+        days_until_day = (current_weekday - weekday.get_value()) % cnt_days_in_week
+
+        return cleaned_dt - relativedelta(days=days_until_day)
+
+    @classmethod
+    def get_last_monday(cls, dt: datetime | date) -> date:
+        """
+        根据指定日期，获取上一个周一的日期
+
+        Parameters
+        ----------
+        dt : datetime | date
+            指定的日期
+
+        Returns
+        -------
+        date
+            根据指定的日期，获取到的上一个周一的日期
+        """
+        return cls.get_last_day(dt, Week.MONDAY)
+
+    @classmethod
+    def get_last_tuesday(cls, dt: datetime | date) -> date:
+        """
+        根据指定日期，获取上一个周二的日期
+
+        Parameters
+        ----------
+        dt : datetime | date
+            指定的日期
+
+        Returns
+        -------
+        date
+            根据指定的日期，获取到的上一个周二的日期
+        """
+        return cls.get_last_day(dt, Week.TUESDAY)
+
+    @classmethod
+    def get_last_wednesday(cls, dt: datetime | date) -> date:
+        """
+        根据指定的日期，获取上一个周三的日期
+
+        Parameters
+        ----------
+        dt : datetime | date
+            指定的日期
+
+        Returns
+        -------
+        date
+            根据指定的日期，获取到的上一个周三的日期
+        """
+        return cls.get_last_day(dt, Week.WEDNESDAY)
+
+    @classmethod
+    def get_last_thursday(cls, dt: datetime | date) -> date:
+        """
+        根据指定的日期，获取上一个周四的日期
+
+        Parameters
+        ----------
+        dt : datetime | date
+            指定的日期
+
+        Returns
+        -------
+        date
+            根据指定的日期，获取到的上一个周四的日期
+        """
+        return cls.get_last_day(dt, Week.THURSDAY)
+
+    @classmethod
+    def get_last_friday(cls, dt: datetime | date) -> date:
+        """
+        根据指定的日期，获取上一个周五的日期
+
+        Parameters
+        ----------
+        dt : datetime | date
+            指定的日期
+
+        Returns
+        -------
+        date
+            根据指定的日期，获取到的上一个周五的日期
+        """
+        return cls.get_last_day(dt, Week.FRIDAY)
+
+    @classmethod
+    def get_last_saturday(cls, dt: datetime | date) -> date:
+        """
+        根据指定的日期，获取上一个周六的日期
+
+        Parameters
+        ----------
+        dt : datetime | date
+            指定的日期
+
+        Returns
+        -------
+        date
+            根据指定的日期，获取到的上一个周六的日期
+        """
+        return cls.get_last_day(dt, Week.SATURDAY)
+
+    @classmethod
+    def get_last_sunday(cls, dt: datetime | date) -> date:
+        """
+        根据指定的日期，获取上一个周日的日期
+
+        Parameters
+        ----------
+        dt : datetime | date
+            指定的日期
+
+        Returns
+        -------
+        date
+            根据指定的日期，获取到的上一个周日的日期
+        """
+        return cls.get_last_day(dt, Week.SUNDAY)
+
+    @classmethod
+    def get_closest_weekday(cls, dt: datetime | date, weekday: Week) -> date:
+        """
+        获取指定日期的最近的指定星期的日期
+
+        Parameters
+        ----------
+        dt : datetime | date
+            指定日期
+        weekday : Week
+            指定星期
+
+        Returns
+        -------
+        date
+            指定日期的最近的指定星期的日期
+        """
+        dt = cls.get_cleaned_date(dt)
+        last_weekday = cls.get_last_day(dt, weekday)
+        upcoming_weekday = cls.get_upcoming_day(dt, weekday)
+
+        if abs((dt - last_weekday).days) < abs((dt - upcoming_weekday).days):
+            return last_weekday
+        else:
+            return upcoming_weekday
+
+    @classmethod
+    def get_closest_monday(cls, dt: datetime | date) -> date:
+        """
+        根据给定的日期，获取最近的星期一的日期
+
+        Parameters
+        ----------
+        dt : datetime | date
+            给定的日期
+
+        Returns
+        -------
+        date
+            根据给定的日期获取到的最近的星期一的日期
+        """
+        return cls.get_closest_weekday(dt, Week.MONDAY)
+
+    @classmethod
+    def get_closest_tuesday(cls, dt: datetime | date) -> date:
+        """
+        根据给定的日期，获取最近的星期二的日期
+
+        Parameters
+        ----------
+        dt : datetime | date
+            给定的日期
+
+        Returns
+        -------
+        date
+            根据给定的日期获取到的最近的星期二的日期
+        """
+        return cls.get_closest_weekday(dt, Week.TUESDAY)
+
+    @classmethod
+    def get_closest_wednesday(cls, dt: datetime | date) -> date:
+        """
+        根据给定的日期，获取最近的星期三的日期
+
+        Parameters
+        ----------
+        dt : datetime | date
+            给定的日期
+
+        Returns
+        -------
+        date
+            根据给定的日期获取到的最近的星期三的日期
+        """
+        return cls.get_closest_weekday(dt, Week.WEDNESDAY)
+
+    @classmethod
+    def get_closest_thursday(cls, dt: datetime | date) -> date:
+        """
+        根据给定的日期，获取最近的星期四的日期
+
+        Parameters
+        ----------
+        dt : datetime | date
+            给定的日期
+
+        Returns
+        -------
+        date
+            根据给定的日期获取到的最近的星期四的日期
+        """
+        return cls.get_closest_weekday(dt, Week.THURSDAY)
+
+    @classmethod
+    def get_closest_friday(cls, dt: datetime | date) -> date:
+        """
+        根据给定的日期，获取最近的星期五的日期
+
+        Parameters
+        ----------
+        dt : datetime | date
+            给定的日期
+
+        Returns
+        -------
+        date
+            根据给定的日期获取到的最近的星期五的日期
+        """
+        return cls.get_closest_weekday(dt, Week.FRIDAY)
+
+    @classmethod
+    def get_closest_saturday(cls, dt: datetime | date) -> date:
+        """
+        根据给定的日期，获取最近的星期六的日期
+
+        Parameters
+        ----------
+        dt : datetime | date
+            给定的日期
+
+        Returns
+        -------
+        date
+            根据给定的日期获取到的最近的星期六的日期
+        """
+        return cls.get_closest_weekday(dt, Week.SATURDAY)
+
+    @classmethod
+    def get_closest_sunday(cls, dt: datetime | date) -> date:
+        """
+        根据给定的日期，获取最近的星期日的日期
+
+        Parameters
+        ----------
+        dt : datetime | date
+            给定的日期
+
+        Returns
+        -------
+        date
+            根据给定的日期获取到的最近的星期日的日期
+        """
+        return cls.get_closest_weekday(dt, Week.SUNDAY)
 
     @classmethod
     def offset_year(cls, dt: datetime, offset: int) -> datetime:
@@ -1449,7 +1884,7 @@ class DatetimeUtil:
         datetime
             日期所在周的星期一日期
         """
-        return None if dt is None else dt - timedelta(days=dt.weekday())
+        return None if dt is None else dt - relativedelta(days=dt.weekday())
 
     @classmethod
     def get_hour_from_dt(cls, dt: datetime) -> str:
@@ -1587,7 +2022,206 @@ class DatetimeUtil:
         return dt.strftime(format_str) if dt is not None else ""
 
     @classmethod
+    def get_cleaned_date(
+        cls,
+        day: datetime | date,
+        keep_datetime=False,
+    ) -> date:
+        """
+        返回一个"干净"的 :py:class:`datetime.date` 对象, \n
+        * 可以保证原始 :py:class:`datetime.datetime` 或者 :py:class:`datetime.date` 对象不变,
+            只返回 :py:class:`datetime.date` 对象
+        * 可以将任何 date 的鸭子类型转换成 date 对象
+
+        Parameters
+        ----------
+        day : datetime | date
+            待转换对象
+        keep_datetime : bool, optional
+            如果是 datetime 对象, 是否保留时间信息和时区信息, by default False
+
+        Returns
+        -------
+        date
+            转换后的 date 类型
+
+        Raises
+        ------
+        UnsupportedDateType
+            如果给定的对象不是 date 或 datetime 类型, 则抛出 UnsupportedDateType 异常
+
+        NOTES:
+        ------
+        ref: https://github.com/workalendar/workalendar/blob/b131f2b64377e951654652a9a32e72a34f34e88f/workalendar/core.py#L35
+        """
+        if not isinstance(day, (date | datetime)):
+            raise UnsupportedDateType(f"`{day}` is of unsupported type ({type(day)})")
+        if not keep_datetime and (hasattr(day, "date") and callable(day.date)):
+            day = day.date()
+        return day
+
+    @classmethod
+    def get_all_dates_in_year(cls, year: int) -> list[date]:
+        """
+        获取指定年份的所有日期
+
+        Parameters
+        ----------
+        year : int
+            待获取年份
+
+        Returns
+        -------
+        list[date]
+            指定年份的所有日期
+        """
+        return [
+            date(year, month, day) for month in range(1, 13) for day in range(1, cls.days_in_month(year, month) + 1)
+        ]
+
+    @classmethod
+    def get_all_mondays_in_year(cls, year: int) -> list[date]:
+        """
+        获取给定年份的所有星期一日期
+
+        Parameters
+        ----------
+        year : int
+            给定的年份
+
+        Returns
+        -------
+        list[date]
+            给定年份的所有星期一日期
+        """
+        return [i for i in cls.get_all_dates_in_year(year) if i.weekday() == Week.MONDAY.get_value()]
+
+    @classmethod
+    def get_all_tuesdays_in_year(cls, year: int) -> list[date]:
+        """
+        获取给定年份的所有星期二日期
+
+        Parameters
+        ----------
+        year : int
+            给定的年份
+
+        Returns
+        -------
+        list[date]
+            给定年份的所有星期二日期
+        """
+        return [i for i in cls.get_all_dates_in_year(year) if i.weekday() == Week.TUESDAY.get_value()]
+
+    @classmethod
+    def get_all_wednesdays_in_year(cls, year: int) -> list[date]:
+        """
+        获取给定年份的所有星期三日期
+
+        Parameters
+        ----------
+        year : int
+            给定的年份
+
+        Returns
+        -------
+        list[date]
+            给定年份的所有星期三日期
+        """
+        return [i for i in cls.get_all_dates_in_year(year) if i.weekday() == Week.WEDNESDAY.get_value()]
+
+    @classmethod
+    def get_all_thursdays_in_year(cls, year: int) -> list[date]:
+        """
+        获取给定年份的所有星期四日期
+
+        Parameters
+        ----------
+        year : int
+            给定年份
+
+        Returns
+        -------
+        list[date]
+            给定年份的所有星期四日期
+        """
+        return [i for i in cls.get_all_dates_in_year(year) if i.weekday() == Week.THURSDAY.get_value()]
+
+    @classmethod
+    def get_all_fridays_in_year(cls, year: int) -> list[date]:
+        """
+        获取给定年份的所有星期五日期
+
+        Parameters
+        ----------
+        year : int
+            给定年份
+
+        Returns
+        -------
+        list[date]
+            给定年份的所有星期五日期
+        """
+        return [i for i in cls.get_all_dates_in_year(year) if i.weekday() == Week.FRIDAY.get_value()]
+
+    @classmethod
+    def get_all_saturdays_in_year(cls, year: int) -> list[date]:
+        """
+        获取给定年份的所有星期六日期
+
+        Parameters
+        ----------
+        year : int
+            给定年份
+
+        Returns
+        -------
+        list[date]
+            给定年份的所有星期六日期
+        """
+        return [i for i in cls.get_all_dates_in_year(year) if i.weekday() == Week.SATURDAY.get_value()]
+
+    @classmethod
+    def get_all_sundays_in_year(cls, year: int) -> list[date]:
+        """
+        获取给定年份的所有星期日日期
+
+        Parameters
+        ----------
+        year : int
+            给定年份
+
+        Returns
+        -------
+        list[date]
+            给定年份的所有星期日日期
+        """
+        return [i for i in cls.get_all_dates_in_year(year) if i.weekday() == Week.SUNDAY.get_value()]
+
+    @classmethod
     def convert_time(cls, value: int | float, from_unit: TimeUnit, to_unit: TimeUnit) -> int | float:
+        """
+        根据给定的时间单位转换时间
+
+        Parameters
+        ----------
+        value : int | float
+            待转换时间值
+        from_unit : TimeUnit
+            初始时间单位
+        to_unit : TimeUnit
+            目标时间单位
+
+        Returns
+        -------
+        int | float
+            转换后的时间值
+
+        Raises
+        ------
+        ValueError
+            如果 from_unit 或 to_unit 为 None, 则抛出 ValueError
+        """
         if value is None or from_unit is None or to_unit is None:
             raise ValueError("value cannot be None")
 
