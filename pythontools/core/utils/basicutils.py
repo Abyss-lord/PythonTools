@@ -15,6 +15,7 @@ Change Activity:
 # here put the import lib
 
 import itertools as it
+import random
 import string
 import sys
 import typing
@@ -1104,9 +1105,7 @@ class StringUtil(SequenceUtil):
         bool
             字符串是否全为空白字符
         """
-        if s is None:
-            return False
-        return True if cls.get_length(s) == 0 else all(c.isspace() for c in s)
+        return all(c.isspace() for c in s) if s is not None else False
 
     @classmethod
     def is_ascii_control(cls, s: str) -> bool:
@@ -1378,6 +1377,33 @@ class StringUtil(SequenceUtil):
         if cls.is_empty(suffixes) or cls.is_blank(s):
             return False
         return any(cls.is_ends_with(s, suffix, case_insensitive=case_insensitive) for suffix in suffixes)
+
+    @classmethod
+    def is_mixed_case(cls, s: str) -> bool:
+        """
+        判断给定的字符串是否包含大写字母和小写字母
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+
+        Returns
+        -------
+        bool
+            如果字符串包含大写字母和小写字母则返回True, 否则返回False
+        """
+        if cls.is_empty(s) or cls.get_length(s) == 1:
+            return False
+        contain_lower_case = False
+        contain_upper_case = False
+        for c in s:
+            if c.islower():
+                contain_lower_case = True
+            elif c.isupper():
+                contain_upper_case = True
+
+        return contain_lower_case and contain_upper_case
 
     @classmethod
     def contain_digit(cls, s: str) -> bool:
@@ -2147,6 +2173,48 @@ class StringUtil(SequenceUtil):
         return "".join(common_str_lst)
 
     @classmethod
+    def get_most_common_letter(cls, text: str) -> str:
+        """
+        获取给定字符串中最多的字母
+
+        Parameters
+        ----------
+        text : str
+            待检测字符串
+
+        Returns
+        -------
+        str
+            字符串中最多的字母
+        """
+        text = text.lower()
+        return max(string.ascii_lowercase, key=text.count)
+
+    @classmethod
+    def get_right(cls, s: str, len: int) -> str:
+        """
+        获取最右边的字符串
+
+        Parameters
+        ----------
+        s : str
+            待获取字符串
+        len : int
+            获取的长度
+
+        Returns
+        -------
+        str
+            获取后的字符串
+        """
+        if s is None or len < 0:
+            return cls.EMPTY
+        if len >= (s_len := cls.get_length(s)):
+            return s
+
+        return cls.sub_sequence(s, s_len - len)
+
+    @classmethod
     def group_by_length(cls, s: str, n: int) -> list[str]:
         """
         根据制定的长度分组字符串
@@ -2206,6 +2274,58 @@ class StringUtil(SequenceUtil):
         sign_str = "-" if negative_flg else ""
 
         return f"{sign_str}{integer_str}{decimal_str}"
+
+    @classmethod
+    def unwrap(cls, s: str, wrap_str: str) -> str:
+        """
+        折叠字符串中给定的字符
+
+        Parameters
+        ----------
+        s : str
+            待折叠字符串
+        wrap_str : str
+            给定的字符
+
+        Returns
+        -------
+        str
+            折叠后的字符串
+        """
+        if cls.is_empty(s) or cls.get_length(wrap_str) != 1 or wrap_str == CharPool.NUL or cls.get_length(s) < 2:
+            return s
+
+        start_idx = 0
+        res_lst = []
+
+        while start_idx < len(s):
+            current_char = s[start_idx]
+            if current_char != wrap_str:
+                res_lst.append(current_char)
+            elif SequenceUtil.is_empty(res_lst) or res_lst[-1] != wrap_str:
+                res_lst.append(current_char)
+            start_idx += 1
+
+        return "".join(res_lst)
+
+    @classmethod
+    def shuffle(cls, s: str) -> str:
+        """
+        打乱字符串并返回
+
+        Parameters
+        ----------
+        s : str
+            待打乱字符串
+
+        Returns
+        -------
+        str
+            打乱后的字符串
+        """
+        chars = list(s)
+        random.shuffle(chars)
+        return "".join(chars)
 
     @classmethod
     def append_if_missing(cls, s: str, suffix: str, case_insensitive: bool = True) -> str:

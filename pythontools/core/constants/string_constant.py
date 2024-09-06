@@ -44,6 +44,7 @@ class CharPool:
     COLON: typing.Final[str] = ":"
     AT: typing.Final[str] = "@"
     ASTERISK: typing.Final[str] = "*"
+    NUL = "\0"
 
 
 class DesensitizedType(Enum):
