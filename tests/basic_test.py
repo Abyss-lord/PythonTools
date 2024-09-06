@@ -16,4 +16,9 @@ Change Activity:
 
 
 class TestBasic:
-    pass
+    def test_format_formula(self):
+        for i in range(0, 7):
+            for j in range(0, 7):
+                print(f"{i=}, {j=}, {(7 - (i - j)) % 7}")
+
+            print()

@@ -15,17 +15,22 @@ Change Activity:
 
 # here put the import lib
 import datetime as dt_lib
-from datetime import UTC, datetime, timedelta, timezone
+from datetime import UTC, date, datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Any
 
 from pythontools.core.constants.pattern_pool import PatternPool
+from pythontools.core.date.format.baseformat import BaseFormat
+from pythontools.core.date.format.datepattern import DatePattern
 from pythontools.core.errors import DatetimeParseError
+from pythontools.core.utils.datetimeutils import DatetimeUtil
 from pythontools.core.utils.reutils import ReUtil
 from pythontools.core.validators.datetime_validator import DatetimeValidator
 
 
-class ISO8601:
+class ISO8601(BaseFormat):
+    PATTERN = DatePattern.ISO8601_PATTERN
+
     @classmethod
     def parse_timezone(
         cls,
@@ -89,7 +94,7 @@ class ISO8601:
             如果日期字符串格式不正确则抛出该异常，
         """
         try:
-            if not DatetimeValidator.is_iso8601_datetime(date_string):
+            if not cls.is_match(date_string):
                 raise DatetimeParseError(f"Invalid date string {date_string!r}")
         except Exception as e:
             raise DatetimeParseError from e
@@ -114,6 +119,29 @@ class ISO8601:
             raise DatetimeParseError from e
 
     @classmethod
+    def format_date(
+        cls,
+        date_obj: datetime | date,
+    ) -> str:
+        """
+        将 datetime 对象格式化为 ISO 8601 日期字符串
+
+        Parameters
+        ----------
+        date_obj : datetime
+            datetime 对象
+
+        Returns
+        -------
+        str
+            ISO 8601 日期字符串
+        """
+        datetime_obj = DatetimeUtil.get_cleaned_datetime(date_obj)
+        if datetime_obj.tzinfo is None:
+            date_obj = datetime_obj.replace(tzinfo=UTC)
+        return date_obj.strftime(cls.get_pattern_string())
+
+    @classmethod
     def _FixedOffset(
         cls,
         offset_hours: float,
@@ -127,3 +155,20 @@ class ISO8601:
             ),
             name,
         )
+
+    @classmethod
+    def is_match(cls, date_string: str) -> bool:
+        """
+        判断给定的日期字符串是否匹配 ISO 8601 日期格式
+
+        Parameters
+        ----------
+        date_string : str
+            给定的日期字符串
+
+        Returns
+        -------
+        bool
+            如果匹配 ISO 8601 日期格式则返回 True，否则返回 False
+        """
+        return DatetimeValidator.is_iso8601_datetime(date_string)

@@ -383,6 +383,19 @@ class TestDateTimeUtil:
                 assert DatetimeUtil.get_closest_saturday(date(2024, 9, 4)) == date(2024, 9, 7)
                 assert DatetimeUtil.get_closest_sunday(date(2024, 9, 4)) == date(2024, 9, 1)
 
+        @allure.title("")
+        def test_get_cleaned_obj(self) -> None:
+            dt = datetime(2024, 9, 6, 12, 30, 45, 123456)
+            dt_cleaned = DatetimeUtil.get_cleaned_date(dt)
+            assert dt_cleaned == date(2024, 9, 6)
+
+            dt_cleaned = DatetimeUtil.get_cleaned_datetime(dt)
+            assert dt == dt_cleaned
+
+            dt_obj = date(2024, 9, 6)
+            dt_cleaned = DatetimeUtil.get_cleaned_datetime(dt_obj)
+            assert dt_cleaned == datetime(2024, 9, 6, 0, 0, 0, 0)
+
     @allure.story("判断时间、日期属性")
     @allure.description("工具类支持判断时间、日期的属性，如是否闰年、是否同一天、是否同一月、是否同一年等")
     class TestDtProperty:
