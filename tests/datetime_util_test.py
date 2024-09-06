@@ -22,7 +22,7 @@ import pytest
 from faker import Faker
 from loguru import logger
 
-from .context_test import DatetimeUtil, Quarter, TimeUnit, Week
+from .context_test import ISO8601, RFC822, DatetimeUtil, Quarter, TimeUnit, Week, relativedelta
 
 BASIC_FAKE = Faker()
 BASIC_CHINESE_FAKE = Faker("zh_CN")
@@ -383,7 +383,7 @@ class TestDateTimeUtil:
                 assert DatetimeUtil.get_closest_saturday(date(2024, 9, 4)) == date(2024, 9, 7)
                 assert DatetimeUtil.get_closest_sunday(date(2024, 9, 4)) == date(2024, 9, 1)
 
-        @allure.title("")
+        @allure.title("测试获取干净的 date 对象和 datetime 对象")
         def test_get_cleaned_obj(self) -> None:
             dt = datetime(2024, 9, 6, 12, 30, 45, 123456)
             dt_cleaned = DatetimeUtil.get_cleaned_date(dt)
@@ -395,6 +395,16 @@ class TestDateTimeUtil:
             dt_obj = date(2024, 9, 6)
             dt_cleaned = DatetimeUtil.get_cleaned_datetime(dt_obj)
             assert dt_cleaned == datetime(2024, 9, 6, 0, 0, 0, 0)
+
+        @allure.title("测试日期格式化")
+        def test_format_date(self) -> None:
+            with allure.step("步骤1:测试日期格式化为RFC822格式"):
+                dt = datetime(2024, 9, 6, 12, 30, 45, 123456)
+                rfc_822_str = RFC822.format_date(dt)
+                assert rfc_822_str == "Fri, 06 Sep 2024 12:30:45 "
+            with allure.step("步骤2:测试日期格式化为ISO8601格式"):
+                iso_str = ISO8601.format_date(dt)
+                assert iso_str == "2024-09-06T12:30:45.123456+0000"
 
     @allure.story("判断时间、日期属性")
     @allure.description("工具类支持判断时间、日期的属性，如是否闰年、是否同一天、是否同一月、是否同一年等")
@@ -489,6 +499,17 @@ class TestDateTimeUtil:
                 assert not DatetimeUtil.is_valid_datetime(year=2022, month=13, day=1, hour=23, minute=59, second=59)
                 assert not DatetimeUtil.is_valid_datetime(year=2022, month=2, day=29, hour=23, minute=59, second=59)
                 assert not DatetimeUtil.is_valid_datetime(year=1900, month=2, day=29, hour=23, minute=59, second=59)
+
+            with allure.step("步骤11:测试给定的日期是否是RFC格式"):
+                assert RFC822.is_match("Thu, 01 Jan 2021 12:00:00 GMT")
+                assert RFC822.is_match("Thu, 01 Jan 2021 12:00:00 +0800")
+                assert RFC822.is_match("Thu, 01 Jan 2021 12:00:00 +08:00")
+                assert not RFC822.is_match("Thu, 01 Jan 2021 12:00:00 UTC")
+
+            with allure.step("步骤12:测试给定的日期是否是ISO格式"):
+                assert ISO8601.is_match("2021-01-01T12:00:00Z")
+                assert ISO8601.is_match("2021-01-01T12:00:00+08:00")
+                assert not ISO8601.is_match("2021-01-01T")
 
         @allure.title("测试是否同一年")
         def test_is_same_year(self):
@@ -617,6 +638,23 @@ class TestDateTimeUtil:
                 res = DatetimeUtil.datetime_to_ISO8601(dt)
                 logger.debug(f"{dt=}, {res=}")
                 assert DatetimeUtil.datetime_to_ISO8601(None) == ""
+
+        @allure.title("测试解析周期")
+        def test_parse_period(self):
+            delta = DatetimeUtil.parse_period("10s")
+            assert delta == relativedelta(seconds=10)
+
+            delta = DatetimeUtil.parse_period("1m")
+            assert delta == relativedelta(minutes=1)
+
+            delta = DatetimeUtil.parse_period("2h")
+            assert delta == relativedelta(hours=2)
+
+            delta = DatetimeUtil.parse_period("2D")
+            assert delta == relativedelta(days=2)
+
+            delta = DatetimeUtil.parse_period("3W")
+            assert delta == relativedelta(weeks=3)
 
     @allure.story("其他功能")
     @allure.description("工具类提供其他功能，如获更精确的休眠等")
