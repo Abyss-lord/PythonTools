@@ -30,7 +30,7 @@ from pythontools.core.utils.randomutils import RandomUtil
 
 
 class DatetimeUtil:
-    UNITS = {"s": "seconds", "m": "minutes", "h": "hours", "D": "days", "W": "weeks"}
+    UNITS = {"s": "seconds", "m": "minutes", "h": "hours", "d": "days", "w": "weeks"}
     WTB = [
         "sun",
         "mon",
@@ -2022,6 +2022,36 @@ class DatetimeUtil:
         return dt.strftime(format_str) if dt is not None else ""
 
     @classmethod
+    def get_cleaned_datetime(cls, day: datetime | date) -> datetime:
+        """
+        返回一个干净的 :py:class:`datetime.datetime` 对象, \n
+        * 可以保证原始 :py:class:`datetime.datetime` 对象不变, 只返回 :py:class:`datetime.datetime` 对象
+        * 可以将任何 datetime 的鸭子类型转换成 datetime 对象
+
+        Parameters
+        ----------
+        day : datetime | date
+            待转换对象
+
+        Returns
+        -------
+        datetime
+            转换后干净的对象
+
+        Raises
+        ------
+        UnsupportedDateType
+            如果给定的对象不是 date 或 datetime 类型, 则抛出 UnsupportedDateType 异常
+        """
+        if not isinstance(day, (date | datetime)):
+            raise UnsupportedDateType(f"`{day}` is of unsupported type ({type(day)})")
+        if isinstance(day, datetime):
+            return day
+        if isinstance(day, date):
+            day = datetime.combine(day, datetime.min.time())
+        return datetime.fromtimestamp(day.timestamp())
+
+    @classmethod
     def get_cleaned_date(
         cls,
         day: datetime | date,
@@ -2245,7 +2275,7 @@ class DatetimeUtil:
         return dt.isoformat() if dt is not None else ""
 
     @classmethod
-    def parse_period(cls, period: str) -> timedelta:
+    def parse_period(cls, period: str) -> relativedelta:
         """
         解析周期字符串, 如 "1D" 表示1天, "2W" 表示2周, "3M" 表示3个月, "4Y" 表示4年
 
@@ -2279,7 +2309,7 @@ class DatetimeUtil:
         if unit not in cls.UNITS:
             raise ValueError(f"Invalid unit: {unit}")
         kwargs = {cls.UNITS[unit]: value}
-        return timedelta(**kwargs)
+        return relativedelta(**kwargs)
 
     @classmethod
     def generate_dt_range(
