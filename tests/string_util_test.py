@@ -443,6 +443,14 @@ class TestStringUtil:
                 s = StringUtil.replace_range("hello world", "你好", 0)
                 assert s == "你好llo world"
 
+        @allure.title("测试字符串折叠")
+        def test_string_unwrap(self) -> None:
+            assert StringUtil.unwrap("aa", "a") == "a"
+            assert StringUtil.unwrap("AABabcBAA", "A") == "ABabcBA"
+            assert StringUtil.unwrap("AABabAAAAcBAA", "A") == "ABabAcBA"
+            assert StringUtil.unwrap("#A", "#") == "#A"
+            assert StringUtil.unwrap("A#", "#") == "A#"
+
     @allure.story("字符串编码")
     @allure.description("测试字符串编码,例如罗马数字编码等")
     class TestStringEncode:
