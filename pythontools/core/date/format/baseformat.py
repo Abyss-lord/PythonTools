@@ -14,7 +14,7 @@ Change Activity:
 """
 
 # here put the import lib
-from abc import ABC, abstractmethod
+from abc import ABC
 from datetime import UTC, date, datetime, timezone
 
 from pythontools.core.date.format.datepattern import DatePattern
@@ -23,7 +23,6 @@ from pythontools.core.date.format.datepattern import DatePattern
 class BaseFormat(ABC):
     PATTERN: DatePattern = DatePattern.NORM_YEAR_PATTERN
 
-    @abstractmethod
     @classmethod
     def parse_date(
         cls,
@@ -45,8 +44,8 @@ class BaseFormat(ABC):
         datetime
             返回解析后的 datetime 对象
         """
+        raise NotImplementedError()
 
-    @abstractmethod
     @classmethod
     def format_date(
         cls,
@@ -65,9 +64,8 @@ class BaseFormat(ABC):
         str
             返回格式化后的字符串
         """
-        ...
+        raise NotImplementedError()
 
-    @abstractmethod
     @classmethod
     def is_match(cls, date_string: str) -> bool:
         """
@@ -83,7 +81,7 @@ class BaseFormat(ABC):
         bool
             如果匹配返回 True, 否则返回 False
         """
-        ...
+        raise NotImplementedError()
 
     @classmethod
     def get_pattern_string(cls) -> str:
@@ -96,4 +94,3 @@ class BaseFormat(ABC):
             当前日期格式的字符串表示
         """
         return cls.PATTERN.get_value()
-        ...

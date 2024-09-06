@@ -82,3 +82,28 @@ class DatetimeValidator:
         """
 
         return bool(_ := ReUtil.is_match(PatternPool.ISO8601, datetime_str))
+
+    @classmethod
+    def is_rfc822_datetime(cls, datetime_str: str) -> bool:
+        """
+        验证是否为RFC822格式的日期时间字符串
+
+        Example:
+        ----------
+        >>> Validator.is_rfc822_datetime('Thu, 01 Jan 2021 12:00:00 GMT') # returns True
+        >>> Validator.is_rfc822_datetime('Thu, 01 Jan 2021 12:00:00 +0800') # returns True
+        >>> Validator.is_rfc822_datetime('Thu, 01 Jan 2021 12:00:00') # returns True
+        >>> Validator.is_rfc822_datetime('Thu, 01 Jan 2021 12:00:00 +08:00') # returns False
+
+        Parameters
+        ----------
+        datetime_str : str
+            待检测日期时间字符串
+
+        Returns
+        -------
+        bool
+            如果是合法的RFC822格式的日期时间字符串, 则返回True, 否则返回False
+        """
+
+        return bool(_ := ReUtil.is_match(PatternPool.RFC822, datetime_str))

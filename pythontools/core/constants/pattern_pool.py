@@ -152,7 +152,7 @@ class RegexPool:
     # A 股股票代码
     A_STOCK = r"/^(s[hz]|S[HZ])(000[\d]{3}|002[\d]{3}|300[\d]{3}|600[\d]{3}|60[\d]{4})$/"
     # ISO8601 日期格式
-    iso8601 = r"""(?P<year>[0-9]{4})
+    ISO8601 = r"""(?P<year>[0-9]{4})
     (
         (
             (-(?P<monthdash>[0-9]{1,2}))
@@ -191,6 +191,25 @@ class RegexPool:
     ){0,1}  # YYYY only
     $
     """
+    RFC822 = r"""(?P<weekday>(Mon|Tue|Wed|Thu|Fri|Sat|Sun)),\s        # 匹配星期，如 'Tue'
+(?P<day>[0-9]{2})\s                                  # 匹配日期，两位数字，如 '05'
+(?P<month>(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))\s  # 匹配月份，如 'Sep'
+(?P<year>[0-9]{4})\s                                 # 匹配年份，四位数字，如 '2023'
+(?P<hour>[0-9]{2}):(?P<minute>[0-9]{2}):(?P<second>[0-9]{2})\s # 匹配时间，如 '08:49:37'
+(?P<timezone>
+                        GMT
+                        |
+                        Z
+                        |
+                        (
+                            (?P<tz_sign>[-+])
+                            (?P<tz_hour>[0-9]{2})
+                            :{0,1}
+                            (?P<tz_minute>[0-9]{2}){0,1}
+                        )
+                    ){0,1}                                    # 匹配时区，固定为 'GMT'
+$
+"""
 
 
 class PatternPool:
@@ -315,4 +334,6 @@ class PatternPool:
     # A 股股票代码
     A_STOCK = re.compile(RegexPool.A_STOCK)
     # ISO8601 日期格式
-    ISO8601 = re.compile(RegexPool.iso8601, re.VERBOSE)
+    ISO8601 = re.compile(RegexPool.ISO8601, re.VERBOSE)
+    # RFC822
+    RFC822 = re.compile(RegexPool.RFC822, re.VERBOSE)

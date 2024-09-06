@@ -18,7 +18,7 @@ import calendar
 from collections import namedtuple
 from datetime import date, datetime
 from enum import Enum
-from typing import Optional
+from typing import Literal, Optional
 
 QuarterTuple = namedtuple(
     "QuarterTuple",
@@ -760,3 +760,18 @@ class TimeUnit(Enum):
 
     def to_days(self, duration: int) -> int:
         return duration * self.value.unit_val_in_ns // TimeUnit.DAYS.value.unit_val_in_ns
+
+
+class DayType(str, Enum):
+    WORKING_DAY = "WT"
+    CALENDAR_DAY = "KT"
+    REST_DAY = "RD"
+    HOLIDAY = "HD"
+
+
+class EndDateType(Enum):
+    INCLUSIVE = 1
+    EXCLUSIVE = 2
+
+
+_DayTyp = DayType | Literal["WT", "KT"]  # noqa: F821
