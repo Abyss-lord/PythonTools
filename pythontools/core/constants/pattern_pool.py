@@ -94,6 +94,8 @@ class RegexPool:
     EMAIL = "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)])"  # noqa: E501
     # 不含任何字母
     HAS_NO_LETTER = "/^[^A-Za-z]*$/"
+    # 没有字母和数字
+    HAS_NO_LETTERS_OR_NUMBERS = r"[^\w\d]+|_+"
     # 浮点数
     FLOAT_NUM = r"^[+-]?([0-9]*\.?[0-9]+|[0-9]+\.?[0-9]*)([eE][+-]?[0-9]+)?$"
     # 严格浮点数
@@ -210,6 +212,37 @@ class RegexPool:
                     ){0,1}                                    # 匹配时区，固定为 'GMT'
 $
 """
+    # 空白
+    SPACE = r"\s"
+    # CAMEL CASE
+    CAMEL_CASE = r"^[a-zA-Z]*([a-z]+[A-Z]+|[A-Z]+[a-z]+)[a-zA-Z\d]*$"
+    # SNAKE CASE
+    SNAKE_CASE_TEST = r"^([a-z]+\d*_[a-z\d_]*|_+[a-z\d]+[a-z\d_]*)$"
+    # SNAKE CASE WITH DASH
+    SNAKE_CASE_TEST_DASH = r"([a-z]+\d*-[a-z\d-]*|-+[a-z\d]+[a-z\d-]*)$"
+    # HTML 文件
+    HTML = r"((<([a-z]+:)?[a-z]+[^>]*/?>)(.*?(</([a-z]+:)?[a-z]+>))?|<!--.*-->|<!doctype.*>)"
+    HTML_TAG_ONLY = r"(<([a-z]+:)?[a-z]+[^>]*/?>|</([a-z]+:)?[a-z]+>|<!--.*-->|<!doctype.*>)"
+    # URL 原始字符
+    URLS_RAW_STRING = (
+        r"([a-z-]+://)"  # scheme
+        r"([a-z_\d-]+:[a-z_\d-]+@)?"  # user:password
+        r"(www\.)?"  # www.
+        r"((?<!\.)[a-z\d]+[a-z\d.-]+\.[a-z]{2,6}|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|localhost)"  # domain
+        r"(:\d{2,})?"  # port number
+        r"(/[a-z\d_%+-]*)*"  # folders
+        r"(\.[a-z\d_%+-]+)*"  # file extension
+        r"(\?[a-z\d_+%-=]*)?"  # query string
+        r"(#\S*)?"  # hash
+    )
+    # URL
+    URL = rf"^{URLS_RAW_STRING}$"
+    # URLS
+    URLS = rf"({URLS_RAW_STRING})"
+    # VISA 卡号
+    VISA = r"^4\d{12}(?:\d{3})?$"
+    # CAMEL CASE 转下划线
+    CAMEL_CASE_REPLACE = r"([a-z]|[A-Z]+)(?=[A-Z])"
 
 
 class PatternPool:
@@ -276,6 +309,8 @@ class PatternPool:
     EMAIL = re.compile(RegexPool.EMAIL, re.IGNORECASE)
     # 不含任何字母
     HAS_NO_LETTER = re.compile(RegexPool.HAS_NO_LETTER)
+    # 不含任何数字和字母
+    HAS_NO_LETTERS_OR_NUMBERS = re.compile(RegexPool.HAS_NO_LETTERS_OR_NUMBERS, re.IGNORECASE | re.UNICODE)
     # 浮点数
     FLOAT_NUM = re.compile(RegexPool.FLOAT_NUM)
     # 严格浮点数
@@ -300,7 +335,6 @@ class PatternPool:
     NON_NEGATIVE_INTEGER = re.compile(RegexPool.NON_NEGATIVE_INTEGER)
     # 腾讯qq
     TECENT_CODE = re.compile(RegexPool.TECENT_CODE)
-
     # 密码
     PASSWORD = re.compile(RegexPool.PASSWORD)
     # 空行
@@ -337,3 +371,26 @@ class PatternPool:
     ISO8601 = re.compile(RegexPool.ISO8601, re.VERBOSE)
     # RFC822
     RFC822 = re.compile(RegexPool.RFC822, re.VERBOSE)
+    # 空白
+    SPACE = re.compile(RegexPool.SPACE)
+    # CAMEL CASE
+    CAMEL_CASE = re.compile(RegexPool.CAMEL_CASE)
+    # SNAKE CASE
+    SNAKE_CASE_TEST = re.compile(RegexPool.SNAKE_CASE_TEST, re.IGNORECASE)
+    # SNAKE CASE WITH DASH
+    SNAKE_CASE_TEST_DASH = re.compile(RegexPool.SNAKE_CASE_TEST_DASH, re.IGNORECASE)
+    # HTML 文件
+    HTML = re.compile(RegexPool.HTML, re.DOTALL | re.IGNORECASE | re.MULTILINE)
+    # HTML 标签
+    HTML_TAG_ONLY = re.compile(
+        RegexPool.HTML_TAG_ONLY,
+        re.IGNORECASE | re.MULTILINE | re.DOTALL,
+    )
+    # URL
+    URL = re.compile(RegexPool.URL, re.IGNORECASE)
+    # URLS
+    URLS = re.compile(RegexPool.URLS, re.IGNORECASE)
+    # VISA 卡号
+    VISA = re.compile(RegexPool.VISA)
+    # CAMEL CASE 转换正则
+    CAMEL_CASE_REPLACE = re.compile(RegexPool.CAMEL_CASE_REPLACE)

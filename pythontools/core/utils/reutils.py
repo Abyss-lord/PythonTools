@@ -216,6 +216,42 @@ class ReUtil:
         return res is not None
 
     @classmethod
+    def is_contains(cls, pattern: re.Pattern, s: str, *, raise_exception: bool = False) -> bool:
+        """
+        检查是否包含
+
+        Parameters
+        ----------
+        pattern : re.Pattern
+            编译后的正则模式
+        s : str
+            待匹配字符串
+        raise_exception : bool, optional
+            如果匹配失败, 是否抛出异常, by default False
+
+        Returns
+        -------
+        bool
+            如果匹配成功, 返回True, 如果匹配失败, 且raise_error为True, 抛出异常, 否则返回False
+
+        Raises
+        ------
+        TypeError
+            如果pattern不是re.Pattern对象抛出异常
+        ValueError
+            如果raise_error为True, 且匹配失败, 抛出ValueError异常
+        """
+
+        if not isinstance(pattern, re.Pattern):
+            raise TypeError("pattern must be a re.Pattern object")
+
+        res = pattern.search(s)
+        if res is None and raise_exception:
+            raise ValidationError(pattern, s, f"pattern {pattern} not match string {s}")
+
+        return res is not None
+
+    @classmethod
     def is_match_reg(cls, s: str, reg: str, *, raise_exception: bool = False) -> bool:
         """
         是否匹配正则表达式

@@ -17,6 +17,10 @@ import contextlib
 
 # here put the import lib
 import json
+import re
+import string
+
+from pythontools.core.constants.string_constant import CharPool
 
 from ..constants.pattern_pool import PatternPool
 from ..utils.basicutils import StringUtil
@@ -158,6 +162,288 @@ class StringValidator:
             reg = "^\\w{" + str(min_length) + ",}$"
 
         return ReUtil.is_match_reg(s, reg, raise_exception=raise_exception)
+
+    @classmethod
+    def is_isbn(cls, s: str, *, raise_exception: bool = False) -> bool:
+        """
+        判断给定的字符串是否为ISBN-10或ISBN-13
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            如果匹配失败, 是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            如果是ISBN-10或ISBN-13, 则返回True, 否则返回False
+
+        NOTES
+        -----
+        ISBN-10: 10位数字，由9个数字组成，最后一位是校验位。\n
+        ISBN-13: 13位数字，由12个数字组成，最后一位是校验位。\n
+        ref: https://zh.wikipedia.org/wiki/国际标准书号
+        """
+        if StringUtil.get_length(s) == 13:
+            return cls.is_isbn_13(s, raise_exception=raise_exception)
+        elif StringUtil.get_length(s) == 10:
+            return cls.is_isbn_10(s, raise_exception=raise_exception)
+        else:
+            return False
+
+    @classmethod
+    def is_isbn_10(
+        cls,
+        s: str,
+        *,
+        raise_exception: bool = False,
+    ) -> bool:
+        """
+        判断给定的字符串是否为ISBN-10
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            如果匹配失败, 是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            如果是ISBN-10, 则返回True, 否则返回False
+
+        Raises
+        ------
+        ValueError
+            如果raise_exception为True, 且不匹配时, 抛出ValueError异常
+        """
+        s = s.replace(CharPool.DASHED, "")
+        error_msg = f"ISBN-10: {s} is invalid"
+
+        if StringUtil.get_length(s) != 10:
+            return cls._raise_exception(
+                False,
+                error_msg,
+                raise_exception=raise_exception,
+                error_cls=ValueError,
+            )
+
+        with contextlib.suppress(ValueError):
+            product = sum(int(digit) * (index + 1) for index, digit in enumerate(s))
+            return cls._raise_exception(
+                product % 11 == 0, error_msg, raise_exception=raise_exception, error_cls=ValueError
+            )
+
+        return False
+
+    @classmethod
+    def is_isbn_13(
+        cls,
+        s: str,
+        *,
+        raise_exception: bool = False,
+    ) -> bool:
+        """
+        判断给定的字符串是否为ISBN-13
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            如果匹配失败, 是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            如果是ISBN-13, 则返回True, 否则返回False
+
+        Raises
+        ------
+        ValueError
+            如果raise_exception为True, 且不匹配时, 抛出ValueError异常
+        """
+        s = s.replace(CharPool.DASHED, "")
+        error_msg = f"ISBN-13: {s} is invalid"
+
+        if StringUtil.get_length(s) != 13:
+            return cls._raise_exception(
+                False,
+                error_msg,
+                raise_exception=raise_exception,
+                error_cls=ValueError,
+            )
+
+        with contextlib.suppress(ValueError):
+            product = 0
+            for index, digit in enumerate(s):
+                weight = 1 if (index % 2 == 0) else 3
+                product += int(digit) * weight
+
+            return cls._raise_exception(
+                product % 10 == 0, error_msg, raise_exception=raise_exception, error_cls=ValueError
+            )
+
+        return False
+
+    @classmethod
+    def is_pangram(cls, s: str, *, raise_exception: bool = False) -> bool:
+        """
+        判断给定的字符串是否是全字母字符串
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+
+        Returns
+        -------
+        bool
+            如果是全字母字符串, 则返回True, 否则返回False
+
+        NOTES
+        -----
+        全字母字符串: 由26个英文字母组成。\n
+        https://en.wikipedia.org/wiki/Pangram
+        """
+        flg = set(PatternPool.SPACE.sub("", s)).issuperset(set(string.ascii_lowercase))
+        return cls._raise_exception(
+            flg,
+            f"{s} is not a pangram",
+            raise_exception=False,
+            error_cls=ValueError,
+        )
+
+    @classmethod
+    def is_camel_case(cls, s: str, *, raise_exception: bool = False) -> bool:
+        """
+        判断给定的字符串是否是驼峰命名法
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            如果匹配失败, 是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            如果是驼峰命名法, 则返回True, 否则返回False
+
+        NOTES
+        -----
+        驼峰命名法: 驼峰命名法是指以一个单词的第一个字母开始，后面每个单词的首字母均大写，如firstName、lastName、userName等。\n
+        """  # noqa: E501
+        return ReUtil.is_match(PatternPool.CAMEL_CASE, s, raise_exception=raise_exception)
+
+    @classmethod
+    def is_snake_case(cls, s: str, separator: str = "_", *, raise_exception: bool = False) -> bool:
+        """
+        判断给定字符串是否是蛇形命名法
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        separator : str, optional
+            单词之间的分隔符, by default "_"
+
+        Returns
+        -------
+        bool
+            如果是蛇形命名法, 则返回True, 否则返回False
+        """
+        re_map = {
+            "_": PatternPool.SNAKE_CASE_TEST,
+            "-": PatternPool.SNAKE_CASE_TEST_DASH,
+        }
+        re_template = r"([a-z]+\d*{sign}[a-z\d{sign}]*|{sign}+[a-z\d]+[a-z\d{sign}]*)"
+        r = re_map.get(
+            separator,
+            re.compile(re_template.format(sign=re.escape(separator)), re.IGNORECASE),
+        )
+
+        return cls._raise_exception(
+            r.match(s) is not None,
+            f"{s} is not a snake case string",
+            raise_exception=raise_exception,
+            error_cls=ValueError,
+        )
+
+    @classmethod
+    def is_palindrome(
+        cls,
+        s: str,
+        *,
+        raise_exception: bool = False,
+        ignore_spaces: bool = False,
+        ignore_case: bool = False,
+    ) -> bool:
+        """
+        判断给定的字符串是否是回文字符串
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            如果匹配失败, 是否引发异常, by default False
+        ignore_spaces : bool, optional
+            是否忽略空格, by default False
+        ignore_case : bool, optional
+            是否忽略大小写, by default False
+
+        Returns
+        -------
+        bool
+            如果是回文字符串, 则返回True, 否则返回False
+        """
+        if ignore_spaces:
+            s = PatternPool.SPACE.sub("", s)
+
+        flg = True
+
+        string_length = StringUtil.get_length(s)
+        for index in range(string_length):
+            head_char = s[index]
+            tail_char = s[string_length - index - 1]
+
+            if ignore_case:
+                head_char = head_char.lower()
+                tail_char = tail_char.lower()
+
+            if head_char != tail_char:
+                flg = False
+
+        return cls._raise_exception(
+            flg,
+            f"{s} is not a palindrome",
+            raise_exception=raise_exception,
+            error_cls=ValueError,
+        )
+
+    @classmethod
+    def contains_html(cls, s: str, *, raise_exception: bool = False) -> bool:
+        """
+        判断给定的字符串是否包含html标签
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            如果匹配失败, 是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            如果包含html标签, 则返回True, 否则返回False
+        """
+        return ReUtil.is_contains(PatternPool.HTML, s, raise_exception=raise_exception)
 
     @classmethod
     def is_money(cls, s: str, *, raise_exception: bool = False) -> bool:
@@ -977,3 +1263,36 @@ class StringValidator:
             给定字符串是否为A股代码
         """
         return ReUtil.is_match(PatternPool.A_STOCK, s, raise_exception=raise_exception)
+
+    @classmethod
+    def is_url(cls, s: str, *, raise_exception: bool = False) -> bool:
+        """
+        判断给定的字符串是否是URL地址
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        raise_exception : bool, optional
+            如果匹配失败是否引发异常, by default False
+
+        Returns
+        -------
+        bool
+            如果给定的字符串是URL地址，返回True，否则返回False
+        """
+        return ReUtil.is_match(PatternPool.URL, s, raise_exception=raise_exception)
+
+    @classmethod
+    def _raise_exception(
+        cls,
+        value: bool,
+        message: str,
+        *,
+        raise_exception: bool,
+        error_cls: type[Exception] = ValueError,
+    ) -> bool:
+        if not raise_exception:
+            return value
+        else:
+            raise error_cls(message)

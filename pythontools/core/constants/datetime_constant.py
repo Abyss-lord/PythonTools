@@ -739,6 +739,7 @@ class TimeUnit(Enum):
     MINUTES = TimeUnitTuple("分钟(min)", 60 * SECONDS.unit_val_in_ns)
     HOURS = TimeUnitTuple("小时(h)", 60 * MINUTES.unit_val_in_ns)
     DAYS = TimeUnitTuple("天(d)", 24 * HOURS.unit_val_in_ns)
+    WEEK = TimeUnitTuple("周(w)", 7 * DAYS.unit_val_in_ns)
 
     def to_nanos(self, duration: int) -> int:
         return duration * self.value.unit_val_in_ns
@@ -760,6 +761,9 @@ class TimeUnit(Enum):
 
     def to_days(self, duration: int) -> int:
         return duration * self.value.unit_val_in_ns // TimeUnit.DAYS.value.unit_val_in_ns
+
+    def to_weeks(self, duration: int) -> int:
+        return duration * self.value.unit_val_in_ns // TimeUnit.WEEK.value.unit_val_in_ns
 
 
 class DayType(str, Enum):

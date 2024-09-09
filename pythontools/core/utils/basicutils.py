@@ -14,13 +14,17 @@ Change Activity:
 """
 # here put the import lib
 
+import binascii
 import itertools as it
+import os
 import random
 import string
 import sys
 import typing
 from collections.abc import Mapping, Sequence, Set
 from typing import Any
+
+from pythontools.core.constants.pattern_pool import PatternPool
 
 from ..constants.string_constant import CharPool, CharsetUtil
 from ..decorator import UnCheckFunction
@@ -1406,6 +1410,40 @@ class StringUtil(SequenceUtil):
         return contain_lower_case and contain_upper_case
 
     @classmethod
+    def is_half_of_alphabet(cls, text: str) -> bool:
+        """
+        判断给定的字符串是否都是字母表中前半部分的字母
+
+        Parameters
+        ----------
+        text : str
+            待检测字符串
+
+        Returns
+        -------
+        bool
+            如果字符串都是字母表中前半部分的字母则返回True, 否则返回False
+        """
+        return all(c.lower() <= "m" for c in text)
+
+    @classmethod
+    def is_last_half_of_alphabet(cls, text: str) -> bool:
+        """
+        判断给定的字符串中的字符是否都是字母表中最后半部分的字母
+
+        Parameters
+        ----------
+        text : str
+            待检测字符串
+
+        Returns
+        -------
+        bool
+            如果字符串中的字符都是字母表中最后半部分的字母则返回True, 否则返回False
+        """
+        return all(c.lower() >= "m" for c in text)
+
+    @classmethod
     def contain_digit(cls, s: str) -> bool:
         """
         判断字符串是否包含数字
@@ -1580,6 +1618,76 @@ class StringUtil(SequenceUtil):
         else:
             # 非数字或字母字符，返回原字符
             return char
+
+    @classmethod
+    def camel_case_to_snake(
+        cls,
+        input_string: str,
+        separator="_",
+    ) -> str:
+        """
+        camelCase 格式的字符串转为 snake_case 格式的字符串
+
+        Parameters
+        ----------
+        input_string : str
+            待转换字符串
+        separator : str, optional
+            分隔符, by default "_"
+
+        Returns
+        -------
+        str
+            转换后的字符串
+
+        Raises
+        ------
+        TypeError
+            如果 input_string 不是字符串则抛出异常
+        """
+        if not cls.is_string(input_string):
+            raise TypeError("input_string must be a string")
+
+        return PatternPool.CAMEL_CASE_REPLACE.sub(lambda m: m.group(1) + separator, input_string).lower()
+
+    @classmethod
+    def snake_case_to_camel(
+        cls,
+        input_string: str,
+        upper_case_first: bool = False,
+        separator: str = "_",
+    ) -> str:
+        """
+        将 snake_case 格式的字符串转为 camelCase 格式的字符串
+
+        Parameters
+        ----------
+        input_string : str
+            待转换字符串
+        upper_case_first : bool, optional
+            是否首单词首字母大写, by default False
+        separator : str, optional
+            分隔符, by default "_"
+
+        Returns
+        -------
+        str
+            转换后的字符串
+
+        Raises
+        ------
+        TypeError
+            如果 input_string 不是字符串则抛出异常
+        """
+        if not cls.is_string(input_string):
+            raise TypeError("input_string must be a string")
+
+        tokens = [s.title() for s in input_string.split(separator)]
+
+        if not upper_case_first:
+            tokens[0] = tokens[0].lower()
+
+        return "".join(tokens)
 
     @classmethod
     def get_circled_number(cls, number: int) -> str:
@@ -1884,6 +1992,17 @@ class StringUtil(SequenceUtil):
             chars = string.ascii_letters
 
         return "".join(RandomUtil.get_random_items_from_sequence(chars, n))
+
+    @classmethod
+    def get_random_secure_hex(cls, n: int) -> str:
+        if not isinstance(n, int) or n < 1:
+            raise ValueError("byte_count must be >= 1")
+
+        random_bytes = os.urandom(n)
+        hex_bytes = binascii.hexlify(random_bytes)
+        hex_string = hex_bytes.decode()
+
+        return hex_string
 
     @classmethod
     def get_random_chinese(cls) -> str:
@@ -2213,6 +2332,23 @@ class StringUtil(SequenceUtil):
             return s
 
         return cls.sub_sequence(s, s_len - len)
+
+    @classmethod
+    def get_ascii_number_pairs(cls, text: str) -> list[tuple[str, int]]:
+        """
+        获取字符串-ASCII码对
+
+        Parameters
+        ----------
+        text : str
+            待获取字符串
+
+        Returns
+        -------
+        list[tuple[str, int]]
+            字符串-ASCII码对列表
+        """
+        return [(c, ord(c)) for c in text]
 
     @classmethod
     def group_by_length(cls, s: str, n: int) -> list[str]:

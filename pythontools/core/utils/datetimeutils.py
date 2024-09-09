@@ -2534,6 +2534,12 @@ class DatetimeUtil:
         return cls._check_range_or_raise(0, 999, millisecond)
 
     @classmethod
+    def round_datetime(cls, dt: datetime, round_to: str) -> datetime:
+        round_to = round_to.strip().lower()
+
+        return dt
+
+    @classmethod
     def nth_day_of_month(cls, *, year: int, month: int, weekday: int, n: int) -> date:
         """
         返回给定日期的第n个星期几的日期
