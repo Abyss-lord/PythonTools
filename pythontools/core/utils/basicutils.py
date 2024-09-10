@@ -24,8 +24,7 @@ import typing
 from collections.abc import Mapping, Sequence, Set
 from typing import Any
 
-from pythontools.core.constants.pattern_pool import PatternPool
-
+from ..constants.pattern_pool import PatternPool
 from ..constants.string_constant import CharPool, CharsetUtil
 from ..decorator import UnCheckFunction
 from .randomutils import RandomUtil
@@ -1995,14 +1994,30 @@ class StringUtil(SequenceUtil):
 
     @classmethod
     def get_random_secure_hex(cls, n: int) -> str:
+        """
+        获取随机的安全的十六进制字符串
+
+        Parameters
+        ----------
+        n : int
+            字符串数量
+
+        Returns
+        -------
+        str
+            随机的安全的十六进制字符串
+
+        Raises
+        ------
+        ValueError
+            如果 n 小于 1, 则抛出异常
+        """
         if not isinstance(n, int) or n < 1:
             raise ValueError("byte_count must be >= 1")
 
         random_bytes = os.urandom(n)
         hex_bytes = binascii.hexlify(random_bytes)
-        hex_string = hex_bytes.decode()
-
-        return hex_string
+        return hex_bytes.decode()
 
     @classmethod
     def get_random_chinese(cls) -> str:
@@ -2306,6 +2321,8 @@ class StringUtil(SequenceUtil):
         str
             字符串中最多的字母
         """
+        if cls.is_blank(text):
+            return cls.EMPTY
         text = text.lower()
         return max(string.ascii_lowercase, key=text.count)
 
@@ -2431,17 +2448,14 @@ class StringUtil(SequenceUtil):
         if cls.is_empty(s) or cls.get_length(wrap_str) != 1 or wrap_str == CharPool.NUL or cls.get_length(s) < 2:
             return s
 
-        start_idx = 0
         res_lst = []
 
-        while start_idx < len(s):
+        for start_idx in range(len(s)):
             current_char = s[start_idx]
             if current_char != wrap_str:
                 res_lst.append(current_char)
             elif SequenceUtil.is_empty(res_lst) or res_lst[-1] != wrap_str:
                 res_lst.append(current_char)
-            start_idx += 1
-
         return "".join(res_lst)
 
     @classmethod
