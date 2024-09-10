@@ -17,6 +17,7 @@ Change Activity:
 import itertools as it
 import typing
 from collections import abc
+from collections.abc import Generator, Iterable, Sequence
 from typing import Any
 
 
@@ -79,3 +80,75 @@ class CollectionUtil:
         """
         s = list(iterable)
         yield it.chain.from_iterable(it.combinations(s, r) for r in range(len(s) + 1))
+
+    @classmethod
+    def flatten(cls, seq: Iterable[Any]) -> Generator[Any, Any, None]:
+        """
+        展平嵌套序列
+
+        Examples
+        --------
+        >>> list(CollectionUtil.flatten([1, [2, 3], [4, [5, 6]]])) # [1, 2, 3, 4, 5, 6]
+
+        Parameters
+        ----------
+        seq : Iterable[Any]
+            待展平序列
+
+        Yields
+        ------
+        Generator[Any, Any, None]
+            展平序列生成器, 返回展平序列
+        """
+        for ele in seq:
+            if hasattr(ele, "__iter__") and isinstance(ele, Sequence):
+                yield from cls.flatten(ele)
+            else:
+                yield ele
+
+    @classmethod
+    def merge_dicts(cls, *dicts: typing.Mapping[Any, Any]) -> dict[Any, Any]:
+        """
+        合并多个字典
+
+        Returns
+        -------
+        dict[Any, Any]
+            字典序列
+
+        Raises
+        ------
+        TypeError
+            如果参数不是字典类型
+        """
+        base_dict: dict[Any, Any] = {}
+        for i, dict_element in enumerate(dicts):
+            if not isinstance(dict_element, dict):
+                raise TypeError(f"Argument {i} is not a dictionary")
+            base_dict = cls.merge_two_dict(base_dict, dict_element)
+        return base_dict
+
+    @classmethod
+    def merge_two_dict(cls, d1: typing.Mapping[Any, Any], d2: typing.Mapping[Any, Any]) -> dict[Any, Any]:
+        """
+        合并两个字典
+
+        Examples
+        --------
+        >>> d1 = {'a':1, 'b':2} # {'a':1, 'b':2}
+        >>> d2 = {'b':3, 'c':4} # {'b':3, 'c':4}
+        >>> CollectionUtil.merge_two_dict(d1, d2) # {'a':1, 'b':3, 'c':4}
+
+        Parameters
+        ----------
+        d1 : typing.Mapping[Any, Any]
+            字典1
+        d2 : typing.Mapping[Any, Any]
+            字典2
+
+        Returns
+        -------
+        dict[Any, Any]
+            合并后的字典
+        """
+        return {**d1, **d2}
