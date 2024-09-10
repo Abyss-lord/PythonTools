@@ -130,6 +130,7 @@ class TestStringUtil:
                 assert StringUtil.is_ends_with_any("hello world", "d", "ld", "world")
                 assert StringUtil.is_ends_with_any("hello world", "ld", "world")
                 assert not StringUtil.is_ends_with_any("hello world", "he", "o")
+                assert not StringUtil.is_ends_with_any("", "l", "ld")
 
         @allure.title("测试字符串是否被指定前后缀包裹")
         def test_is_surround(self) -> None:
@@ -155,72 +156,104 @@ class TestStringUtil:
             with pytest.raises(ValueError):
                 assert not StringUtil.is_file_separator("")
 
-        @allure.story("获取字符串的属性和方法")
-        @allure.description("测试获取字符串的属性和方法,例如长度,大小写等")
-        class TestStringProperties:
-            @allure.title("测试获取字符串公共前后缀")
-            def test_prefix_and_suffix(self) -> None:
-                with allure.step("步骤1:测试获取字符串公共前缀"):
-                    test_str1 = "hello world"
-                    test_str2 = "hello python"
-                    assert StringUtil.get_common_prefix(test_str1, test_str2) == "hello "
+        @allure.title("测试字符串是否同时包含大小写")
+        def test_is_mixed_case(self) -> None:
+            with allure.step("步骤1:测试字符串是否同时包含大小写"):
+                assert StringUtil.is_mixed_case("Hello World")
+                assert StringUtil.is_mixed_case("hElLo wOrld")
+                assert not StringUtil.is_mixed_case("hello world")
+                assert not StringUtil.is_mixed_case("")
 
-                with allure.step("步骤2:测试获取字符串公共后缀"):
-                    test_2_str1 = "programming"
-                    test_2_str2 = "progress"
-                    assert StringUtil.get_common_prefix(test_2_str1, test_2_str2) == "progr"
+            with allure.step("步骤2:测试字符串是否包含大写字符"):
+                assert StringUtil.has_uppercase("Hello World")
+                assert StringUtil.has_uppercase("hElLo wOrld")
+                assert not StringUtil.has_uppercase("hello world")
+                assert not StringUtil.has_uppercase("")
 
-                with allure.step("步骤3:测试获取字符串公共前后缀为空"):
-                    test_prefix_str1 = "hello world"
-                    test_prefix_str2 = "world hello"
-                    assert StringUtil.get_common_prefix(test_prefix_str1, test_prefix_str2) == ""
+            with allure.step("步骤3:测试字符串是否包含小写字符"):
+                assert StringUtil.has_lowercase("Hello World")
+                assert StringUtil.has_lowercase("hElLo wOrld")
+                assert not StringUtil.has_lowercase("HELLO")
+                assert not StringUtil.has_lowercase("")
 
-                    test_suffix_str1 = "hello world"
-                    test_suffix_str2 = "world hello"
-                    assert StringUtil.get_common_suffix(test_suffix_str1, test_suffix_str2) == ""
+        @allure.title("测试字符串在字母表的位置")
+        def test_is_half_of_alphabet(self) -> None:
+            with allure.step("步骤1:测试字符串是否在字母表的前半部分"):
+                assert StringUtil.is_half_of_alphabet("abcdefg")
+                assert StringUtil.is_half_of_alphabet("ABCDEFG")
+                assert not StringUtil.is_half_of_alphabet("OPi")
 
-            @allure.title("测试获取字符串长度和宽度")
-            def test_get_string_length(self) -> None:
-                with allure.step("步骤1:测试获取长度"):
-                    assert StringUtil.get_length("hello world") == 11
-                    assert StringUtil.get_length("1234567890") == 10
-                    assert StringUtil.get_length("你好啊") == 3
-                    assert StringUtil.get_length("") == 0
+            with allure.step("步骤2:测试字符串是否在字母表的后半部分"):
+                assert StringUtil.is_last_half_of_alphabet("mnopqrstuvwxyz")
+                assert StringUtil.is_last_half_of_alphabet("MNOPQRSTUVWXYZ")
+                assert not StringUtil.is_last_half_of_alphabet("aada")
 
-                with allure.step("步骤2:测试获取宽度"):
-                    assert StringUtil.get_width("你好啊") == 6
-                    assert StringUtil.get_width("1234567890") == 10
-                    assert StringUtil.get_width("") == 0
-                    assert StringUtil.get_width(None) == 0  # type: ignore
-                    assert StringUtil.get_width("\t") == 1
-                    assert StringUtil.get_width("\r") == 1
-                    assert StringUtil.get_width("\n") == 1
+    @allure.story("获取字符串的属性和方法")
+    @allure.description("测试获取字符串的属性和方法,例如长度,大小写等")
+    class TestStringProperties:
+        @allure.title("测试获取字符串公共前后缀")
+        def test_prefix_and_suffix(self) -> None:
+            with allure.step("步骤1:测试获取字符串公共前缀"):
+                test_str1 = "hello world"
+                test_str2 = "hello python"
+                assert StringUtil.get_common_prefix(test_str1, test_str2) == "hello "
 
-            @allure.title("测试获取注释后的字符串信息")
-            def test_get_annotation_str(self) -> None:
-                with allure.step("步骤1:测试获取注释后的字符串信息，使用默认注释符号"):
-                    assert StringUtil.get_annotation_str("hello world") == "-- hello world"
-                    assert StringUtil.get_annotation_str("你好啊") == "-- 你好啊"
-                    assert StringUtil.get_annotation_str("") == "-- "
+            with allure.step("步骤2:测试获取字符串公共后缀"):
+                test_2_str1 = "programming"
+                test_2_str2 = "progress"
+                assert StringUtil.get_common_prefix(test_2_str1, test_2_str2) == "progr"
 
-                with allure.step("步骤2:测试获取注释后的字符串信息，使用自定义注释符号"):
-                    assert StringUtil.get_annotation_str("hello world", "#") == "# hello world"
-                    assert StringUtil.get_annotation_str("你好啊", "*") == "* 你好啊"
-                    assert StringUtil.get_annotation_str("", "#") == "# "
+            with allure.step("步骤3:测试获取字符串公共前后缀为空"):
+                test_prefix_str1 = "hello world"
+                test_prefix_str2 = "world hello"
+                assert StringUtil.get_common_prefix(test_prefix_str1, test_prefix_str2) == ""
 
-            @allure.title("测试获取字符串居中信息")
-            def test_center_msg(self) -> None:
-                a = StringUtil.get_center_msg("hello world", "=", 40)
-                b = StringUtil.get_center_msg("hello world", "=", 1)
+                test_suffix_str1 = "hello world"
+                test_suffix_str2 = "world hello"
+                assert StringUtil.get_common_suffix(test_suffix_str1, test_suffix_str2) == ""
 
-                assert a == "=== hello world ===="
-                assert b == " hello world "
+        @allure.title("测试获取字符串长度和宽度")
+        def test_get_string_length(self) -> None:
+            with allure.step("步骤1:测试获取长度"):
+                assert StringUtil.get_length("hello world") == 11
+                assert StringUtil.get_length("1234567890") == 10
+                assert StringUtil.get_length("你好啊") == 3
+                assert StringUtil.get_length("") == 0
 
-            @allure.title("测试获取字符串的元音字母")
-            def test_get_vowels_from_str(self) -> None:
-                assert StringUtil.get_vowels_from_str("hello world") == "eoo"
-                assert StringUtil.get_vowels_from_str("你好啊") == ""
-                assert StringUtil.get_vowels_from_str("aeiounknknknknkjhknjniaodnwaondwo") == "aeiouiaoaoo"
+            with allure.step("步骤2:测试获取宽度"):
+                assert StringUtil.get_width("你好啊") == 6
+                assert StringUtil.get_width("1234567890") == 10
+                assert StringUtil.get_width("") == 0
+                assert StringUtil.get_width(None) == 0  # type: ignore
+                assert StringUtil.get_width("\t") == 1
+                assert StringUtil.get_width("\r") == 1
+                assert StringUtil.get_width("\n") == 1
+
+        @allure.title("测试获取注释后的字符串信息")
+        def test_get_annotation_str(self) -> None:
+            with allure.step("步骤1:测试获取注释后的字符串信息，使用默认注释符号"):
+                assert StringUtil.get_annotation_str("hello world") == "-- hello world"
+                assert StringUtil.get_annotation_str("你好啊") == "-- 你好啊"
+                assert StringUtil.get_annotation_str("") == "-- "
+
+            with allure.step("步骤2:测试获取注释后的字符串信息，使用自定义注释符号"):
+                assert StringUtil.get_annotation_str("hello world", "#") == "# hello world"
+                assert StringUtil.get_annotation_str("你好啊", "*") == "* 你好啊"
+                assert StringUtil.get_annotation_str("", "#") == "# "
+
+        @allure.title("测试获取字符串居中信息")
+        def test_center_msg(self) -> None:
+            a = StringUtil.get_center_msg("hello world", "=", 40)
+            b = StringUtil.get_center_msg("hello world", "=", 1)
+
+            assert a == "=== hello world ===="
+            assert b == " hello world "
+
+        @allure.title("测试获取字符串的元音字母")
+        def test_get_vowels_from_str(self) -> None:
+            assert StringUtil.get_vowels_from_str("hello world") == "eoo"
+            assert StringUtil.get_vowels_from_str("你好啊") == ""
+            assert StringUtil.get_vowels_from_str("aeiounknknknknkjhknjniaodnwaondwo") == "aeiouiaoaoo"
 
     @allure.story("获取字符")
     @allure.description("测试获取字符,例如获取随机中文、小写字符等")
@@ -294,10 +327,51 @@ class TestStringUtil:
             next(generator) == "IV"
             next(generator) == "V"
 
-        @allure.title("测试获取圆括号数字")
+        @allure.title("测试获取圆括号字符串")
         def test_get_parentheses(self) -> None:
-            assert StringUtil.get_circled_number(1) == "①"
-            assert StringUtil.get_circled_number(4) == "④"
+            with allure.step("步骤1:测试获取圆括号字符串"):
+                assert StringUtil.get_circled_number(1) == "①"
+                assert StringUtil.get_circled_number(4) == "④"
+            # TODO 更改 get_circled_number 实现
+            logger.debug(ord("Ⓐ"))
+
+        @allure.title("测试获取随机16进制字符串")
+        def test_get_secure_random_hex_str(self) -> None:
+            logger.debug(StringUtil.get_random_secure_hex(16))
+
+        @allure.title("测试获取字符串中最多的字符")
+        def test_get_most_frequent_char(self) -> None:
+            s = "hello world"
+            assert StringUtil.get_most_common_letter(s) == "l"
+            s = "a你b好c啊d,b"
+            assert StringUtil.get_most_common_letter(s) == "b"
+            s = "aaaaa"
+            assert StringUtil.get_most_common_letter(s) == "a"
+            s = ""
+            assert StringUtil.get_most_common_letter(s) == ""
+
+        @allure.title("测试获取字符串各个位置的字符")
+        def test_get_char(self) -> None:
+            with allure.step("步骤1:测试获取字符右边的字符"):
+                s = "abc"
+                assert StringUtil.get_right(s, 1) == "c"
+                assert StringUtil.get_right(s, 3) == "abc"
+                assert StringUtil.get_right(s, 4) == "abc"
+
+            with allure.step("步骤2:测试获取字符右边的字符，错误的输入"):
+                with pytest.raises(ValueError):
+                    assert StringUtil.get_right(s, 0) == ""
+
+        @allure.title("测试获取字符串的字符串-ASCII码对 ")
+        def test_get_pair(self) -> None:
+            s = "abc"
+            res = StringUtil.get_ascii_number_pairs(s)
+            assert res == [("a", 97), ("b", 98), ("c", 99)]
+
+        @allure.title("测试字符串乱序获取")
+        def test_shuffle_str(self) -> None:
+            s = "abc"
+            logger.debug(s)
 
     @allure.story("字符串操作")
     @allure.description("测试字符串操作,例如字符串截取、替换、分割等")
@@ -451,6 +525,24 @@ class TestStringUtil:
             assert StringUtil.unwrap("#A", "#") == "#A"
             assert StringUtil.unwrap("A#", "#") == "A#"
 
+        @allure.title("测试移除字符串中的字符")
+        def test_remove_char(self) -> None:
+            with allure.step("步骤1:测试根据位置索引移除字符串中的字符"):
+                assert StringUtil.remove_char_at("hello world", 0) == "ello world"
+                assert StringUtil.remove_char_at("hello world", 5) == "helloworld"
+                assert StringUtil.remove_char_at("", 11) == ""
+
+                with pytest.raises(ValueError):
+                    StringUtil.remove_char_at("hello world", -7)
+
+            with allure.step("步骤2:测试根据范围移除字符串中的字符"):
+                s = "abcdefg"
+                assert StringUtil.remove_range(s, 0, 3) == "defg"
+
+            with allure.step("步骤3:测试移除字符串中的某些类型的字符"):
+                s = "我的世界，Hello World！"
+                assert StringUtil.remove_non_ascii(s) == "Hello World"
+
     @allure.story("字符串编码")
     @allure.description("测试字符串编码,例如罗马数字编码等")
     class TestStringEncode:
@@ -475,10 +567,10 @@ class TestStringUtil:
                 assert StringUtil.to_bytes("你好啊").decode("utf-8") == "你好啊"
 
             with allure.step("步骤3:测试英文gbk编码"):
-                assert StringUtil.to_bytes("hello world", "gbk").decode("gbk") == "hello world"
+                assert StringUtil.to_str(StringUtil.to_bytes("hello world", "gbk"), "gbk") == "hello world"
 
             with allure.step("步骤4:测试中文gbk编码"):
-                assert StringUtil.to_bytes("你好啊", "gbk").decode("gbk") == "你好啊"
+                assert StringUtil.to_str(StringUtil.to_bytes("你好啊", "gbk"), "gbk") == "你好啊"
 
         @allure.title("测试字符串重复")
         def test_repeat_by_length(self) -> None:
@@ -492,6 +584,17 @@ class TestStringUtil:
                 assert StringUtil.repeat_by_count("hello", 2) == "hellohello"
                 assert StringUtil.repeat_by_count("hello", 1) == "hello"
                 assert StringUtil.repeat_by_count("", 10) == ""
+
+        @allure.title("测试命名格式之间相互转换")
+        def test_name_format_convert(self) -> None:
+            with allure.step("步骤1:测试驼峰命名格式转下划线命名格式"):
+                assert StringUtil.camel_case_to_snake("HelloWorld") == "hello_world"
+                assert StringUtil.camel_case_to_snake("HelloWorld123") == "hello_world123"
+                assert StringUtil.camel_case_to_snake("firstTest") == "first_test"
+
+            with allure.step("步骤2:测试下划线命名格式转驼峰命名格式"):
+                assert StringUtil.snake_case_to_camel("hello_world") == "helloWorld"
+                assert StringUtil.snake_case_to_camel("hello_world", True) == "HelloWorld"
 
     @allure.story("字符串格式化")
     @allure.description("测试字符串格式化,例如货币格式化等")
