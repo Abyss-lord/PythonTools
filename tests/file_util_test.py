@@ -62,6 +62,16 @@ class TestFileUtil:
         logger.debug(nanoseconds)
         logger.debug(format_str)
 
+    @allure.title("测试获取文件夹")
+    def test_list_dirs(self) -> None:
+        with allure.step("步骤1:测试获取文件夹"):
+            dirs = FileUtil.list_dirs_from_path("./")
+            logger.debug(dirs)
+
+        with allure.step("步骤2:测试非隐藏文件夹"):
+            dirs = FileUtil.list_dirs_from_path_ignore_hidden("./")
+            logger.debug(dirs)
+
 
 # class TestSysUtil:
 #     @classmethod
