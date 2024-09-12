@@ -14,6 +14,7 @@ Change Activity:
 """
 
 # here put the import lib
+import functools
 import os
 import re
 import tempfile
@@ -150,6 +151,23 @@ class FileUtil:
         return False
 
     @classmethod
+    def is_not_exist(cls, p: str | PathLike[str]) -> bool:
+        """
+        判断给定路径是否不存在
+
+        Parameters
+        ----------
+        p : str | PathLike[str]
+            待检测路径
+
+        Returns
+        -------
+        bool
+            路径是否不存在
+        """
+        return not cls.is_exist(p)
+
+    @classmethod
     def is_dir(
         cls,
         p: str | PathLike[str],
@@ -185,6 +203,23 @@ class FileUtil:
             raise ValueError(p)
 
         return False
+
+    @classmethod
+    def is_not_dir(cls, p: str | PathLike[str]) -> bool:
+        """
+        判断给定路径是否不是文件夹
+
+        Parameters
+        ----------
+        p : str | PathLike[str]
+            待检测路径
+
+        Returns
+        -------
+        bool
+            给定路径是否不是文件夹
+        """
+        return not cls.is_dir(p)
 
     # @Param p: 文件路径
     # @Param raise_exception: 如果文件不存在是否引发异常, 默认不引发异常
@@ -227,6 +262,23 @@ class FileUtil:
         return False
 
     @classmethod
+    def is_not_file(cls, p: str | PathLike[str]) -> bool:
+        """
+        判断给定路径是否不是文件
+
+        Parameters
+        ----------
+        p : str | PathLike[str]
+            待检测路径
+
+        Returns
+        -------
+        bool
+            给定路径是否不是文件
+        """
+        return not cls.is_file(p)
+
+    @classmethod
     def is_root_path(
         cls,
         p: str | PathLike[str],
@@ -247,6 +299,23 @@ class FileUtil:
         path_obj = cls.get_path_object(p)
 
         return path_obj.is_mount()
+
+    @classmethod
+    def is_not_root_path(cls, p: str | PathLike[str]) -> bool:
+        """
+        判断给定路径是否不是根目录
+
+        Parameters
+        ----------
+        p : str | PathLike[str]
+            待检测路径
+
+        Returns
+        -------
+        bool
+            是否不是根目录
+        """
+        return not cls.is_root_path(p)
 
     @classmethod
     def is_ignore(
@@ -275,6 +344,23 @@ class FileUtil:
         )
 
     @classmethod
+    def is_not_ignore(cls, p: str | PathLike[str]) -> bool:
+        """
+        判断给定名称是否不是隐藏文件夹
+
+        Parameters
+        ----------
+        p : str | PathLike[str]
+            待检测名称
+
+        Returns
+        -------
+        bool
+            是否不是隐藏文件夹
+        """
+        return not cls.is_ignore(p)
+
+    @classmethod
     def is_contain_ignore(cls, p: str | PathLike[str]) -> bool:
         """
         判断给定路径中是否含有隐藏文件夹
@@ -300,6 +386,23 @@ class FileUtil:
         return False
 
     @classmethod
+    def is_not_contain_ignore(cls, p: str | PathLike[str]) -> bool:
+        """
+        判断给定路径中是否不含有隐藏文件夹
+
+        Parameters
+        ----------
+        p : str | PathLike[str]
+            待检测路径
+
+        Returns
+        -------
+        bool
+            是否不含有隐藏文件夹
+        """
+        return not cls.is_contain_ignore(p)
+
+    @classmethod
     def is_empty_dir(cls, p: str | PathLike[str]) -> bool:
         """
         判断给定路径是否为空文件夹
@@ -318,7 +421,7 @@ class FileUtil:
         if not cls.is_dir(path_obj):
             return False
 
-        return cls.list_files(path_obj) == [] and cls.list_dirs(path_obj) == []
+        return cls.list_files_from_path(path_obj) == [] and cls.list_dirs_from_path(path_obj) == []
 
     @classmethod
     def is_not_empty_dir(cls, p: str | PathLike[str]) -> bool:
@@ -654,75 +757,65 @@ class FileUtil:
         return time.strftime(time_format, time.localtime(last_modify_time_in_second))
 
     @classmethod
-    def list_dirs(
-        cls,
-        p: str | PathLike[str],
-        *,
-        ignore_hidden_dir: bool = True,
-        check_exist: bool = False,
-    ) -> list[Path]:
+    def list_dirs_from_path_ignore_hidden(cls, p: str | PathLike[str]) -> list[Path]:
         """
-        返回一个文件夹中的所有文件夹
+        列出给定路径下所有的非隐藏文件夹
 
         Parameters
         ----------
-        p : str
-            给定的路径
-        ignore_hidden_dir : bool, optional
-            是否忽略隐藏文件夹, by default True
-        check_exist : bool, optional
-            是否进行检查, by default False
+        p : str | PathLike[str] | Path
+            待检测路径
 
         Returns
         -------
-        typing.List[str]
-            给定路径下的所有文件夹
+        list[Path]
+            非隐藏文件夹列表
         """
-        if check_exist:
-            cls.is_dir(p, raise_exception=True)
-        path_obj = cls.get_path_object(p)
-
-        if ignore_hidden_dir:
-            return [i.absolute() for i in path_obj.rglob("*") if cls.is_dir(i) and not cls.is_contain_ignore(i)]
-        else:
-            return [i.absolute() for i in path_obj.rglob("*") if cls.is_dir(i)]
+        return cls.list_dirs_from_path(
+            p,
+            cls.is_not_contain_ignore,
+        )
 
     @classmethod
-    def list_files(
+    def list_dirs_from_path(
         cls,
         p: str | PathLike[str],
-        *,
-        check_exist: bool = False,
-        ignore_hidden_dir: bool = True,
-        extension: str = "",
+        *predicates,
+    ) -> list[Path]:
+        path_obj = cls.get_path_object(p).absolute()
+        return [
+            cls.get_path_object(f_path)
+            for f_path, _, _ in os.walk(path_obj)
+            if all(predicate(f_path) for predicate in predicates) and cls.is_dir(f_path)
+        ]
+
+    @classmethod
+    def list_files_from_path(
+        cls,
+        p: str | Path,
+        *predicates,
     ) -> list[Path]:
         """
-        返回给定路径下的所有文件
+        列出给定路径下所有的符合规则的文件
 
         Parameters
         ----------
-        p : str
-            给定的路径
-        ignore_hidden_dir : bool, optional
-            是否忽略隐藏文件, by default True
-        check_exist : bool, optional
-            是否进行检查, by default False
+        p : str | Path
+            待检测路径
 
         Returns
         -------
-        typing.List[str]
-            给定路径下的所有文件
+        list[Path]
+            给定路径下所有符合提取规则的文件列表
         """
-        if check_exist:
-            cls.is_dir(p, raise_exception=True)
         path_obj = cls.get_path_object(p)
 
-        wildcard = f"*.{extension}" if extension else "*"
-
-        if ignore_hidden_dir:
-            return [i.absolute() for i in path_obj.rglob(wildcard) if cls.is_file(i) and not cls.is_contain_ignore(i)]
-        else:
-            return [i.absolute() for i in path_obj.rglob(wildcard) if cls.is_file(i)]
+        return [
+            abs_path
+            for f_path, _, fs in os.walk(path_obj)
+            for f in fs
+            if all(predicate(abs_path := Path(f_path) / f) for predicate in predicates)
+        ]
 
     @classmethod
     def get_basename_from_path(cls, p: str | PathLike[str]) -> str:
@@ -780,7 +873,8 @@ class FileUtil:
         list[Path]
             符合条件的文件列表
         """
-        return cls.list_files(p, extension=extension)
+        predicate_func = functools.partial(cls.is_match_extension, extension=extension, check_exist=False)
+        return cls.list_files_from_path(p, predicate_func)
 
     @classmethod
     def get_line_cnt_of_file(cls, f: str) -> int:
@@ -802,6 +896,31 @@ class FileUtil:
             for i, _ in enumerate(f_obj):
                 pass
         return i + 1
+
+    @classmethod
+    def get_lines(cls, fs: str) -> list[str]:
+        """
+        读取文件所有行
+
+        Parameters
+        ----------
+        f : str | Path
+            文件路径
+
+        Returns
+        -------
+        list[str]
+            文件所有行
+        """
+        encoding_lst = ["utf-8", "gbk", "gb2312", "gb18030"]
+        path_obj = cls.get_path_object(fs)
+        for encoding in encoding_lst:
+            try:
+                with open(path_obj, encoding=encoding) as file:
+                    return list(file)
+            except UnicodeDecodeError:
+                continue
+        raise ValueError(f"Can not decode file {fs}")
 
     @classmethod
     def windows_to_linux_line_ending(cls, text: str | bytes) -> str:
