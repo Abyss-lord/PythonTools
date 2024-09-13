@@ -68,34 +68,95 @@ class BooleanUtil:
     @classmethod
     def value_of(cls, val: Any) -> bool:
         """
-        包装方法, 用于将值转换成布尔类型
-        NOTE 底层依赖于 BasicConvertor.to_bool
-        :param val: 待转换的值
-        :return: 转换后的布尔值
+        将给定值转换成布尔值
+
+        Parameters
+        ----------
+        val : Any
+            待转换值
+
+        Returns
+        -------
+        bool
+            转换后的布尔值
         """
-        return bool(val)
+        return cls._get_bool_from_val(val)
 
     @classmethod
-    def negate(cls, state: Any, *, raise_exception: bool = False) -> bool:
+    def is_true(cls, val: Any) -> bool:
         """
-        安全取相反值
-        :param state: Boolean值
-        :param raise_exception: 相反的Boolean值
-        :return:
+        判断给定的值是否为真
+
+        Parameters
+        ----------
+        val : Any
+            待检测值
+
+        Returns
+        -------
+        bool
+            如果值是真, 则返回True, 否则返回False
+        """
+        return cls._get_bool_from_val(val)
+
+    @classmethod
+    def is_false(cls, val: Any) -> bool:
+        """
+        判断给定的值布尔计算是否为假
+
+        Parameters
+        ----------
+        val : Any
+            待判断的值
+
+        Returns
+        -------
+        bool
+            计算结果
+        """
+        return not cls._get_bool_from_val(val)
+
+    @classmethod
+    def negate(
+        cls,
+        state: Any,
+    ) -> bool:
+        """
+        对值取反
+
+        Parameters
+        ----------
+        state : Any
+            待取反值，不一定是布尔类型，函数内部会做布尔计算的
+
+        Returns
+        -------
+        bool
+            取反结果
         """
         if not isinstance(state, bool):
-            if raise_exception:
-                raise TypeError(f"{state} is not a boolean type")
-            state = bool(state)
+            state = cls._get_bool_from_val(state)
         return not state
 
     @classmethod
-    def str_to_boolean(cls, value_str: str, *, strict_mode: bool = False) -> bool:
+    def str_to_boolean(cls, value_str: str) -> bool:
         """
-        转换字符串为boolean值
-        :param value_str: 待转换字符串
-        :param strict_mode: 是否启动严格模式, 如果开启严格模式, 则不会使用BOOL进行布尔运算, 否则会进行布尔运算
-        :return: boolean值
+        将字符串转换为布尔值
+
+        Parameters
+        ----------
+        value_str : str
+            待转换字符串
+
+        Returns
+        -------
+        bool
+            转换后的布尔值
+
+        Raises
+        ------
+        ValueError
+            如果字符串无法转换成布尔值则抛出异常
         """
         if StringUtil.is_blank(value_str):
             return False
@@ -103,66 +164,106 @@ class BooleanUtil:
         value_str = value_str.strip().lower()
         true_flg = value_str in cls.TRUE_SET
         false_flg = value_str in cls.FALSE_SET
-
-        if not true_flg and not false_flg:
-            if strict_mode:
-                raise ValueError(f"{value_str} is not a boolean value")
-            return bool(value_str)
-
-        return not false_flg
+        if true_flg or false_flg:
+            return not false_flg
+        else:
+            raise ValueError(f"{value_str} is not a boolean value")
 
     @classmethod
-    def boolean_to_int(cls, value: bool, *, strict_mode: bool = False) -> int:
+    def boolean_to_int(cls, value: bool) -> int:
         """
-        boolean值转为int
-        :param value: 待测试的值
-        :param strict_mode: 是否启动严格模式, 如果开启严格模式, 则不会使用BOOL进行布尔运算, 否则会进行布尔运算
-        :return: int 值
+        将布尔值转换成整数
+
+        Parameters
+        ----------
+        value : bool
+            待转换布尔值
+
+        Returns
+        -------
+        int
+            转换后的整数值
+
+        Raises
+        ------
+        ValueError
+            如果布尔值无法转换成整数则抛出异常
         """
         if not isinstance(value, bool):
-            if strict_mode:
-                raise ValueError(f"{value} is not a boolean value")
-            return 1 if value else 0
+            raise ValueError(f"{value} is not a boolean value")
 
         return 1 if value else 0
 
     @classmethod
-    def to_str_true_and_false(cls, value: bool, *, strict_mode: bool = True) -> str:
+    def to_str_true_and_false(
+        cls,
+        value: bool,
+    ) -> str:
         """
         将boolean转换为字符串 'true' 或者 'false'.
-        :param value: Boolean值
-        :param strict_mode: 是否启动严格模式, 如果开启严格模式, 则不会使用BOOL进行布尔运算, 否则会进行布尔运算
-        :return: 'true', 'false'
+
+        Parameters
+        ----------
+        value : bool
+            待转换布尔值
+
+
+        Returns
+        -------
+        str
+            如果布尔值为True, 则返回 'TRUE', 否则返回 'FALSE'
         """
         return cls.to_string(
             value,
             cls.DEFAULT_TRUE_STRING,
             cls.DEFAULT_FALSE_STRING,
-            strict_mode=strict_mode,
         )
 
     @classmethod
-    def to_str_on_and_off(cls, value: bool, *, strict_mode: bool = True) -> str:
+    def to_str_on_and_off(
+        cls,
+        value: bool,
+    ) -> str:
         """
         将boolean转换为字符串 'on' 或者 'off'.
-        :param value: Boolean值
-        :param strict_mode: 是否启动严格模式, 如果开启严格模式, 则不会使用BOOL进行布尔运算, 否则会进行布尔运算
-        :return: 'on', 'off'
+
+        Parameters
+        ----------
+        value : bool
+            待转换布尔值
+
+        Returns
+        -------
+        str
+            如果布尔值为True, 则返回 'ON', 否则返回 'OFF'
         """
-        return cls.to_string(value, "ON", "OFF", strict_mode=strict_mode)
+        return cls.to_string(value, "ON", "OFF")
 
     @classmethod
-    def to_str_yes_no(cls, value: bool, *, strict_mode: bool = True) -> str:
+    def to_str_yes_no(
+        cls,
+        value: bool,
+    ) -> str:
         """
         将boolean转换为字符串 'yes' 或者 'no'.
-        :param value: Boolean值
-        :param strict_mode: 是否启动严格模式, 如果开启严格模式, 则不会使用BOOL进行布尔运算, 否则会进行布尔运算
-        :return: 'yes', 'no'
+
+        Parameters
+        ----------
+        value : bool
+            待转换布尔值
+
+        Returns
+        -------
+        str
+            如果布尔值为True, 则返回 'YES', 否则返回 'NO'
         """
-        return cls.to_string(value, "YES", "NO", strict_mode=strict_mode)
+        return cls.to_string(value, "YES", "NO")
 
     @classmethod
-    def to_chinese_str(cls, value: bool, *, strict_mode: bool = True) -> str:
+    def to_chinese_str(
+        cls,
+        value: bool,
+    ) -> str:
         """
         将给定布尔值转换为“是”或者“否”
 
@@ -170,27 +271,39 @@ class BooleanUtil:
         ----------
         value : bool
             待转换布尔值
-        strict_mode : bool, optional
-            是否启动严格模式, 如果开启严格模式, 则不会使用BOOL进行布尔运算,否则会进行布尔运算, by default True
 
         Returns
         -------
         str
-            转换后的字符串
+            如果布尔值为True, 则返回 '是', 否则返回 '否'
         """
-        return cls.to_string(value, "是", "否", strict_mode=strict_mode)
+        return cls.to_string(value, "是", "否")
 
     @classmethod
-    def to_string(cls, value: bool, true_str: str, false_str: str, *, strict_mode: bool = False) -> str:
+    def to_string(
+        cls,
+        value: bool,
+        true_str: str,
+        false_str: str,
+    ) -> str:
         """
-        将boolean转换为字符串
-        :param value: Boolean值
-        :param true_str:
-        :param false_str:
-        :param strict_mode: 是否启动严格模式, 如果开启严格模式, 则不会使用BOOL进行布尔运算, 否则会进行布尔运算
-        :return: 转换后的字符串
+        将布尔值转换成给定的字符串
+
+        Parameters
+        ----------
+        value : bool
+            待转换布尔值
+        true_str : str
+            如果布尔值为True, 返回的字符串
+        false_str : str
+            如果布尔值为False, 返回的字符串
+
+        Returns
+        -------
+        str
+            如果布尔值为True, 则返回true_str, 否则返回false_str
         """
-        value = cls._check_boolean_value(value, strict_mode=strict_mode)
+        value = cls._get_bool_from_val(value)
 
         if StringUtil.is_blank(true_str):
             true_str = cls.DEFAULT_TRUE_STRING
@@ -260,7 +373,7 @@ class BooleanUtil:
         return any(values)
 
     @classmethod
-    def xor(cls, *values, strict: bool = True) -> bool:
+    def xor_all(cls, *values) -> bool:
         """
         对Boolean数组取异或
 
@@ -290,15 +403,12 @@ class BooleanUtil:
             raise ValueError("Empty sequence")
         result = False
         for flg in values:
-            flg = cls._check_boolean_value(flg, strict_mode=strict)
+            flg = cls._get_bool_from_val(flg)
             result = result ^ flg
         return result
 
     @classmethod
-    def _check_boolean_value(cls, value: Any, *, strict_mode: bool = False) -> bool:
-        if not isinstance(value, bool) and strict_mode:
-            raise ValueError(f"{value} is not a boolean value")
-
+    def _get_bool_from_val(cls, value: Any) -> bool:
         return bool(value)
 
 
