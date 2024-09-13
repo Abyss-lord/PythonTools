@@ -66,6 +66,38 @@ class BooleanUtil:
     DEFAULT_FALSE_STRING: typing.Final[str] = "FALSE"
 
     @classmethod
+    def to_bool_default_if_none(
+        cls,
+        value: bool | None,
+        default_val: bool = False,
+    ) -> bool:
+        """
+        给定一个值, 如果值是None, 则返回默认值, 否则返回布尔值
+
+        Example:
+        ----------
+        >>> BooleanUtil.to_bool_default_if_none(None, False)
+        False
+        >>> BooleanUtil.to_bool_default_if_none(True)
+        True
+        >>> BooleanUtil.to_bool_default_if_none(False)
+        False
+
+        Parameters
+        ----------
+        value : bool | None
+            待检测值
+        default_val : bool, optional
+            默认布尔值, by default False
+
+        Returns
+        -------
+        bool
+            如果值是None, 则返回默认值, 否则返回布尔值
+        """
+        return value if value is not None else default_val
+
+    @classmethod
     def value_of(cls, val: Any) -> bool:
         """
         将给定值转换成布尔值
@@ -168,6 +200,23 @@ class BooleanUtil:
             return not false_flg
         else:
             raise ValueError(f"{value_str} is not a boolean value")
+
+    @classmethod
+    def int_to_boolean(cls, value_int: int) -> bool:
+        """
+        将整数值转换成布尔值
+
+        Parameters
+        ----------
+        value_int : int
+            待转换整数值
+
+        Returns
+        -------
+        bool
+            转换后的布尔值
+        """
+        return value_int != 0
 
     @classmethod
     def boolean_to_int(cls, value: bool) -> int:
@@ -333,6 +382,8 @@ class BooleanUtil:
         ValueError
             _description_
         """
+        if SequenceUtil.is_empty(values):
+            raise ValueError("Empty sequence")
 
         return all(values)
 
