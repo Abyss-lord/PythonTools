@@ -21,6 +21,7 @@ import random
 import string
 import sys
 import typing
+import unicodedata
 from collections.abc import Mapping, Sequence, Set
 from typing import Any
 
@@ -493,11 +494,17 @@ class SequenceUtil:
     @classmethod
     def is_not_empty(cls, sequence: typing.Sequence[Any]) -> bool:
         """
-        返回序列是否为非空。\n
-        NOTE 依赖于 is_empty 实现。
+        返回序列是否为非空
 
-        :param sequence:
-        :return:
+        Parameters
+        ----------
+        sequence : typing.Sequence[Any]
+            待检测序列
+
+        Returns
+        -------
+        bool
+            如果序列为非空返回True, 否则返回False
         """
         return not cls.is_empty(sequence)
 
@@ -1350,15 +1357,12 @@ class StringUtil(SequenceUtil):
         """
         if s is None:
             return True
-        if not cls.is_string(s, raise_type_exception=raise_type_exception):
-            return False
 
-        val = s if isinstance(s, str) else str(s)
-        for c in val:
+        for c in s:
             if c in (string.ascii_letters + string.digits + string.punctuation):
                 return False
 
-        return len(val.strip()) == 0
+        return len(s.strip()) == 0
 
     @classmethod
     def is_not_blank(cls, s: str, *, raise_type_exception: bool = False) -> bool:
@@ -1400,7 +1404,6 @@ class StringUtil(SequenceUtil):
         prefix: str,
         *,
         case_insensitive: bool = True,
-        strict_mode: bool = False,
     ) -> bool:
         """
         检查字符串 s 是否以指定的前缀 prefix 开头。
@@ -1421,12 +1424,6 @@ class StringUtil(SequenceUtil):
         bool
             字符串 s 是否以指定的前缀 prefix 开头。
         """
-
-        if strict_mode:
-            return s.startswith(prefix)
-
-        s = s.strip()
-        prefix = prefix.strip()
 
         if case_insensitive:
             return s.lower().startswith(prefix.lower())
@@ -1658,8 +1655,16 @@ class StringUtil(SequenceUtil):
     def none_to_empty(cls, s: str) -> str:
         """
         当给定字符串为null时, 转换为Empty
-        :param s: 待检测字符串
-        :return: 转换后的字符串
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+
+        Returns
+        -------
+        str
+            转换后的字符串
         """
         return cls.none_to_default(s, cls.EMPTY)
 
@@ -1667,9 +1672,18 @@ class StringUtil(SequenceUtil):
     def none_to_default(cls, s: str, default_str: str) -> str:
         """
         如果字符串是 null, 则返回指定默认字符串, 否则返回字符串本身。
-        :param s: 要转换的字符串
-        :param default_str: 默认字符串
-        :return: 如果字符串是 null, 则返回指定默认字符串, 否则返回字符串本身。
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        default_str : str
+            默认字符串
+
+        Returns
+        -------
+        str
+            如果字符串是 null, 则返回指定默认字符串, 否则返回字符串本身。
         """
         return default_str if s is None else s
 
@@ -1677,9 +1691,18 @@ class StringUtil(SequenceUtil):
     def empty_to_default(cls, s: str, default_str: str) -> str:
         """
         如果字符串是null或者"", 则返回指定默认字符串, 否则返回字符串本身。
-        :param s: 要转换的字符串
-        :param default_str: 默认字符串
-        :return: 转换后的字符串
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+        default_str : str
+            默认字符串
+
+        Returns
+        -------
+        str
+            转换后的字符串
         """
         return default_str if s is None or cls.EMPTY == s else s
 
@@ -1687,28 +1710,44 @@ class StringUtil(SequenceUtil):
     def empty_to_none(cls, s: str) -> str | None:
         """
         当给定字符串为空字符串时, 转换为null
-        :param s: 被转换的字符串
-        :return: 转换后的字符串
+
+        Parameters
+        ----------
+        s : str
+            待检测字符串
+
+        Returns
+        -------
+        str | None
+            转换后的值
         """
         return None if cls.is_empty(s) else s
 
     @classmethod
-    def blank_to_default(cls, s: str, default_str: str) -> str:
-        """
-        如果字符串是null或者""或者空白, 则返回指定默认字符串, 否则返回字符串本身。
-        :param s: 要转换的字符串
-        :param default_str: 默认字符串
-        :return: 转换后的字符串
-        """
-        return default_str if cls.is_blank(s) else s
-
-    @classmethod
-    def to_bytes(cls, byte_or_str: bytes | str, encoding=CharsetUtil.UTF_8) -> bytes:
+    def to_bytes(
+        cls,
+        byte_or_str: bytes | str,
+        encoding: str = CharsetUtil.UTF_8,
+    ) -> bytes:
         """
         将字节序列或者字符串转换成字节序列
-        :param byte_or_str: 待转换对象
-        :param encoding: 编码方式
-        :return: 如果是bytes序列则返回自身, 否则编码后返回
+
+        Parameters
+        ----------
+        byte_or_str : bytes | str
+            待转换对象
+        encoding : str, optional
+            编码方式, by default CharsetUtil.UTF_8
+
+        Returns
+        -------
+        bytes
+            如果是bytes序列则返回自身, 否则编码后返回
+
+        Raises
+        ------
+        TypeError
+            如果 byte_or_str 不是 bytes 或 str 则抛出异常
         """
         if not isinstance(byte_or_str, (str | bytes)):
             raise TypeError(f"Expected bytes or str, but found {type(byte_or_str)}")
@@ -1716,12 +1755,30 @@ class StringUtil(SequenceUtil):
         return byte_or_str if isinstance(byte_or_str, bytes) else byte_or_str.encode(encoding)
 
     @classmethod
-    def to_str(cls, byte_or_str: bytes | str, encoding=CharsetUtil.UTF_8) -> str:
+    def to_str(
+        cls,
+        byte_or_str: bytes | str,
+        encoding: str = CharsetUtil.UTF_8,
+    ) -> str:
         """
         将字节序列或者字符串转换成字符串
-        :param byte_or_str: 待转换对象
-        :param encoding: 解码方式
-        :return: 如果是字符串则返回自身, 否则解码后返回
+
+        Parameters
+        ----------
+        byte_or_str : bytes | str
+            待转换对象
+        encoding : str, optional
+            解码方式, by default CharsetUtil.UTF_8
+
+        Returns
+        -------
+        str
+            如果是字符串则返回自身, 否则解码后返回
+
+        Raises
+        ------
+        TypeError
+            如果 byte_or_str 不是 bytes 或 str 则抛出异常
         """
         if not isinstance(byte_or_str, (str | bytes)):
             raise TypeError(f"Expected bytes or str, but found {type(byte_or_str)}")
@@ -1743,6 +1800,31 @@ class StringUtil(SequenceUtil):
             返回的集合
         """
         return frozenset(args) if froze else set(args)
+
+    @classmethod
+    def as_list(cls, *args) -> list[str]:
+        """
+        将多个字符串输入转换成列表
+
+        Returns
+        -------
+        list[str]
+            返回的列表
+        """
+        return list(args)
+
+    @classmethod
+    def show_unicode_info(cls, s: str) -> None:
+        """
+        显示字符串的unicode信息
+
+        Parameters
+        ----------
+        s : str
+            待显示的字符串
+        """
+        for code_point in s:
+            print(f"U+{ord(code_point):04X}, code point: {code_point}, name: {unicodedata.name(code_point)}")
 
     @classmethod
     def convert_to_circled(cls, char: str) -> str:
@@ -1985,7 +2067,6 @@ class StringUtil(SequenceUtil):
         s2: str,
         *,
         case_insensitive: bool = True,
-        strict_mode: bool = False,
     ) -> bool:
         """
         判断两个字符串是否相等
@@ -1998,8 +2079,6 @@ class StringUtil(SequenceUtil):
             待检测字符串 s2
         case_insensitive : bool, optional
             是否忽略大小写, by default True
-        strict_mode : bool, optional
-            是否启用严格模式,即是否调用strip()函数, by default False
 
         Returns
         -------
@@ -2009,13 +2088,9 @@ class StringUtil(SequenceUtil):
         if s1 is None or s2 is None:
             return False
 
-        if strict_mode:
-            return s1 == s2
-
-        s1 = s1.strip()
-        s2 = s2.strip()
-
-        if len(s1) != len(s2):
+        s1_length = cls.get_length(s1)
+        s2_length = cls.get_length(s2)
+        if s1_length != s2_length:
             return False
 
         for i, j in zip(s1, s2):
@@ -2034,9 +2109,26 @@ class StringUtil(SequenceUtil):
         s2: str,
         *,
         case_insensitive: bool = True,
-        strict_mode: bool = False,
     ) -> bool:
-        return not cls.equals(s1, s2, case_insensitive=case_insensitive, strict_mode=strict_mode)
+        """
+        判断两个字符串是否不相等
+
+        Parameters
+        ----------
+        s1 : str
+            待检测字符串1
+        s2 : str
+            待检测字符串2
+        case_insensitive : bool, optional
+            是否忽略大小写, by default True
+
+
+        Returns
+        -------
+        bool
+            _description_
+        """
+        return not cls.equals(s1, s2, case_insensitive=case_insensitive)
 
     @classmethod
     def equals_any(cls, s: str, *args: str, case_insensitive: bool = True) -> bool:
@@ -3518,3 +3610,20 @@ class StringUtil(SequenceUtil):
                 basic_dict["other"] += 1
 
         return basic_dict
+
+    @classmethod
+    def swap_case(cls, s: str) -> str:
+        """
+        交换字符串中的大小写
+
+        Parameters
+        ----------
+        s : str
+            待交换字符串
+
+        Returns
+        -------
+        str
+            交换后的字符串
+        """
+        return "".join(map(lambda x: x.swapcase(), s))
