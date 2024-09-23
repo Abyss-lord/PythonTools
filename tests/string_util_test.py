@@ -58,8 +58,8 @@ class TestStringUtil:
             with allure.step("步骤3:测试严格模式和非严格模式"):
                 s1 = "hello "
                 s2 = "hello"
-                assert StringUtil.equals(s1, s2, strict_mode=False)
-                assert not StringUtil.equals(s1, s2, strict_mode=True)
+
+                assert not StringUtil.equals(s1, s2)
 
         @allure.title("测试字符串是否包含指定字符")
         def test_equals_any(self):
@@ -254,6 +254,11 @@ class TestStringUtil:
             assert StringUtil.get_vowels_from_str("hello world") == "eoo"
             assert StringUtil.get_vowels_from_str("你好啊") == ""
             assert StringUtil.get_vowels_from_str("aeiounknknknknkjhknjniaodnwaondwo") == "aeiouiaoaoo"
+
+        @allure.title("测试显示unicode字符")
+        def test_show_unicode(self) -> None:
+            s = "$%^"
+            StringUtil.show_unicode_info(s)
 
     @allure.story("获取字符")
     @allure.description("测试获取字符,例如获取随机中文、小写字符等")

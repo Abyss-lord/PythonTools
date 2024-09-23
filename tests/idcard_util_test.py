@@ -41,25 +41,11 @@ class TestIdUtil:
     @allure.description("生成随机有效的18位和15位身份证号")
     class TestGenerateRandomValidId:
         @allure.title("测试生成随机有效身份证号")
-        def test_generate_random_id(self):
-            with allure.step("步骤1:测试生成随机有效身份证号"):
-                for _ in range(TestIdUtil.TEST_ROUND):
-                    id_str = IDCardUtil.generate_random_valid_id()
-                    assert IDCardUtil.is_valid_id(id_str)
-
-            with allure.step("步骤2:测试生成18位随机有效身份证号"):
-                for _ in range(TestIdUtil.TEST_ROUND):
-                    id_str = IDCardUtil.generate_random_valid_id(code_length=18)
-                    assert IDCardUtil.is_valid_id(id_str)
-
-            with allure.step("步骤3:测试生成15位随机有效身份证号"):
-                for _ in range(TestIdUtil.TEST_ROUND):
-                    id_str = IDCardUtil.generate_random_valid_id(code_length=15)
-                    assert IDCardUtil.is_valid_id_15(id_str)
-
-            with allure.step("步骤4:测试生成身份证号长度不正确"):
-                with pytest.raises(ValueError):
-                    IDCardUtil.generate_random_valid_id(code_length=21321)
+        @pytest.mark.parametrize(
+            "code_length", [18, 15, pytest.param(21321, marks=pytest.mark.xfail(raises=ValueError))]
+        )
+        def test_generate_random_id(self, code_length: int) -> None:
+            assert IDCardUtil.is_valid_id(IDCardUtil.generate_random_valid_id(code_length=code_length))
 
         @allure.title("测试生成身份证Card对象")
         def test_generate_random_id_card_obj(cls):

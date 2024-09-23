@@ -33,3 +33,14 @@ class TestBasic:
 
     def test_format_formula(self):
         print(self.hex_dump(os.urandom(64)))
+
+    def test_multi_process(self):
+        import multiprocessing as mp
+
+        for _ in range(10):
+            mp.Process(target=run, args=(1, 2)).start()
+
+
+def run(a, b):
+    pid = os.getpid()
+    print(f"pid: {pid}", a, b)
