@@ -18,7 +18,7 @@ import re
 from typing import Any
 
 from pythontools.core.constants.pattern_pool import RegexPool
-from pythontools.core.errors import ValidationError
+from pythontools.core.errors import RegexValidationError
 from pythontools.core.utils.basicutils import SequenceUtil, StringUtil
 
 
@@ -211,7 +211,7 @@ class ReUtil:
 
         res = pattern.match(s)
         if res is None and raise_exception:
-            raise ValidationError(pattern, s, f"pattern {pattern} not match string {s}")
+            raise RegexValidationError(pattern, s, f"pattern {pattern} not match string {s}")
 
         return res is not None
 
@@ -247,7 +247,7 @@ class ReUtil:
 
         res = pattern.search(s)
         if res is None and raise_exception:
-            raise ValidationError(pattern, s, f"pattern {pattern} not match string {s}")
+            raise RegexValidationError(pattern, s, f"pattern {pattern} not match string {s}")
 
         return res is not None
 
