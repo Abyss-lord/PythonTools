@@ -27,7 +27,7 @@ from os import PathLike
 from pathlib import Path
 
 from pythontools.core.constants.string_constant import CharsetUtil
-from pythontools.core.utils.basicutils import StringUtil
+from pythontools.core.utils.basicutils import SequenceUtil, StringUtil
 from pythontools.core.utils.datetimeutils import DatetimeUtil, TimeUnit
 
 
@@ -479,6 +479,26 @@ class FileUtil:
 
         return eq(file_extension, extension) or eq(file_extension, f".{extension}")
 
+    def is_match_extensions(
+        self,
+        p: str | PathLike[str],
+        *extensions,
+    ) -> bool:
+        """
+        判断给定的文件路径是否与给定的扩展名匹配
+
+        Parameters
+        ----------
+        p : str | PathLike[str]
+            待检测路径
+
+        Returns
+        -------
+        bool
+            如果文件扩展名在给定的扩展名列表中则返回True, 否则返回False
+        """
+        return any(self.is_match_extension(p, extension) for extension in extensions)
+
     @classmethod
     def is_newer_than(
         cls, p: str | PathLike[str], reference: float | int | str | PathLike[str], *raise_exception: bool
@@ -786,8 +806,33 @@ class FileUtil:
         return [
             cls.get_path_object(f_path)
             for f_path, _, _ in os.walk(path_obj)
-            if all(predicate(f_path) for predicate in predicates) and cls.is_dir(f_path)
+            if SequenceUtil.is_empty(predicates)
+            or all(predicate(f_path) for predicate in predicates)
+            and cls.is_dir(f_path)
         ]
+
+    @classmethod
+    def list_files_from_path_ignore_hidden(
+        cls,
+        p: str | Path,
+    ) -> list[Path]:
+        """
+        列出给定路径下所有的非隐藏文件
+
+        Parameters
+        ----------
+        p : str | PathLike[str]
+            待检测路径
+
+        Returns
+        -------
+        list[Path]
+            非隐藏文件列表
+        """
+        return cls.list_files_from_path(
+            p,
+            cls.is_not_contain_ignore,
+        )
 
     @classmethod
     def list_files_from_path(
@@ -811,10 +856,10 @@ class FileUtil:
         path_obj = cls.get_path_object(p)
 
         return [
-            abs_path
+            Path(f_path) / f
             for f_path, _, fs in os.walk(path_obj)
             for f in fs
-            if all(predicate(abs_path := Path(f_path) / f) for predicate in predicates)
+            if SequenceUtil.is_empty(predicates) or all(predicate(Path(f_path) / f) for predicate in predicates)
         ]
 
     @classmethod
