@@ -22,6 +22,7 @@ from pythontools.core.date.relativedelta import relativedelta  # noqa: F401
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from pythontools.collection.collectionutils import CollectionUtil  # noqa: F401
+from pythontools.core import log  # noqa: F401
 from pythontools.core.constants.datetime_constant import (  # noqa: F401
     Month,
     Quarter,  # type: ignore # noqa: F401
@@ -33,18 +34,19 @@ from pythontools.core.constants.pattern_pool import PatternPool  # noqa: F401
 # noqa: F401
 from pythontools.core.constants.people_constant import Gender  # noqa: F401
 from pythontools.core.constants.string_constant import (
+    CharPool,  # noqa: F401
     CharsetUtil,  # noqa: F401
     DesensitizedType,  # noqa: F401
 )
 from pythontools.core.convert.convertor import BasicConvertor  # noqa: F401
 from pythontools.core.date.format.iso8601 import ISO8601  # noqa: F401
 from pythontools.core.date.format.rfc822 import RFC822  # noqa: F401
-from pythontools.core.decorator import Singleton, TraceUsedTime, UnCheckFunction  # noqa: F401
+from pythontools.core.decorator import Singleton, TraceUsedTime, UnCheckFunction, need_linux  # noqa: F401
 from pythontools.core.errors import (  # noqa: F401
     ConversionError,
     DatetimeParseError,
+    RegexValidationError,
     UnsupportedOperationError,
-    ValidationError,
 )
 from pythontools.core.io.fileutils import (
     # noqa: F401

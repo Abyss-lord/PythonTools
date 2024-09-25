@@ -257,7 +257,7 @@ class TestStringUtil:
 
         @allure.title("测试显示unicode字符")
         def test_show_unicode(self) -> None:
-            s = "$%^"
+            s = "|"
             StringUtil.show_unicode_info(s)
 
     @allure.story("获取字符")

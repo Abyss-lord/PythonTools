@@ -14,33 +14,12 @@ Change Activity:
 """
 
 # here put the import lib
-import os
+
+import platform
+
+from loguru import logger
 
 
 class TestBasic:
-    def hex_dump(self, b):
-        # hex
-        h = [f"{x:02x}" for x in b]
-        h = [h[i : i + 16] for i in range(0, len(h), 16)]
-        h = [" ".join(x) for x in h]
-        # ascii
-        a = "".join(chr(x) if x in range(32, 127) else "." for x in b)
-        a = [a[i : i + 16] for i in range(0, len(a), 16)]
-        # dump
-        d = ["  ".join([x, y]) for x, y in zip(h, a)]
-        d = os.linesep.join(d)
-        return d
-
-    def test_format_formula(self):
-        print(self.hex_dump(os.urandom(64)))
-
-    def test_multi_process(self):
-        import multiprocessing as mp
-
-        for _ in range(10):
-            mp.Process(target=run, args=(1, 2)).start()
-
-
-def run(a, b):
-    pid = os.getpid()
-    print(f"pid: {pid}", a, b)
+    def test_platform(self):
+        logger.info(platform.system())

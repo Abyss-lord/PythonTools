@@ -56,3 +56,11 @@ class TestDecorator:
             s2 = SingletonCls("s2")
             assert StringUtil.equals(s1.name, s2.name)
             assert s1 is s2
+
+    # @allure.story("前置检测装饰器")
+    # @allure.description("前置检测装饰器, 可以在函数调用前进行前置条件检查")
+    # class TestPreCheckDecorator:
+    #     @allure.title("测试Linux平台检测装饰器")
+    #     @need_linux
+    #     def test_linux_decorator(self) -> None:
+    #         print("test_linux_decorator")
