@@ -15,10 +15,15 @@ Change Activity:
 # here put the import lib
 
 import functools
+import os
+import platform
 import threading
 import time
 import typing
 import warnings
+from typing import Any
+
+from pythontools.core.errors import DecoratorException
 
 
 # 单例模式装饰器
@@ -125,3 +130,108 @@ class UnCheckFunction:
             return func(*args, **kwargs)
 
         return wrapper
+
+
+def need_linux(func: typing.Callable[[Any], Any]) -> typing.Callable[[Any], Any]:
+    """
+    确保在linux系统下运行, 否则抛出异常
+
+    Examples
+    --------
+    >>> from pythontools.core.decorator import need_linux
+    >>> @need_linux
+    ... def you_func():
+    ...     print("test")
+
+
+    Parameters
+    ----------
+    func : typing.Callable[[Any], Any]
+        待装饰函数
+
+    Returns
+    -------
+    typing.Callable[[Any], Any]
+        装饰函数
+
+    Raises
+    ------
+    DecoratorException
+        如果运行的系统不是linux，则抛出异常
+    """
+    if platform.system() != "Linux":
+        raise DecoratorException(
+            need_linux,
+            "The system is not linux." + "This functionality only supported in linux",
+        )
+    return func
+
+
+def need_posix(func: typing.Callable[[Any], Any]) -> typing.Callable[[Any], Any]:
+    """
+    确保在posix系统下运行, 否则抛出异常
+
+    Examples
+    --------
+    >>> from pythontools.core.decorator import need_posix
+    >>> @need_posix
+    ... def you_func():
+    ...     print("test")
+
+
+
+    Parameters
+    ----------
+    func : typing.Callable[[Any], Any]
+        待装饰函数
+
+    Returns
+    -------
+    typing.Callable[[Any], Any]
+        待装饰函数
+
+    Raises
+    ------
+    DecoratorException
+        如果运行的系统不是posix, 则抛出异常
+    """
+    if os.name != "posix":
+        raise DecoratorException(
+            need_posix,
+            "The system is not posix." + "This functionality only supported in posix",
+        )
+    return func
+
+
+def need_mac(func: typing.Callable[[Any], Any]) -> typing.Callable[[Any], Any]:
+    """
+        确保在mac系统下运行, 否则抛出异常
+
+        Examples
+        --------
+        >>> from pythontools.core.decorator import need_mac
+        >>> @need_mac
+        ... def you_func():
+        ...     print("test")
+
+    Parameters
+        ----------
+        func : typing.Callable[[Any], Any]
+            待装饰函数
+
+        Returns
+        -------
+        typing.Callable[[Any], Any]
+            待装饰函数
+
+        Raises
+        ------
+        DecoratorException
+            如果运行的系统不是mac, 则抛出异常
+    """
+    if platform.system() != "Darwin":
+        raise DecoratorException(
+            need_mac,
+            "The system is not mac." + "This functionality only supported in mac",
+        )
+    return func
