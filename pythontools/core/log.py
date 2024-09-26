@@ -17,20 +17,25 @@ Change Activity:
 import collections
 import logging
 import os
+import random
 import re
 import sys
 import threading
 import time
+import warnings
 from logging import Logger, handlers
 
-from .constants.string_constant import CharPool
+from .constants.log_constant import FileHandlerType
+from .constants.string_constant import CharPool, CharsetUtil
 from .errors import LoggerException
 from .utils.osutils import SysUtil
 
-ROTATION = 0
-INFINITE = 1
+DEFAULT_ROTATION_COUNTS = 30
+DEFAULT_ENCODING = CharsetUtil.UTF_8
+DEFAULT_MAX_LOG_SIZE = 1024 * 1024 * 10  # 10M
+DEFAULT_BACKUP_COUNTS = 10
+DEFAULT_INTERVAL = 30
 
-ROTATION_COUNTS = 30
 DEBUG = logging.DEBUG
 INFO = logging.INFO
 WARNING = logging.WARNING
@@ -46,20 +51,32 @@ warning = logging.warning
 error = logging.error
 debug = logging.debug
 critical = logging.critical
-fatal = logging.fatal
 
 
 LoggerParams = collections.namedtuple(
     "LoggerParams",
     [
-        "loglevel",  # one of logging.INFO logging.DEBUG logging.xxx levels
+        "loglevel",  # 日志级别，one of logging.INFO logging.DEBUG logging.xxx levels
         "logfile",  # valid logfile position,  e.g.   /home/test/test.log
         "log_type",  # log.ROTATION  log.INFINITE
-        "max_log_size",
-        "print_console",
+        "max_log_size",  # 日志文件最大大小，单位为字节
+        "print_console",  # 是否将日志输出到控制台
         "gen_wf",  # True/False, generate log lines with level >= WARNING
-        "field_splitter",
+        "field_splitter",  # 日志字段分隔符
+        "encoding",  # 日志编码
     ],
+)
+
+
+DEFAULT_LOG_PARAMS = LoggerParams(
+    loglevel=logging.INFO,
+    logfile=None,
+    log_type=FileHandlerType.ROTATION,
+    max_log_size=DEFAULT_MAX_LOG_SIZE,  # 10M
+    print_console=True,
+    gen_wf=False,
+    field_splitter=CharPool.VERTICAL_LINE,
+    encoding=DEFAULT_ENCODING,
 )
 
 
@@ -83,17 +100,31 @@ class _Singleton:  # pylint: disable=R0903
         return self.__instance
 
 
-class _MsgFilter(logging.Filter):
+class MsgLevelFilter(logging.Filter):
     """
     日志级别过滤器
     """
 
     # pylint: disable= super-init-not-called
-    def __init__(self, msg_level=logging.WARNING):
+    def __init__(self, msg_level=logging.WARNING) -> None:
+        # 默认采用 WARNING 级别过滤
         self.msg_level = msg_level
 
-    def filter(self, record):
+    def filter(self, record) -> bool:
         return record.levelno < self.msg_level
+
+
+class RandomFilter(logging.Filter):
+    """
+    随机日志过滤器
+    """
+
+    # pylint: disable= super-init-not-called
+    def __init__(self, rate: float) -> None:
+        self.rate = rate
+
+    def filter(self, record) -> bool:
+        return random.random() < self.rate
 
 
 class LogInitializer:
@@ -127,8 +158,9 @@ class LogInitializer:
 
         # 设置日志级别
         logger.setLevel(loglevel)
+
         # 创建日志文件
-        cls._check_and_create_log_file(str_log_file)
+        cls.check_and_create_log_file(str_log_file)
         # 设置日志格式
         formatter = cls.get_formatter(log_params)
         # 设置控制台 handler
@@ -210,7 +242,10 @@ class LogInitializer:
         return f"{temp_msg}{msg}"
 
     @classmethod
-    def get_formatter(cls, log_params: LoggerParams) -> logging.Formatter:
+    def get_formatter(
+        cls,
+        log_params: LoggerParams,
+    ) -> logging.Formatter:
         """
         获取日志formatter
 
@@ -229,7 +264,8 @@ class LogInitializer:
         splitter = log_params.field_splitter
         return logging.Formatter(
             fmt=f" %(asctime)s {tznum}({tzkey}) {splitter} %(levelname)-10s {splitter} "
-            f"%(process)d:%(threadName)s(%(thread)x) {splitter} %(filename)s#%(funcName)s:%(lineno)s - %(message)s"
+            f"%(processName)s(%(process)d):%(threadName)s(%(thread)x) {splitter} %(filename)s#%(funcName)s:%(lineno)s -\
+                %(message)s"
         )
 
     @classmethod
@@ -281,7 +317,7 @@ class LogInitializer:
         """
         log_level = log_params.loglevel
 
-        fdhandler = cls._get_file_handler(log_params)
+        fdhandler = cls.get_file_handler(log_params)
 
         fdhandler.setFormatter(formatter)  # type: ignore
         fdhandler.setLevel(log_level)
@@ -289,31 +325,20 @@ class LogInitializer:
         logger.addHandler(fdhandler)
 
     @classmethod
-    def _set_wf(cls, logger: Logger, log_params: LoggerParams, formatter, fdhandler):
-        gen_wf = log_params.gen_wf
-        str_log_file = log_params.logfile
-        if gen_wf:
-            file_wf = f"{str(str_log_file)}.wf"
-            warn_handler = logging.FileHandler(file_wf, "a", encoding="utf-8")
-            warn_handler.setLevel(logging.WARNING)
-            warn_handler.setFormatter(formatter)
-            logger.addHandler(warn_handler)
-            fdhandler.addFilter(_MsgFilter(logging.WARNING))  # type: ignore
+    def check_and_create_log_file(cls, str_log_file: str) -> None:
+        """
+        检查并创建日志文件
 
-    @classmethod
-    def _get_file_handler(cls, log_params: LoggerParams) -> handlers.RotatingFileHandler | logging.FileHandler:
-        str_log_file = log_params.logfile
-        log_type = log_params.log_type
-        maxsize = log_params.max_log_size
+        Parameters
+        ----------
+        str_log_file : str
+            日志文件路径
 
-        return (
-            handlers.RotatingFileHandler(str_log_file, "a", maxsize, ROTATION_COUNTS, encoding="utf-8")
-            if log_type == ROTATION
-            else logging.FileHandler(str_log_file, "a", encoding="utf-8")
-        )  # type: ignore
-
-    @classmethod
-    def _check_and_create_log_file(cls, str_log_file: str) -> None:
+        Raises
+        ------
+        OSError
+            如果日志文件不存在，则尝试创建日志文件，但文件创建失败时抛出 OSError 异常
+        """
         if not os.path.exists(str_log_file):
             try:
                 if SysUtil.is_linux_platform():
@@ -323,15 +348,80 @@ class LogInitializer:
                         f_handle.write("\n")
             except OSError as os_err:
                 raise OSError("log file does not exist. try to create it. but file creation failed") from os_err
+        else:
+            warnings.warn(f"log file {str_log_file} exists")
+
+    @classmethod
+    def get_file_handler(cls, log_params: LoggerParams) -> handlers.RotatingFileHandler | logging.FileHandler:
+        """
+        获取文件 handler
+
+        Parameters
+        ----------
+        log_params : LoggerParams
+            日志配置参数
+
+        Returns
+        -------
+        handlers.RotatingFileHandler | logging.FileHandler
+            文件 handler 实例
+
+        Raises
+        ------
+        ValueError
+            如果没有设置日志文件，则抛出 ValueError 异常
+        """
+        str_log_file = log_params.logfile
+        if str_log_file is None:
+            raise ValueError("log file is None")
+
+        log_type = log_params.log_type
+        maxsize = log_params.max_log_size
+        encoding = log_params.encoding or DEFAULT_ENCODING
+
+        match log_type:
+            case FileHandlerType.INFINITE:
+                return logging.FileHandler(
+                    str_log_file,
+                    "a",
+                    encoding=encoding,
+                )
+            case FileHandlerType.TIME_ROTATION:
+                return handlers.TimedRotatingFileHandler(
+                    str_log_file,
+                    when="s",
+                    interval=DEFAULT_INTERVAL,
+                    encoding=encoding,
+                    backupCount=DEFAULT_BACKUP_COUNTS,
+                )
+            case _:
+                return handlers.RotatingFileHandler(
+                    str_log_file,
+                    "a",
+                    maxsize,
+                    DEFAULT_ROTATION_COUNTS,
+                    encoding=encoding,
+                )
+
+    @classmethod
+    def _set_wf(cls, logger: Logger, log_params: LoggerParams, formatter, fdhandler):
+        gen_wf = log_params.gen_wf
+        if gen_wf:
+            str_log_file = log_params.logfile
+            file_wf = f"{str(str_log_file)}.wf"
+            warn_handler = logging.FileHandler(file_wf, "a", encoding="utf-8")
+            warn_handler.setLevel(logging.WARNING)
+            warn_handler.setFormatter(formatter)
+            logger.addHandler(warn_handler)
+            fdhandler.addFilter(MsgLevelFilter(logging.WARNING))  # type: ignore
 
 
 @_Singleton
 class _RootLoggerMan:
-    _instance = None
     _rootlogger: Logger | None = None
     _b_rotation = False
     _logfile = ""
-    _log_type = ROTATION
+    _log_type = FileHandlerType.ROTATION
     _logger_name: str | None = None
     _LOCK = threading.Lock()
 
@@ -352,7 +442,6 @@ class _RootLoggerMan:
         LoggerException
             如果 root logger 未初始化，则抛出 LoggerException 异常
         """
-
         if self._rootlogger is None:
             raise LoggerException("The Cup logger has not been initialized Yet. " + "Call init_comlog() first")
 
@@ -404,11 +493,13 @@ class _RootLoggerMan:
 def init_comlog(
     logger_name: str,
     loglevel: int = logging.INFO,
-    logfile: str = "cup.log",
-    log_type: int = ROTATION,
-    max_log_size: int = 1073741824,
+    logfile: str = "app.log",
+    log_type: FileHandlerType = FileHandlerType.ROTATION,
+    max_log_size: int = DEFAULT_MAX_LOG_SIZE,
     is_print_console: bool = False,
     gen_wf: bool = False,
+    splitter: str = CharPool.VERTICAL_LINE,
+    encoding: str = DEFAULT_ENCODING,
 ):
     """
     初始化默认logger
@@ -429,12 +520,15 @@ def init_comlog(
         是否显示到控制台, by default False
     gen_wf : bool, optional
         是否创建警告日志文件, by default False
+    splitter : str, optional
+        日志字段分隔符, by default CharPool.VERTICAL_LINE
+    encoding : str, optional
+        日志编码, by default DEFAULT_ENCODING
     """
     logger_man = _RootLoggerMan()
     root_logger = logging.getLogger()
     if not logger_man.is_initialized():
         logger_man.set_rootlogger(logger_name, root_logger)
-        LogInitializer._check_and_create_log_file(logfile)
 
         logger_params = LoggerParams(
             loglevel,
@@ -443,8 +537,10 @@ def init_comlog(
             max_log_size,
             is_print_console,
             gen_wf,
-            CharPool.VERTICAL_LINE,
+            splitter,
+            encoding,
         )
+
         LogInitializer.setup_file_logger(root_logger, logger_params)
         info("-" * 20 + "Log Initialized Successfully" + "-" * 20)
         global G_INITED_LOGGER
@@ -457,20 +553,16 @@ def init_comlog(
 
 
 def re_init_comlog(
-    logger_name,
+    logger_name: str,
     loglevel=logging.INFO,
     logfile="cup.log",
-    log_type=ROTATION,
+    log_type: FileHandlerType = FileHandlerType.ROTATION,
     max_log_size=1073741824,
     is_print_console=False,
     gen_wf=False,
+    splitter=CharPool.VERTICAL_LINE,
+    encoding=DEFAULT_ENCODING,
 ):
-    """
-    reinitialize default root logger for logging
-
-    :param loggername:
-        logger name, should be different from the original one
-    """
     # 检查 logger_name 是否已经被使用
     global G_INITED_LOGGER
     if logger_name in G_INITED_LOGGER:
@@ -479,8 +571,8 @@ def re_init_comlog(
 
     G_INITED_LOGGER.append(logger_name)
     tmp_logger = logging.getLogger(logger_name)
-    LogInitializer._check_and_create_log_file(logfile)
     logger_man = _RootLoggerMan()
+
     logger_params = LoggerParams(
         loglevel,
         logfile,
@@ -488,7 +580,8 @@ def re_init_comlog(
         max_log_size,
         is_print_console,
         gen_wf,
-        CharPool.VERTICAL_LINE,
+        splitter,
+        encoding,
     )
     LogInitializer.setup_file_logger(tmp_logger, logger_params)
     logger_man.reset_rootlogger(tmp_logger)
@@ -665,9 +758,3 @@ def debug_if(bol, msg, back_trace_len=1):
     """log msg with critical loglevel if bol is true"""
     if bol:
         debug(msg, back_trace_len)
-
-
-def fatal_if(bol, msg, back_trace_len=1):
-    """log msg with info loglevel if bol is true"""
-    if bol:
-        fatal(msg, back_trace_len)
