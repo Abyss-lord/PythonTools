@@ -21,9 +21,14 @@ import threading
 import time
 import typing
 import warnings
+from contextlib import contextmanager
+from logging import Logger
 from typing import Any
 
+from pythontools.core import log
 from pythontools.core.errors import DecoratorException
+
+log.init_comlog("test", is_print_console=True)
 
 
 # 单例模式装饰器
@@ -235,3 +240,32 @@ def need_mac(func: typing.Callable[[Any], Any]) -> typing.Callable[[Any], Any]:
             "The system is not mac." + "This functionality only supported in mac",
         )
     return func
+
+
+def log_func_call(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        log.info(f"call {func.__name__} with args: {args}, kwargs: {kwargs}")
+
+        try:
+            result = func(*args, **kwargs)
+            log.debug(f"call {func.__name__} return: {result}")
+            return result
+        except Exception as e:
+            log.error(f"call {func.__name__} raise exception: {e}")
+            raise
+
+    return wrapper
+
+
+@contextmanager
+def log_level(
+    logger: Logger,
+    level: int,
+) -> typing.Generator[None, Any, None]:
+    original_level = logger.level
+    logger.setLevel(level)
+    try:
+        yield
+    finally:
+        logger.setLevel(original_level)

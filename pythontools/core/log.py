@@ -16,7 +16,9 @@ Change Activity:
 # here put the import lib
 import collections
 import logging
+import logging.handlers
 import os
+import platform
 import random
 import re
 import sys
@@ -28,7 +30,6 @@ from logging import Logger, handlers
 from .constants.log_constant import FileHandlerType
 from .constants.string_constant import CharPool, CharsetUtil
 from .errors import LoggerException
-from .utils.osutils import SysUtil
 
 DEFAULT_ROTATION_COUNTS = 30
 DEFAULT_ENCODING = CharsetUtil.UTF_8
@@ -264,8 +265,7 @@ class LogInitializer:
         splitter = log_params.field_splitter
         return logging.Formatter(
             fmt=f" %(asctime)s {tznum}({tzkey}) {splitter} %(levelname)-10s {splitter} "
-            f"%(processName)s(%(process)d):%(threadName)s(%(thread)x) {splitter} %(filename)s#%(funcName)s:%(lineno)s -\
-                %(message)s"
+            f"""%(processName)s(%(process)d):%(threadName)s(%(thread)x) {splitter} %(pathname)s {splitter} %(funcName)s:%(lineno)s - %(message)s"""  # noqa: E501
         )
 
     @classmethod
@@ -341,7 +341,7 @@ class LogInitializer:
         """
         if not os.path.exists(str_log_file):
             try:
-                if SysUtil.is_linux_platform():
+                if is_linux_platform():
                     os.mknod(str_log_file)
                 else:
                     with open(str_log_file, "w+") as f_handle:
@@ -758,3 +758,32 @@ def debug_if(bol, msg, back_trace_len=1):
     """log msg with critical loglevel if bol is true"""
     if bol:
         debug(msg, back_trace_len)
+
+
+def is_linux_platform() -> bool:
+    """
+    判断是否是linux 平台
+
+    Returns
+    -------
+    bool
+        是否是linux平台
+
+    Notes
+    -----
+    1. 依赖 platform 库
+    """
+    platform_info = get_platform_info()
+    return platform_info.lower().startswith("linux")
+
+
+def get_platform_info() -> str:
+    """
+    获取平台信息
+
+    Returns
+    -------
+    str
+        平台信息字符串
+    """
+    return platform.platform()
