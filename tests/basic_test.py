@@ -15,11 +15,6 @@ Change Activity:
 
 # here put the import lib
 
-import platform
-
-from loguru import logger
-
 
 class TestBasic:
-    def test_platform(self):
-        logger.info(platform.system())
+    pass

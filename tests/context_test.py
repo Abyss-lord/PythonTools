@@ -29,6 +29,7 @@ from pythontools.core.constants.datetime_constant import (  # noqa: F401
     TimeUnit,  # noqa: F401
     Week,
 )
+from pythontools.core.constants.log_constant import FileHandlerType  # noqa: F401
 from pythontools.core.constants.pattern_pool import PatternPool  # noqa: F401
 
 # noqa: F401
@@ -41,7 +42,13 @@ from pythontools.core.constants.string_constant import (
 from pythontools.core.convert.convertor import BasicConvertor  # noqa: F401
 from pythontools.core.date.format.iso8601 import ISO8601  # noqa: F401
 from pythontools.core.date.format.rfc822 import RFC822  # noqa: F401
-from pythontools.core.decorator import Singleton, TraceUsedTime, UnCheckFunction, need_linux  # noqa: F401
+from pythontools.core.decorator import (  # noqa: F401
+    Singleton,
+    TraceUsedTime,
+    UnCheckFunction,
+    log_func_call,
+    need_linux,
+)
 from pythontools.core.errors import (  # noqa: F401
     ConversionError,
     DatetimeParseError,

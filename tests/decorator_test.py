@@ -17,8 +17,14 @@ Change Activity:
 import time
 
 import allure
+import pytest
 
-from .context_test import Singleton, StringUtil, TraceUsedTime, UnCheckFunction
+from .context_test import Singleton, StringUtil, TraceUsedTime, UnCheckFunction, log_func_call
+
+
+@log_func_call
+def divide(a, b):
+    return a / b
 
 
 @Singleton
@@ -57,10 +63,18 @@ class TestDecorator:
             assert StringUtil.equals(s1.name, s2.name)
             assert s1 is s2
 
-    # @allure.story("前置检测装饰器")
-    # @allure.description("前置检测装饰器, 可以在函数调用前进行前置条件检查")
-    # class TestPreCheckDecorator:
-    #     @allure.title("测试Linux平台检测装饰器")
-    #     @need_linux
-    #     def test_linux_decorator(self) -> None:
-    #         print("test_linux_decorator")
+        @allure.title("测试函数调用装饰器")
+        @pytest.mark.parametrize(
+            "a,b,expected",
+            [
+                (10, 5, 2),
+                pytest.param(10, 0, None, marks=pytest.mark.xfail(raises=ZeroDivisionError)),
+            ],
+        )
+        def test_log_func_call(
+            self,
+            a,
+            b,
+            expected,
+        ) -> None:
+            assert divide(a, b) == expected
