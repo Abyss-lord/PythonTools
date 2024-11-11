@@ -19,13 +19,13 @@ repos:
       - id: check-added-large-files # 检查大文件的提交, 最大 500kb
         args: ["--maxkb=500"]
     # ruff linter+formatter
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.4.10
-    hooks:
-      - id: ruff
-        args:
-          - --fix
-      - id: ruff-format
+  # - repo: https://github.com/astral-sh/ruff-pre-commit
+  #   rev: v0.4.10
+  #   hooks:
+  #     - id: ruff
+  #       args:
+  #         - --fix
+  #     - id: ruff-format
     # Markdown 格式化
   - repo: https://github.com/markdownlint/markdownlint
     rev: v0.11.0

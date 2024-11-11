@@ -13,6 +13,7 @@ ROOT_DIR=$(
     pwd
 )
 cd "$ROOT_DIR" || exit 2
+
 # 测试目录
 TEST_DIR="$ROOT_DIR/tests"
 python -m pytest "$TEST_DIR" --alluredir allure-results --clean-alluredir

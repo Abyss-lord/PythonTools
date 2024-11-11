@@ -22,11 +22,8 @@ from pythontools.core.constants.area_constant import AREA_INFO, PRO_DICT
 from pythontools.core.constants.pattern_pool import PatternPool
 from pythontools.core.constants.people_constant import Gender
 from pythontools.core.convert.convertor import BasicConvertor
-from pythontools.core.utils.basicutils import SequenceUtil, StringUtil
-from pythontools.core.utils.datetimeutils import DatetimeUtil
-from pythontools.core.utils.reutils import ReUtil
-from pythontools.core.validators.datetime_validator import DatetimeValidator
-from pythontools.core.validators.string_validator import StringValidator
+from pythontools.core.utils.basicutils import DatetimeUtil, ReUtil, SequenceUtil, StringUtil
+from pythontools.core.utils.typeutils import TypeUtil
 
 
 class IDCard:
@@ -417,7 +414,7 @@ class IDCardUtil:
             return False
         # 校验生日
         birthday = StringUtil.sub_sequence(s, 6, 14)
-        if not DatetimeValidator.is_valid_birthday(birthday):
+        if not DatetimeUtil.is_valid_birthday(birthday):
             return False
         # 校验最后一位
         check_sum = cls.get_check_sum(s)
@@ -444,7 +441,7 @@ class IDCardUtil:
         if cls.CHINA_ID_MIN_LENGTH != StringUtil.get_length(s):
             return False
 
-        if not StringValidator.is_number(s):
+        if not TypeUtil.is_number(s):
             return False
         province_code = StringUtil.sub_sequence(s, 0, 2)
         # 校验省
@@ -453,7 +450,7 @@ class IDCardUtil:
 
         birthday = f"19{StringUtil.sub_sequence(s, 6, 12)}"
 
-        return DatetimeValidator.is_valid_birthday(birthday)
+        return DatetimeUtil.is_valid_birthday(birthday)
 
     @classmethod
     def get_check_sum(cls, s: str) -> str:

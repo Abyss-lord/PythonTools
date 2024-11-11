@@ -18,10 +18,10 @@ from abc import ABC, abstractmethod
 from numbers import Complex, Number
 from typing import Any
 
-from ..constants.pattern_pool import PatternPool
-from ..decorator import Singleton
-from ..errors import ConversionError
-from ..utils.reutils import ReUtil
+from pythontools.core.constants.pattern_pool import PatternPool
+from pythontools.core.decorator import Singleton
+from pythontools.core.errors import ConversionError
+from pythontools.core.utils.basicutils import ReUtil
 
 PRIMITIVE_TYPE = (int, float, str, bool)
 NUMERIC_TYPE = Number

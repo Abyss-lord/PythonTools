@@ -17,7 +17,7 @@ Change Activity:
 from abc import ABC
 from datetime import UTC, date, datetime, timezone
 
-from pythontools.core.date.format.datepattern import DatePattern
+from pythontools.date.format.datepattern import DatePattern
 
 
 class BaseFormat(ABC):

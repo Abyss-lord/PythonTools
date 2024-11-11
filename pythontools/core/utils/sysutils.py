@@ -17,7 +17,7 @@ Change Activity:
 import os
 import platform
 import sys
-import typing
+import typing as t
 import warnings
 
 from .basicutils import StringUtil
@@ -47,7 +47,7 @@ class SysUtil:
             是否是 Mac 平台
         """
         platform_info = cls.get_platform_info()
-        return StringUtil.is_starts_with(platform_info, "macos", case_insensitive=True)
+        return StringUtil.starts_with(platform_info, "macos", case_insensitive=True)
 
     @classmethod
     def is_linux_platform(cls) -> bool:
@@ -64,7 +64,7 @@ class SysUtil:
         1. 依赖 platform 库
         """
         platform_info = cls.get_platform_info()
-        return StringUtil.is_starts_with(platform_info, "linux", case_insensitive=True)
+        return StringUtil.starts_with(platform_info, "linux", case_insensitive=True)
 
     @classmethod
     def is_windows_platform(cls) -> bool:
@@ -81,7 +81,7 @@ class SysUtil:
         1. 依赖 platform 库
         """
         platform_info = cls.get_platform_info()
-        return StringUtil.is_starts_with(platform_info, "windows", case_insensitive=True)
+        return StringUtil.starts_with(platform_info, "windows", case_insensitive=True)
 
     @classmethod
     def is_py2(cls) -> bool:
@@ -124,7 +124,13 @@ class SysUtil:
         return (3, 0) <= sys.version_info <= (4, 0)
 
     @classmethod
-    def get_system_property(cls, name: str, default_value: str = "", *, quiet: bool = False) -> typing.Any:
+    def get_system_property(
+        cls,
+        name: str,
+        default_value: str = "",
+        *,
+        quiet: bool = False,
+    ) -> t.Any:
         """
         获取指定名称的系统变量
 

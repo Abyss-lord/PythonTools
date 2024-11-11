@@ -18,9 +18,10 @@ __all__ = ["DatetimeValidator"]
 
 
 from pythontools.core.constants.pattern_pool import PatternPool
-from pythontools.core.convert.convertor import BasicConvertor
-from pythontools.core.utils.datetimeutils import DatetimeUtil  # type: ignore
-from pythontools.core.utils.reutils import ReUtil
+from pythontools.core.utils.basicutils import (
+    DatetimeUtil,  # type: ignore
+    ReUtil,
+)
 
 
 class DatetimeValidator:
@@ -51,12 +52,7 @@ class DatetimeValidator:
             如果是合法的生日, 则返回True, 否则返回False
         """
 
-        if _ := ReUtil.is_match(PatternPool.BIRTHDAY_PATTERN, birthday):
-            year = BasicConvertor.to_int(ReUtil.get_matched_group_by_idx(PatternPool.BIRTHDAY_PATTERN, birthday, 1))
-            month = BasicConvertor.to_int(ReUtil.get_matched_group_by_idx(PatternPool.BIRTHDAY_PATTERN, birthday, 3))
-            day = BasicConvertor.to_int(ReUtil.get_matched_group_by_idx(PatternPool.BIRTHDAY_PATTERN, birthday, 5))
-            return DatetimeUtil.is_valid_date(year, month, day)  # type: ignore
-        return False
+        return DatetimeUtil.is_valid_birthday(birthday)
 
     @classmethod
     def is_iso8601_datetime(cls, datetime_str: str) -> bool:

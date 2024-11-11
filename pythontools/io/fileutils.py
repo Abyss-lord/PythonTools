@@ -27,8 +27,7 @@ from os import PathLike
 from pathlib import Path
 
 from pythontools.core.constants.string_constant import CharsetUtil
-from pythontools.core.utils.basicutils import SequenceUtil, StringUtil
-from pythontools.core.utils.datetimeutils import DatetimeUtil, TimeUnit
+from pythontools.core.utils.basicutils import DatetimeUtil, SequenceUtil, StringUtil, TimeUnit
 
 
 class FileUtil:
@@ -340,7 +339,7 @@ class FileUtil:
         basename = cls.get_basename_from_path(path_obj)
         #
         return bool(
-            StringUtil.is_starts_with(basename, ".") or StringUtil.is_starts_with(basename, "__"),
+            StringUtil.starts_with(basename, ".") or StringUtil.starts_with(basename, "__"),
         )
 
     @classmethod

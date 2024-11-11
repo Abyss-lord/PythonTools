@@ -22,8 +22,8 @@ from os import PathLike
 from pathlib import Path
 from zipfile import ZipInfo
 
-from pythontools.core.io.fileutils import FileUtil
 from pythontools.core.utils.basicutils import StringUtil
+from pythontools.io.fileutils import FileUtil
 
 
 class ZipUtil:

@@ -16,6 +16,8 @@ Change Activity:
 # here put the import lib
 import inspect
 
+from pythontools.core.utils.typeutils import TypeUtil
+
 from ..constants.typehint import T
 
 
@@ -62,7 +64,7 @@ class TypeValidator:
 
     @classmethod
     def is_class_object(cls, obj: T) -> bool:
-        return inspect.isclass(obj)
+        return TypeUtil.is_class_object(obj)
 
     @classmethod
     def is_abstract_clss_object(cls, obj: T) -> bool:

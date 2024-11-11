@@ -18,11 +18,11 @@ import typing
 import unicodedata
 
 from ..constants.pattern_pool import PatternPool
-from ..utils.reutils import ReUtil
+from ..utils.basicutils import ReUtil
 
 
 class BasicValidator:
-    FLOAT_CALCULATE_THREHOLD = 1e-7
+    FLOAT_CALCULATE_THRESHOLD = 1e-7
 
     @classmethod
     def is_number(cls, value: typing.Any) -> bool:
@@ -175,7 +175,7 @@ class BasicValidator:
         bool
             是否相等
         """
-        return abs(num1 - num2) < cls.FLOAT_CALCULATE_THREHOLD
+        return abs(num1 - num2) < cls.FLOAT_CALCULATE_THRESHOLD
 
     @classmethod
     def equals(cls, val1: typing.Any, val2: typing.Any) -> bool:

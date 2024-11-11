@@ -15,18 +15,103 @@ Change Activity:
 
 # here put the import lib
 import inspect
+import sys
+import typing as t
 from collections.abc import Callable, Mapping
-from typing import Any
+
+from pythontools.core.constants.typehint import T
 
 from ..constants.type_constant import FunctionType
 from ..decorator import UnCheckFunction
-from ..validators.type_validator import TypeValidator
 from .basicutils import StringUtil
 
 WARNING_ENABLED = True
 
 
 class TypeUtil:
+    @classmethod
+    def is_class_object(cls, obj: T) -> bool:
+        return inspect.isclass(obj)
+
+    @classmethod
+    def is_number(cls, text: str) -> bool:
+        """
+        判断给定的字符串是否为数字
+
+        Parameters
+        ----------
+        text : str
+            待检测字符串
+
+        Returns
+        -------
+        bool
+            如果字符串是数字，返回True，否则返回False
+        """
+        return cls.is_int(text) or cls.is_float(text)
+
+    @classmethod
+    def is_int(cls, text: str) -> bool:
+        """
+        判断给定的字符串是否为整数
+
+        Parameters
+        ----------
+        text : str
+            待检测字符串
+
+        Returns
+        -------
+        bool
+            如果字符串是整数，返回True，否则返回False
+        """
+        return cls.is_type(text, int)
+
+    @classmethod
+    def is_float(cls, text: str) -> bool:
+        """
+        判断给定的字符串是否为浮点数
+
+        Parameters
+        ----------
+        text : str
+            待检测字符串
+
+        Returns
+        -------
+        bool
+            如果字符串是浮点数，返回True，否则返回False
+        """
+        return cls.is_type(text, float)
+
+    @classmethod
+    def is_type(
+        cls,
+        text: str,
+        target_type: type,
+    ) -> bool:
+        """
+        判断给定的字符串是否为指定类型
+
+        Parameters
+        ----------
+        text : str
+            待检测字符串
+        target_type : type
+            待检测类型
+
+        Returns
+        -------
+        bool
+            如果字符串是指定类型，返回True，否则返回False
+        """
+
+        try:
+            target_type(text)
+            return True
+        except ValueError:
+            return False
+
     @classmethod
     def get_class_name(cls, obj) -> str:
         """
@@ -59,7 +144,7 @@ class TypeUtil:
         List[str]
             对象的原始类列表
         """
-        if TypeValidator.is_class_object(obj):
+        if cls.is_class_object(obj):
             mro = inspect.getmro(obj)
         else:
             mro = inspect.getmro(obj.__class__)
@@ -67,7 +152,46 @@ class TypeUtil:
         return [name for c in mro if (name := c.__name__) != "object"]
 
     @classmethod
-    def get_function_info(cls, func: Callable[[Any], Any], *, show_detail: bool = False) -> Mapping[str, Any]:
+    def get_subclasses(
+        cls,
+        module_name: str,
+        classes: type | tuple[type, ...],
+        exclude: type | tuple[type, ...] = None,
+    ) -> list[t.Any]:
+        """
+        返回指定模块中指定类的所有子类
+
+        Parameters
+        ----------
+        module_name : str
+            模块名称
+        classes : type | tuple[type, ...]
+            待获取的类
+        exclude : type | tuple[type, ...], optional
+            排除的类, by default ()
+
+        Returns
+        -------
+        list[Any]
+            子类列表
+        """
+        if exclude is None:
+            exclude = ()
+        return [
+            obj
+            for _, obj in inspect.getmembers(
+                sys.modules[module_name],
+                lambda obj: inspect.isclass(obj) and issubclass(obj, classes) and obj not in exclude,
+            )
+        ]
+
+    @classmethod
+    def get_function_info(
+        cls,
+        func: Callable[[t.Any], t.Any],
+        *,
+        show_detail: bool = False,
+    ) -> Mapping[str, t.Any]:
         """
         获取一个函数的基本信息，包括函数名、类型、模块、文件路径、签名、参数信息（可选）。
 
@@ -158,7 +282,7 @@ class TypeUtil:
 
     @classmethod
     @UnCheckFunction(WARNING_ENABLED)
-    def show_function_info(cls, func: Callable[[Any], Any], show_detail: bool = False) -> None:
+    def show_function_info(cls, func: Callable[[t.Any], t.Any], show_detail: bool = False) -> None:
         """
         显示一个函数的基本信息，包括函数名、类型、模块、文件路径、签名、参数信息（可选）。
 

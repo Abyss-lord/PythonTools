@@ -16,9 +16,9 @@ Change Activity:
 # here put the import lib
 import string
 
-from ..constants.string_constant import PasswdStrength
-from ..utils.basicutils import SequenceUtil, StringUtil
-from ..validators.datetime_validator import DatetimeValidator
+from pythontools.core.constants.string_constant import PasswdStrength
+from pythontools.core.utils.basicutils import SequenceUtil, StringUtil
+from pythontools.core.validators.datetime_validator import DatetimeValidator
 
 
 class PasswdStrengthUtil:

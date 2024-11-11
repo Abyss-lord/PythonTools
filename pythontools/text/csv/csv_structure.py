@@ -21,8 +21,8 @@ from typing import Any, NamedTuple, Self
 
 from pythontools.core.constants.string_constant import CharPool, CharsetUtil
 from pythontools.core.errors import UnsupportedOperationError
-from pythontools.core.io.fileutils import FileUtil
 from pythontools.core.utils.basicutils import SequenceUtil
+from pythontools.io.fileutils import FileUtil
 
 
 class CsvConfig:

@@ -17,9 +17,9 @@ Change Activity:
 from enum import IntEnum, auto
 from typing import Any, Self
 
-from ..constants.string_constant import CharPool
-from ..convert.convertor import BasicConvertor
-from ..utils.basicutils import StringUtil
+from pythontools.core.constants.string_constant import CharPool
+from pythontools.core.convert.convertor import BasicConvertor
+from pythontools.core.utils.basicutils import StringUtil
 
 
 class NullMode(IntEnum):

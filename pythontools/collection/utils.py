@@ -15,15 +15,15 @@ Change Activity:
 
 # here put the import libraries
 import itertools as it
-import typing
+import typing as t
 from collections import abc
-from collections.abc import Generator, Iterable, Sequence
+from collections.abc import Collection, Generator, Iterable
 from typing import Any
 
 
 class CollectionUtil:
     @classmethod
-    def nested_dict_iter(cls, nested_dict: typing.Mapping[Any, Any]) -> typing.Generator[Any, Any, Any]:
+    def nested_dict_iter(cls, nested_dict: t.Mapping[Any, Any]) -> t.Generator[Any, Any, Any]:
         """
         返回嵌套字典最深层及的键值对
 
@@ -55,7 +55,7 @@ class CollectionUtil:
                 yield key, value
 
     @classmethod
-    def get_powerset(cls, iterable: typing.Iterable) -> typing.Generator[it.chain, Any, Any]:
+    def get_powerset(cls, iterable: t.Iterable) -> t.Generator[it.chain, Any, Any]:
         """
         返回iterable的幂集
 
@@ -101,13 +101,13 @@ class CollectionUtil:
             展平序列生成器, 返回展平序列
         """
         for ele in seq:
-            if hasattr(ele, "__iter__") and isinstance(ele, Sequence):
+            if hasattr(ele, "__iter__") and isinstance(ele, str | bytes):
                 yield from cls.flatten(ele)
             else:
                 yield ele
 
     @classmethod
-    def merge_dicts(cls, *dicts: typing.Mapping[Any, Any]) -> dict[Any, Any]:
+    def merge_dicts(cls, *dicts: t.Mapping[Any, Any]) -> dict[Any, Any]:
         """
         合并多个字典
 
@@ -129,7 +129,7 @@ class CollectionUtil:
         return base_dict
 
     @classmethod
-    def merge_two_dict(cls, d1: typing.Mapping[Any, Any], d2: typing.Mapping[Any, Any]) -> dict[Any, Any]:
+    def merge_two_dict(cls, d1: t.Mapping[Any, Any], d2: t.Mapping[Any, Any]) -> dict[Any, Any]:
         """
         合并两个字典
 
@@ -152,3 +152,82 @@ class CollectionUtil:
             合并后的字典
         """
         return {**d1, **d2}
+
+    @t.overload
+    def ensure_collection(value: t.Collection[t.Any]) -> t.Collection[t.Any]: ...
+
+    @t.overload
+    def ensure_collection(value: t.Any) -> t.Collection[t.Any]: ...
+
+    @t.overload
+    def ensure_collection(value: None) -> t.Collection[t.Any]: ...
+
+    @classmethod
+    def ensure_collection(cls, value) -> t.Collection[t.Any]:
+        """
+        确保值是一个集合，否则强制转换或封装为一个集合。
+
+        Parameters
+        ----------
+        value : None | t.Any | t.Collection[t.Any]
+            待转换的值
+
+        Returns
+        -------
+        t.Collection[t.Any]
+            转换后的集合
+        """
+        if value is None:
+            return []
+        return value if isinstance(value, Collection) and not isinstance(value, str | bytes) else [value]
+
+    @t.overload
+    def ensure_list(value: t.Collection[t.Any]) -> list[t.Any]: ...
+
+    @t.overload
+    def ensure_list(value: t.Any) -> list[t.Any]: ...
+
+    @t.overload
+    def ensure_list(value: None) -> list[t.Any]: ...
+
+    @classmethod
+    def ensure_list(cls, value) -> list[t.Any]:
+        """
+        确保值是一个列表，否则强制转换或封装为一个列表。
+
+        Parameters
+        ----------
+        value : None | t.Any | t.Collection[t.Any]
+            待转换的值
+
+        Returns
+        -------
+        list[t.Any]
+            转换后的列表
+        """
+        if value is None:
+            return []
+
+        return value if isinstance(value, list | tuple) else [value]
+
+    @classmethod
+    def dict_depth(cls, d: dict) -> int:
+        """
+        返回字典的深度
+
+        Parameters
+        ----------
+        d : dict
+            待计算的字典
+
+        Returns
+        -------
+        int
+            字典的深度
+        """
+        try:
+            return 1 + cls.dict_depth(next(iter(d.values())))
+        except AttributeError:
+            return 0
+        except StopIteration:
+            return 1

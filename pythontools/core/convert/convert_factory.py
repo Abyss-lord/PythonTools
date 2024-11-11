@@ -17,7 +17,8 @@ Change Activity:
 from collections.abc import Mapping
 from typing import Any
 
-from ..decorator import Singleton
+from pythontools.core.decorator import Singleton
+
 from .converters import BooleanConverter, Converter, FloatConverter, IntegerConverter, StringConverter
 
 

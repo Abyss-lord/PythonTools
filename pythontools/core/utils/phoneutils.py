@@ -14,17 +14,23 @@ Change Activity:
 """
 # here put the import lib
 
+from pythontools.core.constants.pattern_pool import PatternPool
+from pythontools.core.utils.basicutils import ReUtil
+
 from ..decorator import UnCheckFunction
-from ..validators.string_validator import StringValidator
 from .basicutils import StringUtil
 
 # 是否显示Warning信息
 WARNING_ENABLED = True
 
 
-class PhoneUtils:
+class PhoneUtil:
     @classmethod
-    def is_mobile(cls, phone: str) -> bool:
+    def is_mobile(
+        cls,
+        phone: str,
+        raise_exception: bool = False,
+    ) -> bool:
         """
         判断字符串是否是中国手机号
 
@@ -38,10 +44,18 @@ class PhoneUtils:
         bool
             是否为移动号码
         """
-        return StringValidator.is_mobile(phone)
+        return ReUtil.is_match(
+            PatternPool.MOBILE,
+            phone,
+            raise_exception=raise_exception,
+        )
 
     @classmethod
-    def is_mobile_hk(cls, phone: str) -> bool:
+    def is_mobile_hk(
+        cls,
+        phone: str,
+        raise_exception: bool = False,
+    ) -> bool:
         """
         判断是否是香港移动号码
 
@@ -55,10 +69,14 @@ class PhoneUtils:
         bool
             是否是香港移动号码
         """
-        return StringValidator.is_mobile_hk(phone)
+        return ReUtil.is_match(
+            PatternPool.MOBILE_HK,
+            phone,
+            raise_exception=raise_exception,
+        )
 
     @classmethod
-    def is_mobile_tw(cls, phone: str) -> bool:
+    def is_mobile_tw(cls, phone: str, raise_exception: bool = False) -> bool:
         """
         判断是否是台湾移动号码
 
@@ -72,10 +90,18 @@ class PhoneUtils:
         bool
             是否是台湾移动号码
         """
-        return StringValidator.is_mobile_tw(phone)
+        return ReUtil.is_match(
+            PatternPool.MOBILE_TW,
+            phone,
+            raise_exception=raise_exception,
+        )
 
     @classmethod
-    def is_mobile_mo(cls, phone: str) -> bool:
+    def is_mobile_mo(
+        cls,
+        phone: str,
+        raise_exception: bool = False,
+    ) -> bool:
         """
         判断是否是澳门移动号码
 
@@ -89,10 +115,18 @@ class PhoneUtils:
         bool
             是否是澳门移动号码
         """
-        return StringValidator.is_mobile_mo(phone)
+        return ReUtil.is_match(
+            PatternPool.MOBILE_MO,
+            phone,
+            raise_exception=raise_exception,
+        )
 
     @classmethod
-    def is_tel(cls, tel: str) -> bool:
+    def is_tel(
+        cls,
+        tel: str,
+        raise_exception: bool = False,
+    ) -> bool:
         """
         判断是否是电话号码
 
@@ -106,10 +140,18 @@ class PhoneUtils:
         bool
             是否是电话号码
         """
-        return StringValidator.is_tel(tel)
+        return ReUtil.is_match(
+            PatternPool.TEL,
+            tel,
+            raise_exception=raise_exception,
+        )
 
     @classmethod
-    def is_tel_400800(cls, tel: str) -> bool:
+    def is_tel_400800(
+        cls,
+        tel: str,
+        raise_exception: bool = False,
+    ) -> bool:
         """
         判断是否是座机号码（中国大陆）
 
@@ -123,7 +165,11 @@ class PhoneUtils:
         bool
             是否为座机号码（中国大陆）
         """
-        return StringValidator.is_tel_400800(tel)
+        return ReUtil.is_match(
+            PatternPool.TEL_400_800,
+            tel,
+            raise_exception=raise_exception,
+        )
 
     @classmethod
     def is_valid_phone(cls, phone: str) -> bool:

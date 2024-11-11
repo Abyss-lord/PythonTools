@@ -21,7 +21,7 @@ from os import PathLike
 from typing import Any
 
 from pythontools.core.constants.string_constant import CharsetUtil
-from pythontools.core.io.fileutils import FileUtil
+from pythontools.io.fileutils import FileUtil
 
 
 class CsvUtil:
