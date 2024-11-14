@@ -76,3 +76,7 @@ class UnsupportedDateType(CalendarError):
     """
     Raised when trying to use an unsupported date/datetime type.
     """
+
+
+class NotOneValueFound(BaseToolException):
+    pass

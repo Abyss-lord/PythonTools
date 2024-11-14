@@ -21,7 +21,7 @@ from typing import Any
 from pythontools.core.constants.pattern_pool import PatternPool
 from pythontools.core.decorator import Singleton
 from pythontools.core.errors import ConversionError
-from pythontools.core.utils.basicutils import ReUtil
+from pythontools.core.utils.basic_utils import ReUtil
 
 PRIMITIVE_TYPE = (int, float, str, bool)
 NUMERIC_TYPE = Number

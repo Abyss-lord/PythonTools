@@ -21,7 +21,8 @@ from typing import Any
 
 from pythontools.core.constants.pattern_pool import PatternPool
 from pythontools.core.errors import DatetimeParseError
-from pythontools.core.utils.basicutils import DatetimeUtil, ReUtil
+from pythontools.core.utils.basic_utils import ReUtil
+from pythontools.core.utils.datetime_utils import DatetimeUtil
 from pythontools.core.validators.datetime_validator import DatetimeValidator
 from pythontools.date.format.baseformat import BaseFormat
 from pythontools.date.format.datepattern import DatePattern

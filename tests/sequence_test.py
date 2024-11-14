@@ -48,7 +48,7 @@ class TestSequenceUtil:
         ],
     )
     def test_split_sequence(cls, base, cnt, expected) -> None:
-        assert SequenceUtil.split_sequence(base, cnt) == expected
+        assert SequenceUtil.split_seq(base, cnt) == expected
 
     @allure.title("测试按照每组元素数切分")
     @pytest.mark.parametrize(
@@ -230,7 +230,7 @@ class TestChangeSequence:
         base,
         expected,
     ):
-        assert SequenceUtil.remove_none_item(base) == expected
+        assert SequenceUtil.remove_none(base) == expected
 
     @allure.title("测试移除序列中所有的布尔元算为假的元素")
     @pytest.mark.parametrize(
@@ -246,7 +246,7 @@ class TestChangeSequence:
         base,
         expected,
     ):
-        assert SequenceUtil.remove_false_item(base) == expected
+        assert SequenceUtil.remove_false(base) == expected
 
     @allure.title("测试循环移动序列")
     @pytest.mark.parametrize(

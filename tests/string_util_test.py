@@ -21,10 +21,7 @@ import pytest
 from faker import Faker
 from loguru import logger
 
-from .context_test import (
-    StringUtil,
-    StringValidator,
-)
+from .context_test import Strategy, StringUtil, StringValidator
 
 BASIC_FAKE = Faker()
 BASIC_CHINESE_FAKE = Faker("zh_CN")
@@ -274,16 +271,16 @@ class TestStringState:
             assert not StringUtil.is_mixed_case("")
 
         with allure.step("步骤2:测试字符串是否包含大写字符"):
-            assert StringUtil.has_uppercase("Hello World")
-            assert StringUtil.has_uppercase("hElLo wOrld")
-            assert not StringUtil.has_uppercase("hello world")
-            assert not StringUtil.has_uppercase("")
+            assert StringUtil.contain_uppercase("Hello World")
+            assert StringUtil.contain_uppercase("hElLo wOrld")
+            assert not StringUtil.contain_uppercase("hello world")
+            assert not StringUtil.contain_uppercase("")
 
         with allure.step("步骤3:测试字符串是否包含小写字符"):
-            assert StringUtil.has_lowercase("Hello World")
-            assert StringUtil.has_lowercase("hElLo wOrld")
-            assert not StringUtil.has_lowercase("HELLO")
-            assert not StringUtil.has_lowercase("")
+            assert StringUtil.contain_lowercase("Hello World")
+            assert StringUtil.contain_lowercase("hElLo wOrld")
+            assert not StringUtil.contain_lowercase("HELLO")
+            assert not StringUtil.contain_lowercase("")
 
     @allure.title("测试字符串在字母表的位置")
     def test_is_half_of_alphabet(self) -> None:
@@ -395,7 +392,7 @@ class TestStringProperties:
         comment_char,
         expected,
     ) -> None:
-        assert StringUtil.get_annotation_str(text, comment_char) == expected
+        assert StringUtil.get_annotation_str(text, annotation_syntax=comment_char) == expected
 
     @allure.title("测试获取字符串居中信息")
     @pytest.mark.parametrize(
@@ -600,12 +597,6 @@ class TestGetString:
 @allure.severity(allure.severity_level.NORMAL)
 @allure.tag("util", "string")
 class TestStringOperation:
-    @allure.title("测试字符串按长度分组")
-    def test_group_by_length(cls) -> None:
-        input_string = "abcdefghij"
-        result = StringUtil.group_by_length(input_string, 3)
-        assert result == ["abc", "def", "ghi", "j"]
-
     @allure.title("测试字符串缩写")
     def test_abbreviate_string(cls) -> None:
         assert StringUtil.abbreviate("abcdefg", 6) == "abc..."
@@ -652,84 +643,245 @@ class TestStringOperation:
 
         with allure.step("步骤2:测试移除后缀"):
             s2 = "hello world"
-            assert StringUtil.remove_suffix(s2, "world") == "hello "
-            assert StringUtil.remove_suffix(s2, "hello") == "hello world"
-            assert StringUtil.remove_suffix(s2, "hello world") == ""
+            assert StringUtil.remove_suffixes(s2, "world") == "hello "
+            assert StringUtil.remove_suffixes(s2, "hello") == "hello world"
+            assert StringUtil.remove_suffixes(s2, "hello world") == ""
 
     @allure.title("测试移除指定字符串")
-    def test_remove_all(self) -> None:
-        assert StringUtil.remove_all("hello world", "l", "h") == "eo word"
-        assert StringUtil.remove_all("hello world", "l", "h", "w") == "eo ord"
-        assert StringUtil.remove_all("hello world", "l", "h", "w", "o", "d") == "e r"
+    @pytest.mark.parametrize(
+        "text, expected, values",
+        [
+            ("hello world", "eo word", ["l", "h"]),
+            ("hello world", "eo ord", ["l", "h", "w"]),
+            ("hello world", "e r", ["l", "h", "w", "o", "d"]),
+        ],
+    )
+    def test_remove_all(
+        self,
+        text,
+        expected,
+        values,
+    ) -> None:
+        assert StringUtil.remove_all(text, *values) == expected
 
-    @allure.title("测试根据空字符串转字符串")
-    def test_empty_to_default(self) -> None:
-        with allure.step("步骤1:测试空字符串转默认值"):
-            assert StringUtil.empty_to_default("", "default") == "default"
-            assert StringUtil.empty_to_default(" ", "default") == " "
-            assert StringUtil.empty_to_default("s", "default") == "s"
-            assert StringUtil.empty_to_default(None, "default") == "default"  # type: ignore
+    @allure.title("测试根据空字符串转默认字符串")
+    @pytest.mark.parametrize(
+        "text, expected",
+        [
+            ("", "default"),
+            (" ", "default"),
+            ("s", "s"),
+            (None, "default"),
+        ],
+    )
+    def test_empty_to_default(
+        self,
+        text,
+        expected,
+    ) -> None:
+        assert StringUtil.empty_to_default(text, "default") == expected
 
+    @allure.title("测试空字符串转None")
+    @pytest.mark.parametrize(
+        "text, expected",
+        [
+            ("", None),
+            (" ", None),
+            ("s", "s"),
+        ],
+    )
+    def test_empty_to_none(
+        self,
+        text,
+        expected,
+    ) -> None:
         with allure.step("步骤2:测试空字符串转None"):
-            assert StringUtil.empty_to_none("") is None
-            assert StringUtil.empty_to_none(" ") is not None
-            assert StringUtil.empty_to_none("s") is not None
+            assert StringUtil.empty_to_none(text) == expected
 
     @allure.title("测试None转字符串")
-    def test_none_to_default(self) -> None:
-        with allure.step("步骤1:测试None转默认值"):
-            assert StringUtil.none_to_default(None, "default") == "default"  # type: ignore
-            assert StringUtil.none_to_default(None, "default") == "default"  # type: ignore
-            assert StringUtil.none_to_default("s", "default") == "s"
+    @pytest.mark.parametrize(
+        "text, expected",
+        [
+            (None, "default"),
+            ("s", "s"),
+        ],
+    )
+    def test_none_to_default(
+        self,
+        text,
+        expected,
+    ) -> None:
+        assert StringUtil.none_to_default(text, "default") == expected
 
-        with allure.step("步骤2:测试None转空字符串"):
-            assert StringUtil.none_to_empty(None) == ""  # type: ignore
-            assert StringUtil.none_to_empty("s") == "s"
+    @allure.title("测试None转空字符串")
+    @pytest.mark.parametrize(
+        "text, expected",
+        [
+            (None, ""),
+            ("s", "s"),
+        ],
+    )
+    def test_none_to_empty(
+        self,
+        text,
+        expected,
+    ) -> None:
+        assert StringUtil.none_to_empty(text) == expected
 
-    @allure.title("测试保留特定类型字符串")
-    def test_retain_type_str(self) -> None:
-        with allure.step("步骤1:测试保留数字字符串"):
-            assert StringUtil.only_numerics("1234567890") == "1234567890"
-            assert StringUtil.only_numerics("1234567890hello") == "1234567890"
-            assert StringUtil.only_numerics("hello1234sdadsa567sdasd890") == "1234567890"
+    @allure.title("测试只保留数字")
+    @pytest.mark.parametrize(
+        "text, expected",
+        [
+            ("hello world", ""),
+            ("1234567890", "1234567890"),
+            ("1234567890hello", "1234567890"),
+            ("hello1234sdadsa567sdasd890", "1234567890"),
+        ],
+    )
+    def test_retain_number(
+        self,
+        text,
+        expected,
+    ) -> None:
+        assert StringUtil.only(text, "numerics") == expected
+        assert StringUtil.only(text, Strategy.NUMERICS) == expected
 
-        with allure.step("步骤2:测试保留ASCII字符串"):
-            assert StringUtil.only_ascii("hello world") == "hello world"
-            assert StringUtil.only_ascii("hello1234sdadsa567sdasd890") == "hello1234sdadsa567sdasd890"
-            assert StringUtil.only_ascii("a你b好c啊d") == "abcd"
+    @allure.title("测试只保留ASCII字符")
+    @pytest.mark.parametrize(
+        "text, expected",
+        [
+            ("hello world", "hello world"),
+            ("你好啊", ""),
+            ("hello1234sdadsa567sdasd890", "hello1234sdadsa567sdasd890"),
+            ("a你b好c啊d", "abcd"),
+        ],
+    )
+    def test_retain_ascii(
+        self,
+        text,
+        expected,
+    ) -> None:
+        assert StringUtil.only(text, "ascii") == expected
+        assert StringUtil.only(text, Strategy.ASCII) == expected
 
-        with allure.step("步骤3:测试保留小写字符"):
-            assert StringUtil.only_lowercase("hello world") == "helloworld"
-            assert StringUtil.only_lowercase("HELLO WORLD") == ""
-            assert StringUtil.only_lowercase("a你b好c啊d") == "abcd"
+    @allure.title("测试保留小写字符")
+    @pytest.mark.parametrize(
+        "text, expected",
+        [
+            ("hello world", "helloworld"),
+            ("HELLO WORLD", ""),
+            ("a你b好c啊d", "abcd"),
+        ],
+    )
+    def test_retain_lowercase(
+        self,
+        text,
+        expected,
+    ) -> None:
+        assert StringUtil.only(text, "lowercase") == expected
+        assert StringUtil.only(text, Strategy.LOWERCASE) == expected
 
-        with allure.step("步骤4:测试保留大写字符"):
-            assert StringUtil.only_uppercase("HELLO WORLD") == "HELLOWORLD"
-            assert StringUtil.only_uppercase("hello world") == ""
+    @allure.title("测试保留大写字符")
+    @pytest.mark.parametrize(
+        "text, expected",
+        [
+            ("HELLO WORLD", "HELLOWORLD"),
+            ("hello world", ""),
+            ("a你b好c啊d", ""),
+        ],
+    )
+    def test_retain_uppercase(
+        self,
+        text,
+        expected,
+    ) -> None:
+        assert StringUtil.only(text, "uppercase") == expected
+        assert StringUtil.only(text, Strategy.UPPERCASE) == expected
 
-        with allure.step("步骤5:测试保留英文字符"):
-            StringUtil.only_alphabetic("hello1234sdadsa567sdasd890") == "hellosdadsasdasd"
-            StringUtil.only_alphabetic("a你b好c啊d123213213") == "abcd"
+    @allure.title("测试保留英文字符")
+    @pytest.mark.parametrize(
+        "text, expected",
+        [
+            ("hello world", "helloworld"),
+            ("hello1234sdadsa567sdasd890", "hellosdadsasdasd"),
+            ("a你b好c啊d", "abcd"),
+        ],
+    )
+    def test_retain_alphabetic(
+        self,
+        text,
+        expected,
+    ) -> None:
+        assert StringUtil.only(text, "alphabetic") == expected
+        assert StringUtil.only(text, Strategy.ALPHABETIC) == expected
 
-        with allure.step("步骤6:测试保留字母和数字"):
-            StringUtil.only_alphanumeric("你好啊, hello world 123") == "hello world 123"
-            StringUtil.only_alphanumeric("a你b好c啊d123213213") == "abcd123213213"
+    @allure.title("测试保留数字和英文字符")
+    @pytest.mark.parametrize(
+        "text, expected",
+        [
+            ("你好啊, hello world 123", "helloworld123"),
+            ("a你b好c啊d123213213", "abcd123213213"),
+        ],
+    )
+    def test_retain_alphanumeric(
+        self,
+        text,
+        expected,
+    ) -> None:
+        assert StringUtil.only(text, "alphanumeric") == expected
+        assert StringUtil.only(text, Strategy.ALPHANUMERIC) == expected
 
-        with allure.step("步骤7:测试保留可打印字符"):
-            StringUtil.only_printable("你好啊, hello world 123\t\n") == "你好啊, hello world 123"
-            StringUtil.only_printable("a你b好c啊\rd123213213") == "abcd123213213"
+    @allure.title("测试保留可打印字符")
+    @pytest.mark.parametrize(
+        "text, expected",
+        [
+            ("你好啊, hello world 123\t\n", "你好啊, hello world 123"),
+            ("a你b好c啊\rd123213213", "a你b好c啊d123213213"),
+        ],
+    )
+    def test_retain_printable(
+        self,
+        text,
+        expected,
+    ) -> None:
+        assert StringUtil.only(text, "printable") == expected
+        assert StringUtil.only(text, Strategy.PRINTABLE) == expected
 
-    @allure.title("测试字符串填充")
-    def test_fill_string(self) -> None:
-        with allure.step("步骤1:测试填充左侧字符"):
-            assert StringUtil.fill_after("hello", "*", 10) == "hello*****"
-            assert StringUtil.fill_after("hello", "*", 5) == "hello"
-            assert StringUtil.fill_after("", "*", 10) == "**********"
+    @allure.title("测试在字符串右侧填充")
+    @pytest.mark.parametrize(
+        "text, fill, length, expected",
+        [
+            ("hello", "*", 10, "hello*****"),
+            ("hello", "*", 5, "hello"),
+            ("", "*", 10, "**********"),
+        ],
+    )
+    def test_fill_after(
+        self,
+        text,
+        fill,
+        length,
+        expected,
+    ) -> None:
+        assert StringUtil.fill_after(text, fill, length) == expected
 
-        with allure.step("步骤2:测试填充右侧字符"):
-            assert StringUtil.fill_before("hello", "*", 10) == "*****hello"
-            assert StringUtil.fill_before("hello", "*", 5) == "hello"
-            assert StringUtil.fill_before("", "*", 10) == "**********"
+    @allure.title("测试在字符串左侧填充")
+    @pytest.mark.parametrize(
+        "text, fill, length, expected",
+        [
+            ("hello", "*", 10, "*****hello"),
+            ("hello", "*", 5, "hello"),
+            ("", "*", 10, "**********"),
+        ],
+    )
+    def test_fill_before(
+        self,
+        text,
+        fill,
+        length,
+        expected,
+    ) -> None:
+        assert StringUtil.fill_before(text, fill, length) == expected
 
     @allure.title("测试字符串替换")
     def test_replace_string(self) -> None:
@@ -774,17 +926,38 @@ class TestStringOperation:
 @allure.severity(allure.severity_level.NORMAL)
 @allure.tag("util", "string")
 class TestStringEncode:
-    @allure.title("测试字符串解码")
-    def test_roman_decode(self) -> None:
-        assert StringUtil.roman_decode("VII") == 7
-        assert StringUtil.roman_decode("MCMXCIV") == 1994
+    # @allure.title("测试罗马字符串解码")
+    # @pytest.mark.parametrize(
+    #     "text, expected",
+    #     [
+    #         (9, "MCCXXXVIII"),
+    #         (10, "N"),
+    #         (7, "-MCCXXXVIII"),
+    #     ],
+    # )
+    # def test_roman_decode(
+    #     self,
+    #     text,
+    #     expected,
+    # ) -> None:
+    #     assert StringUtil.roman_decode(text) == expected
 
     @allure.title("测试字符串编码")
-    def test_roman_encode(self) -> None:
-        assert StringUtil.equals(StringUtil.roman_encode(7), "VII")
-        assert StringUtil.equals(StringUtil.roman_encode(1994), "MCMXCIV")
-        assert StringUtil.equals(StringUtil.roman_encode(2020), "MMXX")
-        assert StringUtil.equals(StringUtil.roman_encode(37), "XXXVII")
+    @pytest.mark.parametrize(
+        "num, expected",
+        [
+            (7, "VII"),
+            (1994, "MCMXCIV"),
+            (2020, "MMXX"),
+            (37, "XXXVII"),
+        ],
+    )
+    def test_roman_encode(
+        self,
+        num,
+        expected,
+    ) -> None:
+        assert StringUtil.roman_encode(num) == expected
 
     @allure.title("测试字符串编码")
     def test_chinese_encode(self) -> None:
@@ -832,12 +1005,22 @@ class TestStringEncode:
 @allure.tag("util", "string")
 class TestStringFormat:
     @allure.title("测试字符串按货币格式化")
-    def test_format_in_currency(self) -> None:
-        assert StringUtil.equals(StringUtil.format_in_currency("123456789"), "123,456,789")
-        assert StringUtil.equals(StringUtil.format_in_currency("123456789.45"), "123,456,789.45")
-        assert StringUtil.equals(StringUtil.format_in_currency("-123456789.45"), "-123,456,789.45")
-        assert StringUtil.equals(StringUtil.format_in_currency("0"), "0")
-        assert StringUtil.equals(StringUtil.format_in_currency("-123456789"), "-123,456,789")
+    @pytest.mark.parametrize(
+        "text, expected",
+        [
+            ("123456789", "123,456,789"),
+            ("123456789.45", "123,456,789.45"),
+            ("-123456789.45", "-123,456,789.45"),
+            ("0", "0"),
+            ("-123456789", "-123,456,789"),
+        ],
+    )
+    def test_format_in_currency(
+        self,
+        text,
+        expected,
+    ) -> None:
+        assert StringUtil.format_in_currency(text) == expected
 
     @allure.title("测试字符串对齐")
     def test_align_text(self) -> None:

@@ -18,12 +18,15 @@ import itertools as it
 import typing as t
 from collections import abc
 from collections.abc import Collection, Generator, Iterable
-from typing import Any
+
+Unpack = t.Any
+_KeyT = t.TypeVar("_KeyT")
+_ValuesT = t.Any
 
 
 class CollectionUtil:
     @classmethod
-    def nested_dict_iter(cls, nested_dict: t.Mapping[Any, Any]) -> t.Generator[Any, Any, Any]:
+    def nested_dict_iter(cls, nested_dict: t.Mapping[t.Any, t.Any]) -> t.Generator[t.Any, t.Any, t.Any]:
         """
         返回嵌套字典最深层及的键值对
 
@@ -55,7 +58,7 @@ class CollectionUtil:
                 yield key, value
 
     @classmethod
-    def get_powerset(cls, iterable: t.Iterable) -> t.Generator[it.chain, Any, Any]:
+    def get_powerset(cls, iterable: t.Iterable) -> t.Generator[it.chain, t.Any, t.Any]:
         """
         返回iterable的幂集
 
@@ -82,7 +85,7 @@ class CollectionUtil:
         yield it.chain.from_iterable(it.combinations(s, r) for r in range(len(s) + 1))
 
     @classmethod
-    def flatten(cls, seq: Iterable[Any]) -> Generator[Any, Any, None]:
+    def flatten(cls, seq: Iterable[t.Any]) -> Generator[t.Any, t.Any, None]:
         """
         展平嵌套序列
 
@@ -107,7 +110,7 @@ class CollectionUtil:
                 yield ele
 
     @classmethod
-    def merge_dicts(cls, *dicts: t.Mapping[Any, Any]) -> dict[Any, Any]:
+    def merge_dicts(cls, *dicts: t.Mapping[t.Any, t.Any]) -> dict[t.Any, t.Any]:
         """
         合并多个字典
 
@@ -121,7 +124,7 @@ class CollectionUtil:
         TypeError
             如果参数不是字典类型
         """
-        base_dict: dict[Any, Any] = {}
+        base_dict: dict[t.Any, t.Any] = {}
         for i, dict_element in enumerate(dicts):
             if not isinstance(dict_element, dict):
                 raise TypeError(f"Argument {i} is not a dictionary")
@@ -129,7 +132,7 @@ class CollectionUtil:
         return base_dict
 
     @classmethod
-    def merge_two_dict(cls, d1: t.Mapping[Any, Any], d2: t.Mapping[Any, Any]) -> dict[Any, Any]:
+    def merge_two_dict(cls, d1: t.Mapping[t.Any, t.Any], d2: t.Mapping[t.Any, t.Any]) -> dict[t.Any, t.Any]:
         """
         合并两个字典
 
@@ -231,3 +234,13 @@ class CollectionUtil:
             return 0
         except StopIteration:
             return 1
+
+    @classmethod
+    def zip_dict(cls, *dicts: dict[_KeyT, _ValuesT]) -> t.Generator[tuple[_KeyT, tuple[_ValuesT]], None, None]:
+        all_keys = set(it.chain(*dicts))
+        d0 = dicts[0]
+        if len(all_keys) != len(d0):
+            raise KeyError(f"Missing keys: {all_keys ^ set(d0)}")
+
+        for key in d0:
+            yield key, tuple(d[key] for d in dicts)

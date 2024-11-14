@@ -1,4 +1,16 @@
-#!/usr/bin/env python
+# Copyright 2024 The pythontools Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 """
 -------------------------------------------------
 @File       :   idutils.py
@@ -18,12 +30,13 @@ import random
 import typing
 from datetime import datetime
 
-from pythontools.core.constants.area_constant import AREA_INFO, PRO_DICT
-from pythontools.core.constants.pattern_pool import PatternPool
-from pythontools.core.constants.people_constant import Gender
-from pythontools.core.convert.convertor import BasicConvertor
-from pythontools.core.utils.basicutils import DatetimeUtil, ReUtil, SequenceUtil, StringUtil
-from pythontools.core.utils.typeutils import TypeUtil
+from ..constants.area_constant import AREA_INFO, PRO_DICT
+from ..constants.pattern_pool import PatternPool
+from ..constants.people_constant import Gender
+from ..convert.convertor import BasicConvertor
+from .basic_utils import ReUtil, SequenceUtil, StringUtil
+from .datetime_utils import DatetimeUtil
+from .type_utils import TypeUtil
 
 
 class IDCard:

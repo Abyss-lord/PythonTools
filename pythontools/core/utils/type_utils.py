@@ -23,7 +23,7 @@ from pythontools.core.constants.typehint import T
 
 from ..constants.type_constant import FunctionType
 from ..decorator import UnCheckFunction
-from .basicutils import StringUtil
+from .basic_utils import StringUtil
 
 WARNING_ENABLED = True
 
@@ -111,6 +111,23 @@ class TypeUtil:
             return True
         except ValueError:
             return False
+
+    @classmethod
+    def is_namedtuple(cls, x: t.Any) -> bool:
+        """
+        判断给定的对象是否为namedtuple类型
+
+        Parameters
+        ----------
+        x : Any
+            待检测对象
+
+        Returns
+        -------
+        bool
+            如果对象是namedtuple类型，返回True，否则返回False
+        """
+        return isinstance(x, tuple) and hasattr(type(x), "_fields")
 
     @classmethod
     def get_class_name(cls, obj) -> str:

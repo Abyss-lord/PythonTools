@@ -16,7 +16,7 @@ Change Activity:
 # here put the import lib
 import typing
 
-from ..radixutils import RadixUtil
+from ..radix_utils import RadixUtil
 
 
 class GrayCode:

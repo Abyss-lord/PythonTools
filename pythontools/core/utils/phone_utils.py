@@ -14,11 +14,9 @@ Change Activity:
 """
 # here put the import lib
 
-from pythontools.core.constants.pattern_pool import PatternPool
-from pythontools.core.utils.basicutils import ReUtil
-
+from ..constants.pattern_pool import PatternPool
 from ..decorator import UnCheckFunction
-from .basicutils import StringUtil
+from .basic_utils import ReUtil, StringUtil
 
 # 是否显示Warning信息
 WARNING_ENABLED = True

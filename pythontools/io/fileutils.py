@@ -19,6 +19,7 @@ import os
 import re
 import tempfile
 import time
+import typing as t
 import unicodedata
 import uuid
 from datetime import datetime
@@ -26,8 +27,10 @@ from operator import eq
 from os import PathLike
 from pathlib import Path
 
-from pythontools.core.constants.string_constant import CharsetUtil
-from pythontools.core.utils.basicutils import DatetimeUtil, SequenceUtil, StringUtil, TimeUnit
+from ..core.constants.datetime_constant import TimeUnit
+from ..core.constants.string_constant import CharsetUtil
+from ..core.utils.basic_utils import SequenceUtil, StringUtil
+from ..core.utils.datetime_utils import DatetimeUtil
 
 
 class FileUtil:
@@ -919,6 +922,31 @@ class FileUtil:
         """
         predicate_func = functools.partial(cls.is_match_extension, extension=extension, check_exist=False)
         return cls.list_files_from_path(p, predicate_func)
+
+    @t.overload
+    def get_path_without_ext(cls, path: str) -> str: ...
+
+    @t.overload
+    def get_path_without_ext(cls, path: Path) -> str: ...
+
+    @classmethod
+    def get_path_without_ext(cls, path):
+        """
+        返回一个路径的名字，不带扩展名
+
+        Parameters
+        ----------
+        path : str | Path
+            待处理路径
+
+        Returns
+        -------
+        str
+            文件名
+        """
+        if isinstance(path, str):
+            path = cls.get_path_object(path)
+        return os.path.splitext(path)[0]
 
     @classmethod
     def get_line_cnt_of_file(cls, f: str) -> int:

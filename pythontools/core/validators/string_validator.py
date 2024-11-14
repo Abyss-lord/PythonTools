@@ -21,11 +21,11 @@ import re
 import string
 
 from pythontools.core.constants.string_constant import CharPool
-from pythontools.core.utils.phoneutils import PhoneUtil
-from pythontools.core.utils.typeutils import TypeUtil
+from pythontools.core.utils.phone_utils import PhoneUtil
+from pythontools.core.utils.type_utils import TypeUtil
 
 from ..constants.pattern_pool import PatternPool
-from ..utils.basicutils import ReUtil, StringUtil
+from ..utils.basic_utils import ReUtil, StringUtil
 
 
 class StringValidator:

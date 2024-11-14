@@ -17,7 +17,7 @@ Change Activity:
 import string
 
 from pythontools.core.constants.string_constant import PasswdStrength
-from pythontools.core.utils.basicutils import SequenceUtil, StringUtil
+from pythontools.core.utils.basic_utils import SequenceUtil, StringUtil
 from pythontools.core.validators.datetime_validator import DatetimeValidator
 
 
@@ -43,23 +43,21 @@ class PasswdStrengthUtil:
     """
 
     # 弱密码库
-    SIMPLE_PWD = set(
-        [
-            "password",
-            "abc123",
-            "iloveyou",
-            "adobe123",
-            "123123",
-            "sunshine",
-            "1314520",
-            "a1b2c3",
-            "123qwe",
-            "aaa111",
-            "qweasd",
-            "admin",
-            "passwd",
-        ]
-    )
+    SIMPLE_PWD = set([
+        "password",
+        "abc123",
+        "iloveyou",
+        "adobe123",
+        "123123",
+        "sunshine",
+        "1314520",
+        "a1b2c3",
+        "123qwe",
+        "aaa111",
+        "qweasd",
+        "admin",
+        "passwd",
+    ])
 
     @classmethod
     def get_strength_score(cls, passwd: str) -> int:
@@ -255,7 +253,7 @@ class PasswdStrengthUtil:
 
         # 6. 如果能切分成三部分, 且三部分相等, 则减分
         if length % 3 == 0:
-            part1, part2, part3 = SequenceUtil.split_sequence(passwd, 3)
+            part1, part2, part3 = SequenceUtil.split_seq(passwd, 3)
             if part1 == part2 == part3:
                 level_point -= 1
 

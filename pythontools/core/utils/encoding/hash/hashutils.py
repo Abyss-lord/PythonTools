@@ -18,7 +18,7 @@ import struct
 
 from pythontools.core.constants.string_constant import CharsetUtil
 from pythontools.core.errors import UnsupportedOperationError
-from pythontools.core.utils.basicutils import StringUtil
+from pythontools.core.utils.basic_utils import StringUtil
 from pythontools.core.utils.encoding.hash.hash import Hash32, Hash64, Hash128
 
 

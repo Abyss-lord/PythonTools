@@ -16,10 +16,22 @@ Change Activity:
 # here put the import lib
 import typing
 from collections import namedtuple
-from enum import Enum
+from enum import Enum, auto
 
 DesensitizedTypeTuple = namedtuple("DesensitizedTypeTuple", ["description"])
 PasswdStrengthTuple = namedtuple("PasswdStrengthTuple", ["name", "description", "strength"])
+
+
+class AutoName(Enum):
+    """
+    This is used for creating Enum classes where `auto()` is the string form
+    of the corresponding enum's identifier (e.g. FOO.value results in "FOO").
+
+    Reference: https://docs.python.org/3/howto/enum.html#using-automatic-values
+    """
+
+    def _generate_next_value_(self, _start, _count, _last_values):
+        return self
 
 
 class CharPool:
@@ -109,3 +121,20 @@ class CharsetUtil:
     ISO_8859_1: typing.Final[str] = "ISO-8859-1"
     UTF_8: typing.Final[str] = "UTF-8"
     GBK: typing.Final[str] = "GBK"
+
+
+class Strategy(AutoName):
+    NUMERICS = auto()
+    ALPHABETIC = auto()
+    ALPHANUMERIC = auto()
+    UPPERCASE = auto()
+    LOWERCASE = auto()
+    PRINTABLE = auto()
+    ASCII = auto()
+
+    @classmethod
+    def get_strategy_by_name(cls, name: str) -> "Strategy":
+        try:
+            return cls[name.upper()]
+        except KeyError as e:
+            raise ValueError(f"Invalid strategy name: {name}") from e

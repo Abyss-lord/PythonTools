@@ -18,7 +18,7 @@ import re
 from typing import Self
 
 from pythontools.core.errors import UnsupportedOperationError
-from pythontools.core.utils.basicutils import ReUtil, StringUtil
+from pythontools.core.utils.basic_utils import ReUtil, StringUtil
 
 from .finder import Finder
 

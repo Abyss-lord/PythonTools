@@ -17,7 +17,7 @@ Change Activity:
 from datetime import UTC, date, datetime, timezone
 
 from pythontools.core.errors import DatetimeParseError
-from pythontools.core.utils.basicutils import DatetimeUtil
+from pythontools.core.utils.datetime_utils import DatetimeUtil
 from pythontools.core.validators.datetime_validator import DatetimeValidator
 from pythontools.date.format.baseformat import BaseFormat
 from pythontools.date.format.datepattern import DatePattern

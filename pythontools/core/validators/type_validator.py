@@ -16,7 +16,7 @@ Change Activity:
 # here put the import lib
 import inspect
 
-from pythontools.core.utils.typeutils import TypeUtil
+from pythontools.core.utils.type_utils import TypeUtil
 
 from ..constants.typehint import T
 

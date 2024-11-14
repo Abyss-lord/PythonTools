@@ -18,7 +18,7 @@ import typing
 import unicodedata
 
 from ..constants.pattern_pool import PatternPool
-from ..utils.basicutils import ReUtil
+from ..utils.basic_utils import ReUtil
 
 
 class BasicValidator:

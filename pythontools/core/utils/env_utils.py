@@ -1,4 +1,17 @@
-#!/usr/bin/env python
+# Copyright 2024 The pythontools Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 """
 -------------------------------------------------
 @File       :   osutils.py
@@ -14,16 +27,17 @@ Change Activity:
 """
 # here put the import lib
 
+import gc
 import os
 import platform
 import sys
 import typing as t
 import warnings
 
-from .basicutils import StringUtil
+from .basic_utils import StringUtil
 
 
-class SysUtil:
+class EnvUtil:
     @classmethod
     def get_platform_info(cls) -> str:
         """
@@ -124,6 +138,22 @@ class SysUtil:
         return (3, 0) <= sys.version_info <= (4, 0)
 
     @classmethod
+    def is_notebook(cls) -> bool:
+        """
+        判断是否是 Notebook 环境
+
+        Returns
+        -------
+        bool
+            是否是 Notebook 环境
+        """
+        if IPython := sys.modules.get("IPython"):  # pylint: disable=invalid-name
+            ipython = IPython.get_ipython()
+            if ipython and "IPKernelApp" in ipython.config:
+                return True
+        return False
+
+    @classmethod
     def get_system_property(
         cls,
         name: str,
@@ -178,3 +208,12 @@ class SysUtil:
                 warnings.warn(f"get system properties error: {e}")
 
         return dict(res)
+
+    @classmethod
+    def python_gc(cls) -> None:
+        """Call python's garbage collector."""
+        # gc_collect isn't perfectly synchronous, because it may
+        # break reference cycles that then take time to fully
+        # finalize. Call it thrice and hope for the best.
+        for _ in range(3):
+            gc.collect()

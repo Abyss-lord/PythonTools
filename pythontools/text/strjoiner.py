@@ -19,7 +19,7 @@ from typing import Any, Self
 
 from pythontools.core.constants.string_constant import CharPool
 from pythontools.core.convert.convertor import BasicConvertor
-from pythontools.core.utils.basicutils import StringUtil
+from pythontools.core.utils.basic_utils import StringUtil
 
 
 class NullMode(IntEnum):

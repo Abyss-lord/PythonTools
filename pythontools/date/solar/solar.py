@@ -16,7 +16,7 @@ Change Activity:
 # here put the import lib
 from datetime import date, datetime
 
-from pythontools.core.utils.basicutils import DatetimeUtil
+from pythontools.core.utils.basic_utils import DatetimeUtil
 
 
 class Solar:

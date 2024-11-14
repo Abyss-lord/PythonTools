@@ -22,6 +22,7 @@ from .context_test import (
     DatetimeUtil,
     DatetimeValidator,
     DesensitizedUtil,
+    EnvUtil,
     FileUtil,
     IDCard,
     IDCardUtil,
@@ -32,7 +33,6 @@ from .context_test import (
     ReUtil,
     StringUtil,
     StringValidator,
-    SysUtil,
     TypeUtil,
     TypeValidator,
 )
@@ -44,7 +44,7 @@ DesensitizedUtil
 IDCardUtil
 IDCard
 NumberUtil
-SysUtil
+EnvUtil
 PhoneUtil
 RadixUtil
 RandomUtil
@@ -115,3 +115,25 @@ class TestBasic:
 
         for attr in instance_attributes:
             print(attr)
+
+
+def test_basic():
+    print("中文".isalpha())
+
+
+class A:
+    def val(self):
+        return 1
+
+
+def test_get_current_year(mocker):
+    mock_utcnow = mocker.patch("tests.basic_test.A.val")
+    mock_utcnow.return_value = 7
+
+    # 运行测试并检查结果
+    assert get_current_year() == 7
+
+
+def get_current_year():
+    """获取当前年份"""
+    return A().val()

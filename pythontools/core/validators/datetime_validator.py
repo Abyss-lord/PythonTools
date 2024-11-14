@@ -18,10 +18,10 @@ __all__ = ["DatetimeValidator"]
 
 
 from pythontools.core.constants.pattern_pool import PatternPool
-from pythontools.core.utils.basicutils import (
-    DatetimeUtil,  # type: ignore
+from pythontools.core.utils.basic_utils import (
     ReUtil,
 )
+from pythontools.core.utils.datetime_utils import DatetimeUtil
 
 
 class DatetimeValidator:

@@ -21,22 +21,11 @@ import typing
 import warnings
 from copy import deepcopy
 
-from src.utils.basic_utils import BooleanUtil, StringUtil
-from src.utils.file_utils import FileUtil
+from pythontools.core.constants.string_constant import AutoName
+from pythontools.core.utils.basic_utils import BooleanUtil, StringUtil
+from pythontools.io.fileutils import FileUtil
 
 ConfigItemValue = int | float | str | bool
-
-
-class AutoName(enum.Enum):
-    """
-    This is used for creating Enum classes where `auto()` is the string form
-    of the corresponding enum's identifier (e.g. FOO.value results in "FOO").
-
-    Reference: https://docs.python.org/3/howto/enum.html#using-automatic-values
-    """
-
-    def _generate_next_value_(self, _start, _count, _last_values):
-        return self
 
 
 class ConfigType(AutoName):
